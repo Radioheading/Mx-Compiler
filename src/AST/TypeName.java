@@ -1,9 +1,12 @@
 package AST;
 
-public class TypeNode extends ASTNode {
+import Util.position;
+
+public class TypeNameNode extends ASTNode {
     String typeName;
 
-    TypeNode(String _typeName) {
+    TypeNameNode(String _typeName, position pos) {
+        super(pos);
         this.typeName = _typeName;
     }
 
