@@ -1,8 +1,6 @@
 // Generated from C:/Users/18221/IdeaProjects/MxCompiler/src/Parser\MxParser.g4 by ANTLR 4.12.0
 package Parser;
 
-    package Parser;
-
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
 /**

@@ -6,7 +6,7 @@
         <PerGrammarGenerationSettings>
           <option name="fileName" value="$PROJECT_DIR$/src/Parser/MxParser.g4" />
           <option name="autoGen" value="true" />
-          <option name="outputDir" value="C:\Users\18221\IdeaProjects\MxCompiler\src\Parser" />
+          <option name="outputDir" value="C:\Users\18221\IdeaProjects\MxCompiler\src" />
           <option name="libDir" value="" />
           <option name="encoding" value="" />
           <option name="pkg" value="" />
@@ -16,7 +16,7 @@
         <PerGrammarGenerationSettings>
           <option name="fileName" value="$PROJECT_DIR$/src/Parser/MxLexer.g4" />
           <option name="autoGen" value="true" />
-          <option name="outputDir" value="C:\Users\18221\IdeaProjects\MxCompiler\src\Parser" />
+          <option name="outputDir" value="C:\Users\18221\IdeaProjects\MxCompiler\src" />
           <option name="libDir" value="" />
           <option name="encoding" value="" />
           <option name="pkg" value="" />

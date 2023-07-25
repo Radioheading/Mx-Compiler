@@ -1,13 +1,11 @@
 package AST;
 
 import Util.position;
-
 import java.util.ArrayList;
 
-public class RootNode extends ASTNode {
-    public ArrayList<ASTNode> def = new ArrayList<ASTNode>();
-
-    public RootNode(position pos) {
+public class ParameterListNode extends ASTNode {
+    public ArrayList<VarDefAssignNode> parameters;
+    public ParameterListNode(position pos) {
         super(pos);
     }
 

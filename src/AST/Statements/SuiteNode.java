@@ -6,8 +6,8 @@ import Util.position;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 
-public abstract class SuiteNode extends BaseStatement {
-    public ArrayList<BaseStatement> baseStatements;
+public abstract class SuiteNode extends BaseStmtNode {
+    public ArrayList<BaseStmtNode> baseStatements;
 
     public SuiteNode(position pos) {
         super(pos);

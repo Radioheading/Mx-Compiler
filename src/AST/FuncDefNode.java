@@ -1,15 +1,19 @@
 package AST;
 
-import Parser.MxParser.*;
+import AST.Statements.SuiteNode;
+import Util.position;
 
 public class FuncDefNode extends ASTNode {
-    public TypeNode returnType;
+    public TypeNameNode returnType;
     public String funcName;
-    public ParameterListContext parameterList;
-    public SuiteContext suite;
+    public ParameterListNode parameterList;
+    public SuiteNode suite;
 
-    public FuncDefNode() {}
-    public FuncDefNode(TypeNode _returnType, String _funcName, ParameterListContext _parameterList, SuiteContext _suite) {
+    public FuncDefNode(position pos) {
+        super(pos);
+    }
+    public FuncDefNode(position pos, TypeNameNode _returnType, String _funcName, ParameterListNode _parameterList, SuiteNode _suite) {
+        super(pos);
         this.returnType = _returnType;
         this.funcName = _funcName;
         this.parameterList = _parameterList;

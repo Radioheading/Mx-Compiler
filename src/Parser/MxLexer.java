@@ -1,7 +1,6 @@
 // Generated from C:/Users/18221/IdeaProjects/MxCompiler/src/Parser\MxLexer.g4 by ANTLR 4.12.0
 package Parser;
 
-package Parser;
 
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
