@@ -662,7 +662,7 @@ public class MxParser extends Parser {
 			setState(103);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 575316173731676164L) != 0)) {
+			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & 575316173731676166L) != 0)) {
 				{
 				{
 				setState(100);
@@ -1365,7 +1365,7 @@ public class MxParser extends Parser {
 			setState(178);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 504939720087715844L) != 0)) {
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 504939720087715846L) != 0)) {
 				{
 				setState(177);
 				expr(0);
@@ -1427,7 +1427,7 @@ public class MxParser extends Parser {
 			setState(185);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 504939720087715844L) != 0)) {
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 504939720087715846L) != 0)) {
 				{
 				setState(184);
 				expr(0);
@@ -1576,7 +1576,7 @@ public class MxParser extends Parser {
 			setState(196);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 504939720087715844L) != 0)) {
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 504939720087715846L) != 0)) {
 				{
 				setState(195);
 				expr(0);
@@ -1766,7 +1766,7 @@ public class MxParser extends Parser {
 			setState(213);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 504939720087715844L) != 0)) {
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 504939720087715846L) != 0)) {
 				{
 				setState(212);
 				funcCallParameters();
@@ -1838,84 +1838,54 @@ public class MxParser extends Parser {
 		}
 	}
 	@SuppressWarnings("CheckReturnValue")
-	public static class LogicExpr6Context extends ExprContext {
-		public Token op;
-		public List<ExprContext> expr() {
-			return getRuleContexts(ExprContext.class);
+	public static class BasicExprContext extends ExprContext {
+		public BaseExprContext baseExpr() {
+			return getRuleContext(BaseExprContext.class,0);
 		}
-		public ExprContext expr(int i) {
-			return getRuleContext(ExprContext.class,i);
-		}
-		public TerminalNode Greater() { return getToken(MxParser.Greater, 0); }
-		public TerminalNode Less() { return getToken(MxParser.Less, 0); }
-		public TerminalNode Geq() { return getToken(MxParser.Geq, 0); }
-		public TerminalNode Leq() { return getToken(MxParser.Leq, 0); }
-		public LogicExpr6Context(ExprContext ctx) { copyFrom(ctx); }
+		public BasicExprContext(ExprContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).enterLogicExpr6(this);
+			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).enterBasicExpr(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).exitLogicExpr6(this);
+			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).exitBasicExpr(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MxParserVisitor ) return ((MxParserVisitor<? extends T>)visitor).visitLogicExpr6(this);
+			if ( visitor instanceof MxParserVisitor ) return ((MxParserVisitor<? extends T>)visitor).visitBasicExpr(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 	@SuppressWarnings("CheckReturnValue")
-	public static class LogicExpr5Context extends ExprContext {
-		public Token op;
-		public List<ExprContext> expr() {
-			return getRuleContexts(ExprContext.class);
-		}
-		public ExprContext expr(int i) {
-			return getRuleContext(ExprContext.class,i);
-		}
-		public TerminalNode RightShift() { return getToken(MxParser.RightShift, 0); }
-		public TerminalNode LeftShift() { return getToken(MxParser.LeftShift, 0); }
-		public LogicExpr5Context(ExprContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).enterLogicExpr5(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).exitLogicExpr5(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MxParserVisitor ) return ((MxParserVisitor<? extends T>)visitor).visitLogicExpr5(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-	@SuppressWarnings("CheckReturnValue")
-	public static class PreAddSubExprContext extends ExprContext {
+	public static class UnaryExprContext extends ExprContext {
 		public Token op;
 		public ExprContext expr() {
 			return getRuleContext(ExprContext.class,0);
 		}
 		public TerminalNode SelfInc() { return getToken(MxParser.SelfInc, 0); }
 		public TerminalNode SelfDec() { return getToken(MxParser.SelfDec, 0); }
-		public PreAddSubExprContext(ExprContext ctx) { copyFrom(ctx); }
+		public TerminalNode Add() { return getToken(MxParser.Add, 0); }
+		public TerminalNode Sub() { return getToken(MxParser.Sub, 0); }
+		public TerminalNode Not() { return getToken(MxParser.Not, 0); }
+		public TerminalNode BitNot() { return getToken(MxParser.BitNot, 0); }
+		public UnaryExprContext(ExprContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).enterPreAddSubExpr(this);
+			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).enterUnaryExpr(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).exitPreAddSubExpr(this);
+			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).exitUnaryExpr(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MxParserVisitor ) return ((MxParserVisitor<? extends T>)visitor).visitPreAddSubExpr(this);
+			if ( visitor instanceof MxParserVisitor ) return ((MxParserVisitor<? extends T>)visitor).visitUnaryExpr(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 	@SuppressWarnings("CheckReturnValue")
-	public static class LogicExpr9Context extends ExprContext {
+	public static class TernaryExprContext extends ExprContext {
 		public Token op;
 		public List<ExprContext> expr() {
 			return getRuleContexts(ExprContext.class);
@@ -1923,70 +1893,45 @@ public class MxParser extends Parser {
 		public ExprContext expr(int i) {
 			return getRuleContext(ExprContext.class,i);
 		}
-		public TerminalNode BitXor() { return getToken(MxParser.BitXor, 0); }
-		public LogicExpr9Context(ExprContext ctx) { copyFrom(ctx); }
+		public TerminalNode QMark() { return getToken(MxParser.QMark, 0); }
+		public TerminalNode Colon() { return getToken(MxParser.Colon, 0); }
+		public TernaryExprContext(ExprContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).enterLogicExpr9(this);
+			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).enterTernaryExpr(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).exitLogicExpr9(this);
+			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).exitTernaryExpr(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MxParserVisitor ) return ((MxParserVisitor<? extends T>)visitor).visitLogicExpr9(this);
+			if ( visitor instanceof MxParserVisitor ) return ((MxParserVisitor<? extends T>)visitor).visitTernaryExpr(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 	@SuppressWarnings("CheckReturnValue")
-	public static class LogicExpr8Context extends ExprContext {
-		public Token op;
+	public static class ArraySubExprContext extends ExprContext {
 		public List<ExprContext> expr() {
 			return getRuleContexts(ExprContext.class);
 		}
 		public ExprContext expr(int i) {
 			return getRuleContext(ExprContext.class,i);
 		}
-		public TerminalNode BitAnd() { return getToken(MxParser.BitAnd, 0); }
-		public LogicExpr8Context(ExprContext ctx) { copyFrom(ctx); }
+		public TerminalNode LBracket() { return getToken(MxParser.LBracket, 0); }
+		public TerminalNode RBracket() { return getToken(MxParser.RBracket, 0); }
+		public ArraySubExprContext(ExprContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).enterLogicExpr8(this);
+			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).enterArraySubExpr(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).exitLogicExpr8(this);
+			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).exitArraySubExpr(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MxParserVisitor ) return ((MxParserVisitor<? extends T>)visitor).visitLogicExpr8(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-	@SuppressWarnings("CheckReturnValue")
-	public static class LogicExpr7Context extends ExprContext {
-		public Token op;
-		public List<ExprContext> expr() {
-			return getRuleContexts(ExprContext.class);
-		}
-		public ExprContext expr(int i) {
-			return getRuleContext(ExprContext.class,i);
-		}
-		public TerminalNode Equal() { return getToken(MxParser.Equal, 0); }
-		public TerminalNode NotEqual() { return getToken(MxParser.NotEqual, 0); }
-		public LogicExpr7Context(ExprContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).enterLogicExpr7(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).exitLogicExpr7(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MxParserVisitor ) return ((MxParserVisitor<? extends T>)visitor).visitLogicExpr7(this);
+			if ( visitor instanceof MxParserVisitor ) return ((MxParserVisitor<? extends T>)visitor).visitArraySubExpr(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -2017,7 +1962,7 @@ public class MxParser extends Parser {
 		}
 	}
 	@SuppressWarnings("CheckReturnValue")
-	public static class ArithExpr3Context extends ExprContext {
+	public static class BinaryExprContext extends ExprContext {
 		public Token op;
 		public List<ExprContext> expr() {
 			return getRuleContexts(ExprContext.class);
@@ -2028,18 +1973,33 @@ public class MxParser extends Parser {
 		public TerminalNode Mul() { return getToken(MxParser.Mul, 0); }
 		public TerminalNode Div() { return getToken(MxParser.Div, 0); }
 		public TerminalNode Mod() { return getToken(MxParser.Mod, 0); }
-		public ArithExpr3Context(ExprContext ctx) { copyFrom(ctx); }
+		public TerminalNode Add() { return getToken(MxParser.Add, 0); }
+		public TerminalNode Sub() { return getToken(MxParser.Sub, 0); }
+		public TerminalNode RightShift() { return getToken(MxParser.RightShift, 0); }
+		public TerminalNode LeftShift() { return getToken(MxParser.LeftShift, 0); }
+		public TerminalNode Greater() { return getToken(MxParser.Greater, 0); }
+		public TerminalNode Less() { return getToken(MxParser.Less, 0); }
+		public TerminalNode Geq() { return getToken(MxParser.Geq, 0); }
+		public TerminalNode Leq() { return getToken(MxParser.Leq, 0); }
+		public TerminalNode Equal() { return getToken(MxParser.Equal, 0); }
+		public TerminalNode NotEqual() { return getToken(MxParser.NotEqual, 0); }
+		public TerminalNode BitAnd() { return getToken(MxParser.BitAnd, 0); }
+		public TerminalNode BitXor() { return getToken(MxParser.BitXor, 0); }
+		public TerminalNode BitOr() { return getToken(MxParser.BitOr, 0); }
+		public TerminalNode And() { return getToken(MxParser.And, 0); }
+		public TerminalNode Or() { return getToken(MxParser.Or, 0); }
+		public BinaryExprContext(ExprContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).enterArithExpr3(this);
+			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).enterBinaryExpr(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).exitArithExpr3(this);
+			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).exitBinaryExpr(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MxParserVisitor ) return ((MxParserVisitor<? extends T>)visitor).visitArithExpr3(this);
+			if ( visitor instanceof MxParserVisitor ) return ((MxParserVisitor<? extends T>)visitor).visitBinaryExpr(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -2060,150 +2020,6 @@ public class MxParser extends Parser {
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof MxParserVisitor ) return ((MxParserVisitor<? extends T>)visitor).visitFuncCallExpr(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-	@SuppressWarnings("CheckReturnValue")
-	public static class ArithExpr4Context extends ExprContext {
-		public Token op;
-		public List<ExprContext> expr() {
-			return getRuleContexts(ExprContext.class);
-		}
-		public ExprContext expr(int i) {
-			return getRuleContext(ExprContext.class,i);
-		}
-		public TerminalNode Add() { return getToken(MxParser.Add, 0); }
-		public TerminalNode Sub() { return getToken(MxParser.Sub, 0); }
-		public ArithExpr4Context(ExprContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).enterArithExpr4(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).exitArithExpr4(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MxParserVisitor ) return ((MxParserVisitor<? extends T>)visitor).visitArithExpr4(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-	@SuppressWarnings("CheckReturnValue")
-	public static class ParenExprContext extends ExprContext {
-		public TerminalNode LParen() { return getToken(MxParser.LParen, 0); }
-		public ExprContext expr() {
-			return getRuleContext(ExprContext.class,0);
-		}
-		public TerminalNode RParen() { return getToken(MxParser.RParen, 0); }
-		public ParenExprContext(ExprContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).enterParenExpr(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).exitParenExpr(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MxParserVisitor ) return ((MxParserVisitor<? extends T>)visitor).visitParenExpr(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-	@SuppressWarnings("CheckReturnValue")
-	public static class BasicExprContext extends ExprContext {
-		public BaseExprContext baseExpr() {
-			return getRuleContext(BaseExprContext.class,0);
-		}
-		public BasicExprContext(ExprContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).enterBasicExpr(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).exitBasicExpr(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MxParserVisitor ) return ((MxParserVisitor<? extends T>)visitor).visitBasicExpr(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-	@SuppressWarnings("CheckReturnValue")
-	public static class TernaryConditionContext extends ExprContext {
-		public Token op;
-		public List<ExprContext> expr() {
-			return getRuleContexts(ExprContext.class);
-		}
-		public ExprContext expr(int i) {
-			return getRuleContext(ExprContext.class,i);
-		}
-		public TerminalNode QMark() { return getToken(MxParser.QMark, 0); }
-		public TerminalNode Colon() { return getToken(MxParser.Colon, 0); }
-		public TernaryConditionContext(ExprContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).enterTernaryCondition(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).exitTernaryCondition(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MxParserVisitor ) return ((MxParserVisitor<? extends T>)visitor).visitTernaryCondition(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-	@SuppressWarnings("CheckReturnValue")
-	public static class ArraySubExprContext extends ExprContext {
-		public List<ExprContext> expr() {
-			return getRuleContexts(ExprContext.class);
-		}
-		public ExprContext expr(int i) {
-			return getRuleContext(ExprContext.class,i);
-		}
-		public TerminalNode LBracket() { return getToken(MxParser.LBracket, 0); }
-		public TerminalNode RBracket() { return getToken(MxParser.RBracket, 0); }
-		public ArraySubExprContext(ExprContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).enterArraySubExpr(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).exitArraySubExpr(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MxParserVisitor ) return ((MxParserVisitor<? extends T>)visitor).visitArraySubExpr(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-	@SuppressWarnings("CheckReturnValue")
-	public static class LogicExpr12Context extends ExprContext {
-		public Token op;
-		public List<ExprContext> expr() {
-			return getRuleContexts(ExprContext.class);
-		}
-		public ExprContext expr(int i) {
-			return getRuleContext(ExprContext.class,i);
-		}
-		public TerminalNode Or() { return getToken(MxParser.Or, 0); }
-		public LogicExpr12Context(ExprContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).enterLogicExpr12(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).exitLogicExpr12(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MxParserVisitor ) return ((MxParserVisitor<? extends T>)visitor).visitLogicExpr12(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -2233,99 +2049,24 @@ public class MxParser extends Parser {
 		}
 	}
 	@SuppressWarnings("CheckReturnValue")
-	public static class PostAddSubExprContext extends ExprContext {
-		public Token op;
+	public static class ParenExprContext extends ExprContext {
+		public TerminalNode LParen() { return getToken(MxParser.LParen, 0); }
 		public ExprContext expr() {
 			return getRuleContext(ExprContext.class,0);
 		}
-		public TerminalNode SelfInc() { return getToken(MxParser.SelfInc, 0); }
-		public TerminalNode SelfDec() { return getToken(MxParser.SelfDec, 0); }
-		public PostAddSubExprContext(ExprContext ctx) { copyFrom(ctx); }
+		public TerminalNode RParen() { return getToken(MxParser.RParen, 0); }
+		public ParenExprContext(ExprContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).enterPostAddSubExpr(this);
+			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).enterParenExpr(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).exitPostAddSubExpr(this);
+			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).exitParenExpr(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MxParserVisitor ) return ((MxParserVisitor<? extends T>)visitor).visitPostAddSubExpr(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-	@SuppressWarnings("CheckReturnValue")
-	public static class LogicExpr2Context extends ExprContext {
-		public Token op;
-		public ExprContext expr() {
-			return getRuleContext(ExprContext.class,0);
-		}
-		public TerminalNode Sub() { return getToken(MxParser.Sub, 0); }
-		public TerminalNode Not() { return getToken(MxParser.Not, 0); }
-		public TerminalNode BitNot() { return getToken(MxParser.BitNot, 0); }
-		public LogicExpr2Context(ExprContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).enterLogicExpr2(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).exitLogicExpr2(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MxParserVisitor ) return ((MxParserVisitor<? extends T>)visitor).visitLogicExpr2(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-	@SuppressWarnings("CheckReturnValue")
-	public static class LogicExpr10Context extends ExprContext {
-		public Token op;
-		public List<ExprContext> expr() {
-			return getRuleContexts(ExprContext.class);
-		}
-		public ExprContext expr(int i) {
-			return getRuleContext(ExprContext.class,i);
-		}
-		public TerminalNode BitOr() { return getToken(MxParser.BitOr, 0); }
-		public LogicExpr10Context(ExprContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).enterLogicExpr10(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).exitLogicExpr10(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MxParserVisitor ) return ((MxParserVisitor<? extends T>)visitor).visitLogicExpr10(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-	@SuppressWarnings("CheckReturnValue")
-	public static class LogicExpr11Context extends ExprContext {
-		public Token op;
-		public List<ExprContext> expr() {
-			return getRuleContexts(ExprContext.class);
-		}
-		public ExprContext expr(int i) {
-			return getRuleContext(ExprContext.class,i);
-		}
-		public TerminalNode And() { return getToken(MxParser.And, 0); }
-		public LogicExpr11Context(ExprContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).enterLogicExpr11(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof MxParserListener ) ((MxParserListener)listener).exitLogicExpr11(this);
-		}
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof MxParserVisitor ) return ((MxParserVisitor<? extends T>)visitor).visitLogicExpr11(this);
+			if ( visitor instanceof MxParserVisitor ) return ((MxParserVisitor<? extends T>)visitor).visitParenExpr(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -2374,14 +2115,14 @@ public class MxParser extends Parser {
 				break;
 			case 3:
 				{
-				_localctx = new PreAddSubExprContext(_localctx);
+				_localctx = new UnaryExprContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
 				setState(223);
-				((PreAddSubExprContext)_localctx).op = _input.LT(1);
+				((UnaryExprContext)_localctx).op = _input.LT(1);
 				_la = _input.LA(1);
 				if ( !(_la==SelfInc || _la==SelfDec) ) {
-					((PreAddSubExprContext)_localctx).op = (Token)_errHandler.recoverInline(this);
+					((UnaryExprContext)_localctx).op = (Token)_errHandler.recoverInline(this);
 				}
 				else {
 					if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
@@ -2394,14 +2135,14 @@ public class MxParser extends Parser {
 				break;
 			case 4:
 				{
-				_localctx = new LogicExpr2Context(_localctx);
+				_localctx = new UnaryExprContext(_localctx);
 				_ctx = _localctx;
 				_prevctx = _localctx;
 				setState(225);
-				((LogicExpr2Context)_localctx).op = _input.LT(1);
+				((UnaryExprContext)_localctx).op = _input.LT(1);
 				_la = _input.LA(1);
-				if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & 1064964L) != 0)) ) {
-					((LogicExpr2Context)_localctx).op = (Token)_errHandler.recoverInline(this);
+				if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & 1064966L) != 0)) ) {
+					((UnaryExprContext)_localctx).op = (Token)_errHandler.recoverInline(this);
 				}
 				else {
 					if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
@@ -2433,7 +2174,7 @@ public class MxParser extends Parser {
 						setState(231);
 						_errHandler.sync(this);
 						_la = _input.LA(1);
-						if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 504939720087715844L) != 0)) {
+						if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 504939720087715846L) != 0)) {
 							{
 							setState(230);
 							expr(0);
@@ -2487,15 +2228,15 @@ public class MxParser extends Parser {
 					switch ( getInterpreter().adaptivePredict(_input,25,_ctx) ) {
 					case 1:
 						{
-						_localctx = new ArithExpr3Context(new ExprContext(_parentctx, _parentState));
+						_localctx = new BinaryExprContext(new ExprContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expr);
 						setState(246);
 						if (!(precpred(_ctx, 13))) throw new FailedPredicateException(this, "precpred(_ctx, 13)");
 						setState(247);
-						((ArithExpr3Context)_localctx).op = _input.LT(1);
+						((BinaryExprContext)_localctx).op = _input.LT(1);
 						_la = _input.LA(1);
 						if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & 56L) != 0)) ) {
-							((ArithExpr3Context)_localctx).op = (Token)_errHandler.recoverInline(this);
+							((BinaryExprContext)_localctx).op = (Token)_errHandler.recoverInline(this);
 						}
 						else {
 							if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
@@ -2508,15 +2249,15 @@ public class MxParser extends Parser {
 						break;
 					case 2:
 						{
-						_localctx = new ArithExpr4Context(new ExprContext(_parentctx, _parentState));
+						_localctx = new BinaryExprContext(new ExprContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expr);
 						setState(249);
 						if (!(precpred(_ctx, 12))) throw new FailedPredicateException(this, "precpred(_ctx, 12)");
 						setState(250);
-						((ArithExpr4Context)_localctx).op = _input.LT(1);
+						((BinaryExprContext)_localctx).op = _input.LT(1);
 						_la = _input.LA(1);
 						if ( !(_la==Add || _la==Sub) ) {
-							((ArithExpr4Context)_localctx).op = (Token)_errHandler.recoverInline(this);
+							((BinaryExprContext)_localctx).op = (Token)_errHandler.recoverInline(this);
 						}
 						else {
 							if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
@@ -2529,15 +2270,15 @@ public class MxParser extends Parser {
 						break;
 					case 3:
 						{
-						_localctx = new LogicExpr5Context(new ExprContext(_parentctx, _parentState));
+						_localctx = new BinaryExprContext(new ExprContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expr);
 						setState(252);
 						if (!(precpred(_ctx, 11))) throw new FailedPredicateException(this, "precpred(_ctx, 11)");
 						setState(253);
-						((LogicExpr5Context)_localctx).op = _input.LT(1);
+						((BinaryExprContext)_localctx).op = _input.LT(1);
 						_la = _input.LA(1);
 						if ( !(_la==RightShift || _la==LeftShift) ) {
-							((LogicExpr5Context)_localctx).op = (Token)_errHandler.recoverInline(this);
+							((BinaryExprContext)_localctx).op = (Token)_errHandler.recoverInline(this);
 						}
 						else {
 							if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
@@ -2550,15 +2291,15 @@ public class MxParser extends Parser {
 						break;
 					case 4:
 						{
-						_localctx = new LogicExpr6Context(new ExprContext(_parentctx, _parentState));
+						_localctx = new BinaryExprContext(new ExprContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expr);
 						setState(255);
 						if (!(precpred(_ctx, 10))) throw new FailedPredicateException(this, "precpred(_ctx, 10)");
 						setState(256);
-						((LogicExpr6Context)_localctx).op = _input.LT(1);
+						((BinaryExprContext)_localctx).op = _input.LT(1);
 						_la = _input.LA(1);
 						if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & 960L) != 0)) ) {
-							((LogicExpr6Context)_localctx).op = (Token)_errHandler.recoverInline(this);
+							((BinaryExprContext)_localctx).op = (Token)_errHandler.recoverInline(this);
 						}
 						else {
 							if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
@@ -2571,15 +2312,15 @@ public class MxParser extends Parser {
 						break;
 					case 5:
 						{
-						_localctx = new LogicExpr7Context(new ExprContext(_parentctx, _parentState));
+						_localctx = new BinaryExprContext(new ExprContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expr);
 						setState(258);
 						if (!(precpred(_ctx, 9))) throw new FailedPredicateException(this, "precpred(_ctx, 9)");
 						setState(259);
-						((LogicExpr7Context)_localctx).op = _input.LT(1);
+						((BinaryExprContext)_localctx).op = _input.LT(1);
 						_la = _input.LA(1);
 						if ( !(_la==NotEqual || _la==Equal) ) {
-							((LogicExpr7Context)_localctx).op = (Token)_errHandler.recoverInline(this);
+							((BinaryExprContext)_localctx).op = (Token)_errHandler.recoverInline(this);
 						}
 						else {
 							if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
@@ -2592,76 +2333,76 @@ public class MxParser extends Parser {
 						break;
 					case 6:
 						{
-						_localctx = new LogicExpr8Context(new ExprContext(_parentctx, _parentState));
+						_localctx = new BinaryExprContext(new ExprContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expr);
 						setState(261);
 						if (!(precpred(_ctx, 8))) throw new FailedPredicateException(this, "precpred(_ctx, 8)");
 						setState(262);
-						((LogicExpr8Context)_localctx).op = match(BitAnd);
+						((BinaryExprContext)_localctx).op = match(BitAnd);
 						setState(263);
 						expr(9);
 						}
 						break;
 					case 7:
 						{
-						_localctx = new LogicExpr9Context(new ExprContext(_parentctx, _parentState));
+						_localctx = new BinaryExprContext(new ExprContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expr);
 						setState(264);
 						if (!(precpred(_ctx, 7))) throw new FailedPredicateException(this, "precpred(_ctx, 7)");
 						setState(265);
-						((LogicExpr9Context)_localctx).op = match(BitXor);
+						((BinaryExprContext)_localctx).op = match(BitXor);
 						setState(266);
 						expr(8);
 						}
 						break;
 					case 8:
 						{
-						_localctx = new LogicExpr10Context(new ExprContext(_parentctx, _parentState));
+						_localctx = new BinaryExprContext(new ExprContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expr);
 						setState(267);
 						if (!(precpred(_ctx, 6))) throw new FailedPredicateException(this, "precpred(_ctx, 6)");
 						setState(268);
-						((LogicExpr10Context)_localctx).op = match(BitOr);
+						((BinaryExprContext)_localctx).op = match(BitOr);
 						setState(269);
 						expr(7);
 						}
 						break;
 					case 9:
 						{
-						_localctx = new LogicExpr11Context(new ExprContext(_parentctx, _parentState));
+						_localctx = new BinaryExprContext(new ExprContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expr);
 						setState(270);
 						if (!(precpred(_ctx, 5))) throw new FailedPredicateException(this, "precpred(_ctx, 5)");
 						setState(271);
-						((LogicExpr11Context)_localctx).op = match(And);
+						((BinaryExprContext)_localctx).op = match(And);
 						setState(272);
 						expr(6);
 						}
 						break;
 					case 10:
 						{
-						_localctx = new LogicExpr12Context(new ExprContext(_parentctx, _parentState));
+						_localctx = new BinaryExprContext(new ExprContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expr);
 						setState(273);
 						if (!(precpred(_ctx, 4))) throw new FailedPredicateException(this, "precpred(_ctx, 4)");
 						setState(274);
-						((LogicExpr12Context)_localctx).op = match(Or);
+						((BinaryExprContext)_localctx).op = match(Or);
 						setState(275);
 						expr(5);
 						}
 						break;
 					case 11:
 						{
-						_localctx = new TernaryConditionContext(new ExprContext(_parentctx, _parentState));
+						_localctx = new TernaryExprContext(new ExprContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expr);
 						setState(276);
 						if (!(precpred(_ctx, 3))) throw new FailedPredicateException(this, "precpred(_ctx, 3)");
 						setState(277);
-						((TernaryConditionContext)_localctx).op = match(QMark);
+						((TernaryExprContext)_localctx).op = match(QMark);
 						setState(278);
 						expr(0);
 						setState(279);
-						((TernaryConditionContext)_localctx).op = match(Colon);
+						((TernaryExprContext)_localctx).op = match(Colon);
 						setState(280);
 						expr(3);
 						}
@@ -2680,15 +2421,15 @@ public class MxParser extends Parser {
 						break;
 					case 13:
 						{
-						_localctx = new PostAddSubExprContext(new ExprContext(_parentctx, _parentState));
+						_localctx = new UnaryExprContext(new ExprContext(_parentctx, _parentState));
 						pushNewRecursionContext(_localctx, _startState, RULE_expr);
 						setState(285);
 						if (!(precpred(_ctx, 21))) throw new FailedPredicateException(this, "precpred(_ctx, 21)");
 						setState(286);
-						((PostAddSubExprContext)_localctx).op = _input.LT(1);
+						((UnaryExprContext)_localctx).op = _input.LT(1);
 						_la = _input.LA(1);
 						if ( !(_la==SelfInc || _la==SelfDec) ) {
-							((PostAddSubExprContext)_localctx).op = (Token)_errHandler.recoverInline(this);
+							((UnaryExprContext)_localctx).op = (Token)_errHandler.recoverInline(this);
 						}
 						else {
 							if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
@@ -2850,7 +2591,7 @@ public class MxParser extends Parser {
 		"\b\u0018\u0005\u0018\u012b\b\u0018\n\u0018\f\u0018\u012e\t\u0018\u0001"+
 		"\u0018\u0000\u00010\u0019\u0000\u0002\u0004\u0006\b\n\f\u000e\u0010\u0012"+
 		"\u0014\u0016\u0018\u001a\u001c\u001e \"$&(*,.0\u0000\t\u0001\u0000(*\u0002"+
-		"\u0000-08:\u0001\u0000\u0016\u0017\u0003\u0000\u0002\u0002\u000e\u000e"+
+		"\u0000-08:\u0001\u0000\u0016\u0017\u0003\u0000\u0001\u0002\u000e\u000e"+
 		"\u0014\u0014\u0001\u0000\u0003\u0005\u0001\u0000\u0001\u0002\u0001\u0000"+
 		"\u000f\u0010\u0001\u0000\u0006\t\u0001\u0000\n\u000b\u014b\u00007\u0001"+
 		"\u0000\u0000\u0000\u0002<\u0001\u0000\u0000\u0000\u0004E\u0001\u0000\u0000"+

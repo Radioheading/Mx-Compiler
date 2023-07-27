@@ -2,13 +2,12 @@ package AST.Expressions;
 
 import AST.*;
 import Util.position;
+import java.util.ArrayList;
 
-public class ExpressionNode extends ASTNode {
-    public TypeNameNode type;
+public class CallParametersExprNode extends ASTNode {
+    public ArrayList<ExpressionNode> expr;
 
-    public String str;
-
-    public ExpressionNode(position pos) {
+    public CallParametersExprNode(position pos) {
         super(pos);
     }
 

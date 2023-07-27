@@ -9,7 +9,7 @@ public class VarDefAssignNode extends ASTNode {
     public TypeNameNode typeName;
     public ExpressionNode initValue;
 
-    VarDefAssignNode(position pos, String _varName, TypeNameNode _typeName, ExpressionNode _initValue) {
+    public VarDefAssignNode(position pos, String _varName, TypeNameNode _typeName, ExpressionNode _initValue) {
         super(pos);
         this.varName = _varName;
         this.typeName = _typeName;

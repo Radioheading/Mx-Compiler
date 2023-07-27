@@ -1,13 +1,15 @@
 package AST;
 
 import Util.position;
+import Util.Type;
 
 public class TypeNameNode extends ASTNode {
-    String typeName;
+    Type type;
 
-    TypeNameNode(String _typeName, position pos) {
+    public TypeNameNode(position pos, String _typeName, int dim) {
         super(pos);
-        this.typeName = _typeName;
+        type = new Type(_typeName, dim);
+
     }
 
     @Override

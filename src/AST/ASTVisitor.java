@@ -1,6 +1,7 @@
 package AST;
 
 import AST.Expressions.AssignExprNode;
+import AST.Expressions.CallParametersExprNode;
 import AST.Expressions.ExpressionNode;
 import AST.Statements.*;
 
@@ -25,4 +26,5 @@ public interface ASTVisitor {
     void visit(ExpressionNode it);
 
     void visit(AssignExprNode it);
+    void visit(CallParametersExprNode callParametersExprNode);
 }

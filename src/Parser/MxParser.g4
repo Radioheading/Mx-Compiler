@@ -51,31 +51,31 @@ breakStatement: Break SemiColon;
 continueStatement: Continue SemiColon;
 exprStatement: expr? SemiColon;
 
-baseExpr: (IntLiteral | StringLiteral | True | False | Null | Identifier | This); // single apperance is allowed
 funcCallParameters: expr (Comma expr)*;
 
-funcCalling: Identifier LParen funcCallParameters? RParen;
+newArrayUnit: LBracket expr? RBracket;
 
 expr // priority needs to be considered
- : expr op = (SelfInc | SelfDec)                            #postAddSubExpr
- | funcCalling                                              #funcCallExpr
+ : expr op = (SelfInc | SelfDec)                            #unaryExpr
+ | expr LParen funcCallParameters? RParen                   #funcCallExpr
  | LParen expr RParen                                       #parenExpr
  | expr LBracket expr RBracket                              #arraySubExpr
- | expr op = Member (Identifier | funcCalling)              #memberExpr
- | <assoc=right>op = (SelfInc | SelfDec) expr               #preAddSubExpr
- | <assoc=right>op = (Sub | Not | BitNot) expr              #logicExpr2
- | New typeHead (LBracket expr? RBracket)* (LParen RParen)? #newExpr
- | expr op = (Mul | Div | Mod) expr                         #arithExpr3
- | expr op = (Add | Sub) expr                               #arithExpr4
- | expr op = (RightShift | LeftShift) expr                  #logicExpr5
- | expr op = (Greater | Less | Geq | Leq) expr              #logicExpr6
- | expr op = (Equal | NotEqual) expr                        #logicExpr7
- | expr op = BitAnd expr                                    #logicExpr8
- | expr op = BitXor expr                                    #logicExpr9
- | expr op = BitOr expr                                     #logicExpr10
- | expr op = And expr                                       #logicExpr11
- | expr op = Or expr                                        #logicExpr12
- | <assoc=right>expr op = QMark expr op = Colon expr        #ternaryCondition
+ | expr op = Member Identifier                              #memberExpr
+ | <assoc=right>op = (SelfInc | SelfDec) expr               #unaryExpr
+ | <assoc=right>op = (Add | Sub | Not | BitNot) expr        #unaryExpr
+ | New typeHead newArrayUnit+ (LParen RParen)?              #newExpr
+ | expr op = (Mul | Div | Mod) expr                         #binaryExpr
+ | expr op = (Add | Sub) expr                               #binaryExpr
+ | expr op = (RightShift | LeftShift) expr                  #binaryExpr
+ | expr op = (Greater | Less | Geq | Leq) expr              #binaryExpr
+ | expr op = (Equal | NotEqual) expr                        #binaryExpr
+ | expr op = BitAnd expr                                    #binaryExpr
+ | expr op = BitXor expr                                    #binaryExpr
+ | expr op = BitOr expr                                     #binaryExpr
+ | expr op = And expr                                       #binaryExpr
+ | expr op = Or expr                                        #binaryExpr
+ | <assoc=right>expr op = QMark expr op = Colon expr        #ternaryExpr
  | <assoc=right>expr op = Assign expr                       #simpleAssign
- | baseExpr                                                 #basicExpr
+ | (IntLiteral | StringLiteral | True | False | Null | Identifier | This) #baseExpr
+ // single apperance is allowed
  ;
