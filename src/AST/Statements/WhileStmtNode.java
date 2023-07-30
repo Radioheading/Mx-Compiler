@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 public class WhileStmtNode extends BaseStmtNode {
     public ExpressionNode condition;
-    public SuiteNode doStmt;
+    public ArrayList<BaseStmtNode> doStmt = new ArrayList<>();
 
     public WhileStmtNode(ExpressionNode _condition, position pos) {
         super(pos);

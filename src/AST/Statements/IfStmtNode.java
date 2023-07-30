@@ -7,8 +7,8 @@ import java.util.ArrayList;
 
 public class IfStmtNode extends BaseStmtNode {
     public ExpressionNode condition;
-    public SuiteNode thenStmt;
-    public SuiteNode elseStmt;
+    public ArrayList<BaseStmtNode> thenStmt;
+    public ArrayList<BaseStmtNode> elseStmt;
 
     public IfStmtNode(ExpressionNode _condition, position pos) {
         super(pos);

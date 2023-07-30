@@ -11,7 +11,7 @@ import java.io.InputStream;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        String name = "test.yx";
+        String name = "test.mx";
         InputStream input = new FileInputStream(name);
         try {
             MxLexer lexer = new MxLexer(CharStreams.fromStream(input));

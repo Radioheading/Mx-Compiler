@@ -12,7 +12,7 @@ public class ForStmtNode extends BaseStmtNode {
     public ExpressionNode exprInit;
     public ExpressionNode condition;
     public ExpressionNode iteration;
-    public SuiteNode loop;
+    public ArrayList<BaseStmtNode> loop = new ArrayList<>();
     public ForStmtNode(position pos) {
         super(pos);
         exprInit = null;

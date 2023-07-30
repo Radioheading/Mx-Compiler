@@ -8,6 +8,7 @@ public class FuncDefNode extends ASTNode {
     public String funcName;
     public ParameterListNode parameterList;
     public SuiteNode suite;
+    public String className;
 
     public FuncDefNode(position pos) {
         super(pos);

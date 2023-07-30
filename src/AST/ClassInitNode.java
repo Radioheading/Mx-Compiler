@@ -6,7 +6,7 @@ import Util.position;
 import java.lang.reflect.Array;
 
 public class ClassInitNode extends ASTNode {
-    String name;
+    public String name;
     public SuiteNode stmts;
 
     public ClassInitNode(position pos, String _name, SuiteNode _stmts) {

@@ -131,10 +131,20 @@ public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
         ifStmt.thenStmt = null;
         ifStmt.elseStmt = null;
         if (ctx.statement(0).suite() != null) {
-            ifStmt.thenStmt = (SuiteNode) visit(ctx.statement(0).suite());
+            for (var stmt : ctx.statement(0).suite().statement()) {
+                ifStmt.thenStmt.add((BaseStmtNode) visit(stmt));
+            }
+        } else {
+            ifStmt.thenStmt.add((BaseStmtNode) visit(ctx.statement(0)));
         }
-        if (ctx.statement(1).suite() != null) {
-            ifStmt.elseStmt = (SuiteNode) visit(ctx.statement(1).suite());
+        if (ctx.statement().size() > 1) {
+            if (ctx.statement(1).suite() != null) {
+                for (var stmt : ctx.statement(1).suite().statement()) {
+                    ifStmt.elseStmt.add((BaseStmtNode) visit(stmt));
+                }
+            } else {
+                ifStmt.elseStmt.add((BaseStmtNode) visit(ctx.statement(1)));
+            }
         }
         return ifStmt;
     }
@@ -143,7 +153,11 @@ public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
     public ASTNode visitWhileStatement(MxParser.WhileStatementContext ctx) {
         WhileStmtNode whileStmt = new WhileStmtNode((ExpressionNode) visit(ctx.expr()), new position(ctx));
         if (ctx.statement().suite() != null) {
-            whileStmt.doStmt = (SuiteNode) visit(ctx.statement().suite());
+            for (var stmt : ctx.statement().suite().statement()) {
+                whileStmt.doStmt.add((BaseStmtNode) visit(stmt));
+            }
+        } else {
+            whileStmt.doStmt.add((BaseStmtNode) visit(ctx.statement()));
         }
         return whileStmt;
     }
@@ -151,10 +165,12 @@ public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
     @Override
     public ASTNode visitForStatement(MxParser.ForStatementContext ctx) {
         ForStmtNode forStmt = new ForStmtNode(new position(ctx));
-        if (ctx.statement() != null) {
-            forStmt.loop = (SuiteNode) visit(ctx.statement().suite());
+        if (ctx.statement().suite() != null) {
+            for (var stmt : ctx.statement().suite().statement()) {
+                forStmt.loop.add((BaseStmtNode) visit(ctx.statement().suite()));
+            }
         } else {
-            forStmt.loop = null;
+            forStmt.loop.add((BaseStmtNode) visit(ctx.statement()));
         }
         if (ctx.forStart().varDef() != null) { // either varDef or ExprStmt
             forStmt.varInit = (VarDefNode) visit(ctx.forStart().varDef());

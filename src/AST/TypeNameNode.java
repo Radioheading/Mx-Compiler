@@ -4,7 +4,7 @@ import Util.position;
 import Util.Type;
 
 public class TypeNameNode extends ASTNode {
-    Type type;
+    public Type type;
 
     public TypeNameNode(position pos, String _typeName, int dim) {
         super(pos);
@@ -15,5 +15,16 @@ public class TypeNameNode extends ASTNode {
     @Override
     public void accept(ASTVisitor visitor) {
         visitor.visit(this);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof TypeNameNode)) {
+            return false;
+        }
+        return ((TypeNameNode) obj).type == this.type;
     }
 }

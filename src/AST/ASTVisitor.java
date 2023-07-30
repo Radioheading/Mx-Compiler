@@ -1,8 +1,6 @@
 package AST;
 
-import AST.Expressions.AssignExprNode;
-import AST.Expressions.CallParametersExprNode;
-import AST.Expressions.ExpressionNode;
+import AST.Expressions.*;
 import AST.Statements.*;
 
 public interface ASTVisitor {
@@ -23,8 +21,16 @@ public interface ASTVisitor {
     void visit(ReturnStmtNode it);
     void visit(SuiteNode it);
     void visit(WhileStmtNode it);
-    void visit(ExpressionNode it);
-
     void visit(AssignExprNode it);
-    void visit(CallParametersExprNode callParametersExprNode);
+    void visit(BaseExprNode it);
+    void visit(BinaryExprNode it);
+    void visit(CallParametersExprNode it);
+    void visit(ExpressionNode it);
+    void visit(FuncCallExprNode it);
+    void visit(MemberExprNode it);
+    void visit(NewExprNode it);
+    void visit(ParaListExprNode it);
+    void visit(SubscriptExprNode it);
+    void visit(TernaryExprNode it);
+    void visit(UnaryExprNode it);
 }
