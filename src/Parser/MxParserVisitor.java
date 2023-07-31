@@ -1,5 +1,8 @@
 // Generated from C:/Users/18221/IdeaProjects/MxCompiler/src/Parser\MxParser.g4 by ANTLR 4.12.0
 package Parser;
+
+    package Parser;
+
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 /**
@@ -137,12 +140,6 @@ public interface MxParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitExprStatement(MxParser.ExprStatementContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MxParser#baseExpr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitBaseExpr(MxParser.BaseExprContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link MxParser#funcCallParameters}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -162,13 +159,6 @@ public interface MxParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitNewExpr(MxParser.NewExprContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code basicExpr}
-	 * labeled alternative in {@link MxParser#expr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitBasicExpr(MxParser.BasicExprContext ctx);
-	/**
 	 * Visit a parse tree produced by the {@code unaryExpr}
 	 * labeled alternative in {@link MxParser#expr}.
 	 * @param ctx the parse tree
@@ -182,6 +172,13 @@ public interface MxParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitTernaryExpr(MxParser.TernaryExprContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code preAddSubExpr}
+	 * labeled alternative in {@link MxParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPreAddSubExpr(MxParser.PreAddSubExprContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code arraySubExpr}
 	 * labeled alternative in {@link MxParser#expr}.
@@ -203,6 +200,13 @@ public interface MxParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitBinaryExpr(MxParser.BinaryExprContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code baseExpr}
+	 * labeled alternative in {@link MxParser#expr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBaseExpr(MxParser.BaseExprContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code simpleAssign}
 	 * labeled alternative in {@link MxParser#expr}.

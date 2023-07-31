@@ -1,5 +1,8 @@
 // Generated from C:/Users/18221/IdeaProjects/MxCompiler/src/Parser\MxParser.g4 by ANTLR 4.12.0
 package Parser;
+
+    package Parser;
+
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
 /**
@@ -218,16 +221,6 @@ public interface MxParserListener extends ParseTreeListener {
 	 */
 	void exitExprStatement(MxParser.ExprStatementContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MxParser#baseExpr}.
-	 * @param ctx the parse tree
-	 */
-	void enterBaseExpr(MxParser.BaseExprContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link MxParser#baseExpr}.
-	 * @param ctx the parse tree
-	 */
-	void exitBaseExpr(MxParser.BaseExprContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link MxParser#funcCallParameters}.
 	 * @param ctx the parse tree
 	 */
@@ -260,18 +253,6 @@ public interface MxParserListener extends ParseTreeListener {
 	 */
 	void exitNewExpr(MxParser.NewExprContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code basicExpr}
-	 * labeled alternative in {@link MxParser#expr}.
-	 * @param ctx the parse tree
-	 */
-	void enterBasicExpr(MxParser.BasicExprContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code basicExpr}
-	 * labeled alternative in {@link MxParser#expr}.
-	 * @param ctx the parse tree
-	 */
-	void exitBasicExpr(MxParser.BasicExprContext ctx);
-	/**
 	 * Enter a parse tree produced by the {@code unaryExpr}
 	 * labeled alternative in {@link MxParser#expr}.
 	 * @param ctx the parse tree
@@ -295,6 +276,18 @@ public interface MxParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitTernaryExpr(MxParser.TernaryExprContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code preAddSubExpr}
+	 * labeled alternative in {@link MxParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterPreAddSubExpr(MxParser.PreAddSubExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code preAddSubExpr}
+	 * labeled alternative in {@link MxParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitPreAddSubExpr(MxParser.PreAddSubExprContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code arraySubExpr}
 	 * labeled alternative in {@link MxParser#expr}.
@@ -331,6 +324,18 @@ public interface MxParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitBinaryExpr(MxParser.BinaryExprContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code baseExpr}
+	 * labeled alternative in {@link MxParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void enterBaseExpr(MxParser.BaseExprContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code baseExpr}
+	 * labeled alternative in {@link MxParser#expr}.
+	 * @param ctx the parse tree
+	 */
+	void exitBaseExpr(MxParser.BaseExprContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code simpleAssign}
 	 * labeled alternative in {@link MxParser#expr}.

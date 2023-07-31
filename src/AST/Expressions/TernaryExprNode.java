@@ -18,4 +18,9 @@ public class TernaryExprNode extends ExpressionNode {
     public void accept(ASTVisitor visitor) {
         visitor.visit(this);
     }
+
+    @Override
+    public boolean isAssignable() {
+        return false;
+    }
 }

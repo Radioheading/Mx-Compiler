@@ -1,16 +1,16 @@
 package AST.Expressions;
 
 import AST.*;
-import Util.Type;
 import Util.position;
 
-public class AssignExprNode extends ExpressionNode {
-    public ExpressionNode lhs, rhs;
+public class LeftUnaryExprNode extends ExpressionNode {
+    public String op;
+    public ExpressionNode object;
 
-    public AssignExprNode(position pos, ExpressionNode _lhs, ExpressionNode _rhs) {
+    public LeftUnaryExprNode(position pos, ExpressionNode _object, String _op) {
         super(pos);
-        this.lhs = _lhs;
-        this.rhs = _rhs;
+        this.op = _op;
+        this.object = _object;
     }
 
     @Override

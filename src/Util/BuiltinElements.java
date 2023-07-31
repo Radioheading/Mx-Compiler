@@ -9,6 +9,7 @@ public class BuiltinElements {
     public Type IntType = new Type("int");
     public Type VoidType = new Type("void");
     public Type StringType = new Type("string");
+    public Type NullType = new Type("null");
     public Type ThisType = new Type("this");
 
     // builtin functions (global scope)

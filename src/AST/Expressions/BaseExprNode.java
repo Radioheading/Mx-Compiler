@@ -10,8 +10,15 @@ public class BaseExprNode extends ExpressionNode {
         super(pos);
     }
 
+    public boolean isIdentifier;
+
     @Override
     public void accept(ASTVisitor visitor) {
         visitor.visit(this);
+    }
+
+    @Override
+    public boolean isAssignable() {
+        return isIdentifier;
     }
 }

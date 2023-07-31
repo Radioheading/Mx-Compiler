@@ -61,9 +61,9 @@ expr // priority needs to be considered
  | LParen expr RParen                                       #parenExpr
  | expr LBracket expr RBracket                              #arraySubExpr
  | expr op = Member Identifier                              #memberExpr
- | <assoc=right>op = (SelfInc | SelfDec) expr               #unaryExpr
+ | <assoc=right>op = (SelfInc | SelfDec) expr               #preAddSubExpr
  | <assoc=right>op = (Add | Sub | Not | BitNot) expr        #unaryExpr
- | New typeHead newArrayUnit+ (LParen RParen)?              #newExpr
+ | New typeHead newArrayUnit* (LParen RParen)?              #newExpr
  | expr op = (Mul | Div | Mod) expr                         #binaryExpr
  | expr op = (Add | Sub) expr                               #binaryExpr
  | expr op = (RightShift | LeftShift) expr                  #binaryExpr

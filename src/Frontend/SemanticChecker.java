@@ -1,3 +1,9 @@
+/*
+ *@todo: proper arrangement about function calling
+ * function calling can be sorted into Identifier or Member
+ * we implement funcDefNode in ExprNode, credit to @Query Fan
+ */
+
 package Frontend;
 
 import AST.*;
@@ -203,61 +209,161 @@ public class SemanticChecker implements ASTVisitor {
 
     @Override
     public void visit(AssignExprNode it) {
-
+        it.lhs.accept(this);
+        it.rhs.accept(this);
+        if (it.lhs.type == null || it.rhs.type == null || it.rhs.type.type == myBuiltin.VoidType) {
+            throw new semanticError("Invalid Expression: null/void Appearance", it.pos);
+        }
+        if (it.lhs.type != it.rhs.type && it.rhs.type.type != myBuiltin.NullType) {
+            throw new semanticError("Invalid Expression: Type Mismatch", it.pos);
+        }
+        if (!it.lhs.type.type.isReference || it.lhs.type.type == myBuiltin.StringType && it.rhs.type.type == myBuiltin.NullType) {
+            throw new semanticError("Invalid Expression: Only Left Value Objects Can Be Assigned", it.pos);
+        }
     }
 
     @Override
     public void visit(BaseExprNode it) {
-
+        if (it.isIdentifier) {
+            if (it.str.matches("\".*\"")) {
+                it.type = new TypeNameNode(it.pos, myBuiltin.StringType);
+            } else if (it.str.equals("true") || it.str.equals("false")) {
+                it.type = new TypeNameNode(it.pos, myBuiltin.BoolType);
+            } else if (it.str.equals("null")) {
+                it.type = new TypeNameNode(it.pos, myBuiltin.NullType);
+            } else if (it.str.equals("this")) {
+                if (nowScope.fatherClass == null) {
+                    throw new semanticError("This Outside Any Class", it.pos);
+                }
+                it.type = new TypeNameNode(it.pos, nowScope.fatherClass.className, 0);
+            } else {
+                it.type = new TypeNameNode(it.pos, myBuiltin.IntType);
+            }
+        } else {
+            if (nowScope.containsVariable(it.str, true)) {
+                it.type = new TypeNameNode(it.pos, new Type(it.str));
+                if (nowScope.fatherClass != null && nowScope.fatherClass.funcMap.containsKey(it.str)) {
+                    it.funcDefGuess = nowScope.fatherClass.funcMap.get(it.str);
+                } else {
+                    it.funcDefGuess = gScope.getFuncNode(it.str, it.pos);
+                }
+            } else {
+                throw new semanticError("Not Containing This Type", it.pos);
+            }
+        }
     }
 
     @Override
     public void visit(BinaryExprNode it) {
+        it.lhs.accept(this);
+        it.rhs.accept(this);
+        if (it.lhs.type == null || it.rhs.type == null) {
+            throw new semanticError("Invalid Type in Binary Expression", it.pos);
+        }
 
     }
 
     @Override
     public void visit(CallParametersExprNode it) {
-
+        it.expr.forEach(sd -> sd.accept(this));
     }
 
     @Override
-    public void visit(ExpressionNode it) {
-
+    public void visit(ExpressionNode it) { // do not need
     }
 
     @Override
     public void visit(FuncCallExprNode it) {
-
+        it.parameter.accept(this);
+        // todo
     }
 
     @Override
     public void visit(MemberExprNode it) {
-
+        // todo
     }
 
     @Override
     public void visit(NewExprNode it) {
-
+        for (var sd : it.sizes) {
+            sd.accept(this);
+            if (sd.type == null || sd.type.type != myBuiltin.IntType) {
+                throw new semanticError("Wrong Type in New Subscript", it.pos);
+            }
+        }
+        var checker = new TypeNameNode(it.pos, it.newType, it.dim);
+        checker.accept(this);
+        it.type = checker;
     }
 
     @Override
     public void visit(ParaListExprNode it) {
-
+        it.parameters.forEach(sd -> sd.accept(this));
     }
 
     @Override
     public void visit(SubscriptExprNode it) {
-
+        it.name.accept(this);
+        it.subscript.accept(this);
+        if (it.type == null || it.subscript == null || it.subscript.type.type != myBuiltin.IntType) {
+            throw new semanticError("Wrong Type in Subscript Expression", it.pos);
+        }
+        if (it.name.type.type.dim <= 0) {
+            throw new semanticError("Subscript in a non-Array Element", it.pos);
+        }
+        it.type = new TypeNameNode(it.pos, it.name.type.type.name, it.name.type.type.dim - 1);
     }
 
     @Override
     public void visit(TernaryExprNode it) {
-
+        it.condition.accept(this);
+        if (it.condition.type.type != myBuiltin.BoolType) {
+            throw new semanticError("Wrong Condition Type", it.pos);
+        }
+        it.jump_1.accept(this);
+        it.jump_2.accept(this);
+        if (it.jump_2.type == null || it.jump_1.type == null || it.jump_1.type.type == myBuiltin.VoidType || it.jump_2.type.type == myBuiltin.VoidType) {
+            throw new semanticError("Wrong Type in Ternary Expressions", it.pos);
+        }
+        if (it.jump_1.type != it.jump_2.type) {
+            throw new semanticError("Type Mismatch in Ternary Expressions", it.pos);
+        }
+        it.type = new TypeNameNode(it.pos, it.jump_1.type.type);
     }
 
     @Override
     public void visit(UnaryExprNode it) {
+        it.object.accept(this);
+        if (it.type == null || it.type.type == null) {
+            throw new semanticError("Invalid Type", it.pos);
+        }
+        if (it.op.equals("++") || it.op.equals("--")) { // post add/sub
+            if (it.object.type.type != myBuiltin.IntType || !it.object.isAssignable()) {
+                throw new semanticError("Invalid Type in PostAdd/PostSub", it.pos);
+            }
+            it.type = new TypeNameNode(it.pos, myBuiltin.IntType);
+        } else if (it.op.equals("-") || it.op.equals("~") || it.op.equals("+")) {
+            if (it.object.type.type != myBuiltin.IntType) {
+                throw new semanticError("Invalid Type", it.pos);
+            }
+            it.type = new TypeNameNode(it.pos, myBuiltin.IntType);
+        } else if (it.op.equals("!")) {
+            if (it.object.type.type != myBuiltin.BoolType) {
+                throw new semanticError("Invalid Type in Anti", it.pos);
+            }
+            it.type = new TypeNameNode(it.pos, myBuiltin.BoolType);
+        }
+    }
 
+    @Override
+    public void visit(LeftUnaryExprNode it) {
+        it.object.accept(this);
+        if (it.object.type == null) {
+            throw new semanticError("Wrong Object Type", it.pos);
+        }
+        if (it.object.type.type != myBuiltin.IntType || !it.object.isAssignable()) {
+            throw new semanticError("Type Error in PreAdd/PreSub", it.pos);
+        }
+        it.type = new TypeNameNode(it.pos, myBuiltin.IntType);
     }
 }

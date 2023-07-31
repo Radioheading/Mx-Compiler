@@ -12,6 +12,11 @@ public class TypeNameNode extends ASTNode {
 
     }
 
+    public TypeNameNode(position pos, Type _type) {
+        super(pos);
+        type = _type;
+    }
+
     @Override
     public void accept(ASTVisitor visitor) {
         visitor.visit(this);

@@ -21,4 +21,9 @@ public class NewExprNode extends ExpressionNode {
     public void accept(ASTVisitor visitor) {
         visitor.visit(this);
     }
+
+    @Override
+    public boolean isAssignable() {
+        return false;
+    }
 }

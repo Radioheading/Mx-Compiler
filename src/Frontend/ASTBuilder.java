@@ -5,6 +5,7 @@ import AST.Expressions.*;
 import AST.Statements.*;
 import Parser.*;
 import Util.*;
+import Util.error.semanticError;
 
 public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
     @Override
@@ -218,7 +219,9 @@ public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitBaseExpr(MxParser.BaseExprContext ctx) {
-        return new ExpressionNode(new position(ctx));
+        BaseExprNode baseExpr = new BaseExprNode(new position(ctx));
+        baseExpr.isIdentifier = (ctx.Identifier() != null);
+        return baseExpr;
     }
 
     @Override
@@ -238,13 +241,14 @@ public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
     @Override
     public ASTNode visitNewExpr(MxParser.NewExprContext ctx) {
         NewExprNode newExpr = new NewExprNode(new position(ctx), ctx.typeHead().getText());
+        newExpr.type = new TypeNameNode(new position(ctx), ctx.typeHead().getText(), ctx.newArrayUnit().size());
         newExpr.dim = ctx.newArrayUnit().size();
         boolean validCheck = false;
         for (var size : ctx.newArrayUnit()) {
             if (size.expr() == null) {
                 validCheck = true;
             } else if (validCheck) {
-                // throw some Error
+                throw new semanticError("Wrong Size Definition in New Statement", newExpr.pos);
             } else {
                 newExpr.sizes.add((ExpressionNode) visit(size.expr()));
             }
@@ -254,7 +258,6 @@ public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitUnaryExpr(MxParser.UnaryExprContext ctx) {
-        //todo: LValue judgement
         return new UnaryExprNode(new position(ctx), (ExpressionNode) visit(ctx.expr()), ctx.op.getText());
     }
 
@@ -298,5 +301,10 @@ public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
     @Override
     public ASTNode visitParenExpr(MxParser.ParenExprContext ctx) {
         return (ExpressionNode) visit(ctx.expr());
+    }
+
+    @Override
+    public ASTNode visitPreAddSubExpr(MxParser.PreAddSubExprContext ctx) {
+        return new LeftUnaryExprNode(new position(ctx), (ExpressionNode) visit(ctx.expr()), ctx.op.getText());
     }
 }

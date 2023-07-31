@@ -5,7 +5,7 @@ import Util.position;
 
 import java.util.ArrayList;
 
-public class ParaListExprNode extends ExpressionNode {
+public class ParaListExprNode extends ASTNode {
     public ArrayList<ExpressionNode> parameters;
 
     public ParaListExprNode(position pos) {

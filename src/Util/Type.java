@@ -6,26 +6,39 @@ public class Type {
     public String name;
     public boolean isClass = false;
     public boolean isArray = false;
-    public boolean isAssignable = false;
+    public boolean isReference = false;
     public int dim = 0;
+
+    boolean isIdentifier(String name) {
+        switch (name) {
+            case "int", "void", "null", "bool", "this", "string" -> {
+                return false;
+            }
+            default -> {
+                return true;
+            }
+        }
+    }
 
     public Type(String _name) {
         this.name = _name;
         this.dim = 0;
-        this.isClass = false;
+        this.isClass = isIdentifier(_name);
+        this.isReference = this.isClass;
     }
 
     public Type(String _name, int _dim) {
         this.name = _name;
         this.dim = _dim;
-        this.isClass = true;
+        this.isClass = isIdentifier(_name);
+        this.isReference = this.isClass || _dim > 0;
     }
 
     public Type(Type other) {
         this.name = other.name;
         this.isArray = other.isArray;
         this.isClass = other.isClass;
-        this.isAssignable = other.isAssignable;
+        this.isReference = other.isReference;
     }
 
     @Override

@@ -5,6 +5,7 @@ import Util.Type;
 import Util.position;
 
 public class MemberExprNode extends ExpressionNode {
+    boolean checkVar = false;
     public ExpressionNode object;
     public String member;
 
@@ -17,5 +18,10 @@ public class MemberExprNode extends ExpressionNode {
     @Override
     public void accept(ASTVisitor visitor) {
         visitor.visit(this);
+    }
+
+    @Override
+    public boolean isAssignable() {
+        return true;
     }
 }
