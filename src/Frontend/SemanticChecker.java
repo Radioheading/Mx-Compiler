@@ -15,7 +15,7 @@ import Util.error.semanticError;
 import java.util.Objects;
 
 public class SemanticChecker implements ASTVisitor {
-    BuiltinElements myBuiltin;
+    BuiltinElements myBuiltin = new BuiltinElements();
     Scope nowScope;
     globalScope gScope;
 
@@ -57,7 +57,7 @@ public class SemanticChecker implements ASTVisitor {
             it.parameterList.accept(this);
         }
         it.suite.accept(this);
-        if (!nowScope.hasReturned && !Objects.equals(it.funcName, "main") && it.returnType.type != myBuiltin.VoidType) {
+        if (!nowScope.hasReturned && !Objects.equals(it.funcName, "main") && !it.returnType.type.equals(myBuiltin.VoidType)) {
             throw new semanticError("The Function: " + it.funcName + "Doesn't Have Return Statement", it.pos);
         }
         nowScope = nowScope.parentScope;
@@ -71,11 +71,19 @@ public class SemanticChecker implements ASTVisitor {
     @Override
     public void visit(RootNode it) {
         FuncDefNode main = gScope.getFuncNode("main", null);
-        if (main.parameterList != null || main.returnType.type != myBuiltin.IntType) {
+        if (main.parameterList != null || !main.returnType.type.equals(myBuiltin.IntType)) {
+            if (main.parameterList != null) {
+                //System.out.println("shit");
+            }
+            if (!main.returnType.type.equals(myBuiltin.IntType)) {
+                //System.out.println("fuck");
+            }
+            //System.out.println(main.returnType.type.name);
+            //System.out.println(myBuiltin.IntType.name);
             throw new semanticError("Wrong main function definition", it.pos);
         }
-        it.funcDef.forEach(sd -> sd.accept(this));
         it.varDef.forEach(sd -> sd.accept(this));
+        it.funcDef.forEach(sd -> sd.accept(this));
         it.classDef.forEach(sd -> sd.accept(this));
     }
 
@@ -92,15 +100,19 @@ public class SemanticChecker implements ASTVisitor {
     @Override
     public void visit(VarDefAssignNode it) {
         it.typeName.accept(this);
-        it.initValue.accept(this);
+        if (it.initValue != null) {
+            it.initValue.accept(this);
+        }
         if (nowScope.containsVariable(it.varName, false)) {
             throw new semanticError("Multiple Definition of Variable: " + it.varName, it.pos);
         }
+        System.out.println("shit in varDef: " + it.varName + ", type:" + it.typeName.type.name);
         nowScope.varMember.put(it.varName, it.typeName.type);
     }
 
     @Override
     public void visit(VarDefNode it) {
+        System.out.println("shit to varDef: " + it.varName);
         it.varAssigns.forEach(sd -> sd.accept(this));
     }
 
@@ -140,7 +152,8 @@ public class SemanticChecker implements ASTVisitor {
         }
         if (it.condition != null) {
             it.condition.accept(this);
-            if (it.condition.type.type != myBuiltin.BoolType) {
+            System.out.println("For cond: " + it.condition.type.type.name);
+            if (!it.condition.type.type.equals(myBuiltin.BoolType)) {
                 throw new semanticError("Wrong Type of For Condition statement", it.condition.pos);
             }
         }
@@ -155,7 +168,7 @@ public class SemanticChecker implements ASTVisitor {
     public void visit(IfStmtNode it) {
         nowScope = new Scope(nowScope);
         it.condition.accept(this);
-        if (it.condition.type.type != myBuiltin.BoolType) {
+        if (!it.condition.type.type.equals(myBuiltin.BoolType)) {
             throw new semanticError("Wrong Type of If Condition", it.pos);
         }
         it.thenStmt.forEach(sd -> sd.accept(this));
@@ -175,11 +188,13 @@ public class SemanticChecker implements ASTVisitor {
         for (var iterScope = nowScope; iterScope != null; iterScope = iterScope.parentScope) {
             if (iterScope.returnType != null) { // check return type matching
                 if (it.expr != null) {
-                    if (iterScope.returnType.type != it.expr.type.type) {
+                    if (!iterScope.returnType.type.equals(it.expr.type.type)) {
+                        //System.out.println(it.expr.type.type.name);
+                        //System.out.println(iterScope);
                         throw new semanticError("Return Type Mismatch", it.pos);
                     }
                 } else {
-                    if (iterScope.returnType.type != myBuiltin.VoidType) {
+                    if (!iterScope.returnType.type.equals(myBuiltin.VoidType)) {
                         throw new semanticError("Return Type Mismatch", it.pos);
                     }
                 }
@@ -200,7 +215,7 @@ public class SemanticChecker implements ASTVisitor {
     public void visit(WhileStmtNode it) {
         nowScope = new Scope(nowScope);
         it.condition.accept(this);
-        if (it.condition.type.type != myBuiltin.BoolType) {
+        if (!it.condition.type.type.equals(myBuiltin.BoolType)) {
             throw new semanticError("Wrong Type of While Condition", it.condition.pos);
         }
         it.doStmt.forEach(sd -> sd.accept(this));
@@ -211,20 +226,25 @@ public class SemanticChecker implements ASTVisitor {
     public void visit(AssignExprNode it) {
         it.lhs.accept(this);
         it.rhs.accept(this);
-        if (it.lhs.type == null || it.rhs.type == null || it.rhs.type.type == myBuiltin.VoidType) {
+        if (it.lhs.type == null || it.rhs.type == null || it.rhs.type.type.equals(myBuiltin.VoidType)) {
             throw new semanticError("Invalid Expression: null/void Appearance", it.pos);
         }
-        if (it.lhs.type != it.rhs.type && it.rhs.type.type != myBuiltin.NullType) {
+        if (!it.lhs.type.equals(it.rhs.type) && !it.rhs.type.type.equals(myBuiltin.NullType)) {
+            System.out.println("left type: " + it.lhs.type.type.name);
+            System.out.println("right type: " + it.rhs.type.type.name);
             throw new semanticError("Invalid Expression: Type Mismatch", it.pos);
         }
-        if (!it.lhs.type.type.isReference || it.lhs.type.type == myBuiltin.StringType && it.rhs.type.type == myBuiltin.NullType) {
+        if (!it.lhs.isAssignable() || it.lhs.type.type.equals(myBuiltin.StringType) && it.rhs.type.type.equals(myBuiltin.NullType)) {
+            if (!it.lhs.isAssignable()) {
+                System.out.println("Wrong in Subscript! ");
+            }
             throw new semanticError("Invalid Expression: Only Left Value Objects Can Be Assigned", it.pos);
         }
     }
 
     @Override
     public void visit(BaseExprNode it) {
-        if (it.isIdentifier) {
+        if (!it.isIdentifier) {
             if (it.str.matches("\".*\"")) {
                 it.type = new TypeNameNode(it.pos, myBuiltin.StringType);
             } else if (it.str.equals("true") || it.str.equals("false")) {
@@ -237,18 +257,21 @@ public class SemanticChecker implements ASTVisitor {
                 }
                 it.type = new TypeNameNode(it.pos, nowScope.fatherClass.className, 0);
             } else {
+                //System.out.println("intType");
                 it.type = new TypeNameNode(it.pos, myBuiltin.IntType);
             }
         } else {
+            System.out.println("Finding: " + it.str);
             if (nowScope.containsVariable(it.str, true)) {
-                it.type = new TypeNameNode(it.pos, new Type(it.str));
-                if (nowScope.fatherClass != null && nowScope.fatherClass.funcMap.containsKey(it.str)) {
-                    it.funcDefGuess = nowScope.fatherClass.funcMap.get(it.str);
-                } else {
+                it.type = new TypeNameNode(it.pos, nowScope.getVarType(it.str, true));
+                System.out.println("I got: " + it.type.type.name);
+            }
+            if (nowScope.fatherClass != null && nowScope.fatherClass.funcMap.containsKey(it.str)) {
+                it.funcDefGuess = nowScope.fatherClass.funcMap.get(it.str);
+            } else {
+                if (gScope.funcMember.containsKey(it.str)) {
                     it.funcDefGuess = gScope.getFuncNode(it.str, it.pos);
                 }
-            } else {
-                throw new semanticError("Not Containing This Type", it.pos);
             }
         }
     }
@@ -258,10 +281,10 @@ public class SemanticChecker implements ASTVisitor {
         it.lhs.accept(this);
         it.rhs.accept(this);
         if (it.lhs.type == null || it.rhs.type == null
-                || it.lhs.type.type == myBuiltin.VoidType || it.rhs.type.type == myBuiltin.VoidType) {
+                || it.lhs.type.type.equals(myBuiltin.VoidType) || it.rhs.type.type.equals(myBuiltin.VoidType)) {
             throw new semanticError("Invalid Type in Binary Expression", it.pos);
         }
-        if (it.lhs.type.type == myBuiltin.NullType || it.rhs.type.type == myBuiltin.NullType) {
+        if (it.lhs.type.type.equals(myBuiltin.NullType) || it.rhs.type.type.equals(myBuiltin.NullType)) {
             if (Objects.equals(it.op, "==") || Objects.equals(it.op, "!=")) {
                 if (it.lhs.type.type.isReference || it.rhs.type.type.isReference) {
                     it.type = new TypeNameNode(it.pos, myBuiltin.BoolType);
@@ -273,7 +296,9 @@ public class SemanticChecker implements ASTVisitor {
                 throw new semanticError("Wrong Binary Expression Concerning Null", it.pos);
             }
         }
-        if (it.lhs.type != it.rhs.type) {
+        if (!it.lhs.type.equals(it.rhs.type)) {
+            System.out.println("left type: " + it.lhs.type.type.name);
+            System.out.println("right type: " + it.rhs.type.type.name);
             throw new semanticError("Wrong Binary Expression: Type Mismatch", it.pos);
         }
         switch (it.op) {
@@ -283,7 +308,7 @@ public class SemanticChecker implements ASTVisitor {
                 break;
             case "&&":
             case "||":
-                if (it.lhs.type.type == myBuiltin.BoolType) {
+                if (it.lhs.type.type.equals(myBuiltin.BoolType)) {
                     it.type = new TypeNameNode(it.pos, myBuiltin.BoolType);
                     break;
                 } else {
@@ -298,22 +323,28 @@ public class SemanticChecker implements ASTVisitor {
             case "&":
             case "|":
             case "^":
-                if (it.lhs.type.type == myBuiltin.IntType) {
+                if (it.lhs.type.type.equals(myBuiltin.IntType)) {
                     it.type = new TypeNameNode(it.pos, myBuiltin.IntType);
                     break;
                 } else {
                     throw new semanticError("Type Error in Binary Expression", it.pos);
                 }
             case "+":
+                if (it.lhs.type.type.equals(myBuiltin.IntType)) {
+                    it.type = new TypeNameNode(it.pos, myBuiltin.IntType);
+                    break;
+                } else if (it.lhs.type.type.equals(myBuiltin.StringType)) {
+                    it.type = new TypeNameNode(it.pos, myBuiltin.StringType);
+                    break;
+                } else {
+                    throw new semanticError("Type Error in Binary Expression", it.pos);
+                }
             case ">":
             case "<":
             case ">=":
             case "<=":
-                if (it.lhs.type.type == myBuiltin.IntType) {
-                    it.type = new TypeNameNode(it.pos, myBuiltin.IntType);
-                    break;
-                } else if (it.lhs.type.type == myBuiltin.StringType) {
-                    it.type = new TypeNameNode(it.pos, myBuiltin.StringType);
+                if (it.lhs.type.type.equals(myBuiltin.IntType) || it.lhs.type.type.equals(myBuiltin.StringType)) {
+                    it.type = new TypeNameNode(it.pos, myBuiltin.BoolType);
                     break;
                 } else {
                     throw new semanticError("Type Error in Binary Expression", it.pos);
@@ -347,11 +378,24 @@ public class SemanticChecker implements ASTVisitor {
             for (int i = 0; i < it.parameter.parameters.size(); ++i) {
                 var guess = it.parameter.parameters.get(i);
                 var real = it.funcName.funcDefGuess.parameterList.parameters.get(i);
-                if (guess.type != real.typeName && !real.typeName.type.isReference || guess.type.type != myBuiltin.NullType) {
+                System.out.println(guess.type.type.name);
+                System.out.println(real.typeName.type.name);
+                System.out.println(guess.type.type.dim);
+                System.out.println(real.typeName.type.dim);
+                if (!guess.type.equals(real.typeName) && (!real.typeName.type.isReference || guess.type.type.equals(myBuiltin.NullType))) {
+                    if (guess.type.equals(real.typeName)) {
+                        System.out.println("ok in type matching");
+                    }
+                    if (!real.typeName.type.isReference) {
+                        System.out.println("really not reference");
+                    }
+                    if (!guess.type.type.equals(myBuiltin.NullType)) {
+                        System.out.println("not null");
+                    }
                     throw new semanticError("Type Mismatch in Parameter: " + new String(String.valueOf(i)), it.pos);
                 }
             }
-            it.type = new TypeNameNode(it.pos, it.funcDefGuess.returnType.type);
+            it.type = new TypeNameNode(it.pos, it.funcName.funcDefGuess.returnType.type);
         }
     }
 
@@ -362,7 +406,7 @@ public class SemanticChecker implements ASTVisitor {
         if (it.object.type == null) {
             throw new semanticError("Null Type Error", it.pos);
         }
-        if (!it.object.type.type.isReference || !(it.object.type.type == myBuiltin.StringType)) {
+        if (!it.object.type.type.isReference || !(it.object.type.type.equals(myBuiltin.StringType))) {
             throw new semanticError("Member Access in non-Class element", it.pos);
         }
         var classObj = gScope.getClassNode(it.object.type.type.name, it.object.pos);
@@ -382,7 +426,7 @@ public class SemanticChecker implements ASTVisitor {
     public void visit(NewExprNode it) {
         for (var sd : it.sizes) {
             sd.accept(this);
-            if (sd.type == null || sd.type.type != myBuiltin.IntType) {
+            if (sd.type == null || !sd.type.type.equals(myBuiltin.IntType)) {
                 throw new semanticError("Wrong Type in New Subscript", it.pos);
             }
         }
@@ -400,7 +444,7 @@ public class SemanticChecker implements ASTVisitor {
     public void visit(SubscriptExprNode it) {
         it.name.accept(this);
         it.subscript.accept(this);
-        if (it.type == null || it.subscript == null || it.subscript.type.type != myBuiltin.IntType) {
+        if (it.subscript.type == null || it.subscript.type.type == null || !it.subscript.type.type.equals(myBuiltin.IntType)) {
             throw new semanticError("Wrong Type in Subscript Expression", it.pos);
         }
         if (it.name.type.type.dim <= 0) {
@@ -412,15 +456,15 @@ public class SemanticChecker implements ASTVisitor {
     @Override
     public void visit(TernaryExprNode it) {
         it.condition.accept(this);
-        if (it.condition.type.type != myBuiltin.BoolType) {
+        if (!it.condition.type.type.equals(myBuiltin.BoolType)) {
             throw new semanticError("Wrong Condition Type", it.pos);
         }
         it.jump_1.accept(this);
         it.jump_2.accept(this);
-        if (it.jump_2.type == null || it.jump_1.type == null || it.jump_1.type.type == myBuiltin.VoidType || it.jump_2.type.type == myBuiltin.VoidType) {
+        if (it.jump_2.type == null || it.jump_1.type == null || it.jump_1.type.type.equals(myBuiltin.VoidType) || it.jump_2.type.type.equals(myBuiltin.VoidType)) {
             throw new semanticError("Wrong Type in Ternary Expressions", it.pos);
         }
-        if (it.jump_1.type != it.jump_2.type) {
+        if (!it.jump_1.type.equals(it.jump_2.type)) {
             throw new semanticError("Type Mismatch in Ternary Expressions", it.pos);
         }
         it.type = new TypeNameNode(it.pos, it.jump_1.type.type);
@@ -429,21 +473,21 @@ public class SemanticChecker implements ASTVisitor {
     @Override
     public void visit(UnaryExprNode it) {
         it.object.accept(this);
-        if (it.type == null || it.type.type == null) {
+        if (it.object.type == null || it.object.type.type == null) {
             throw new semanticError("Invalid Type", it.pos);
         }
         if (it.op.equals("++") || it.op.equals("--")) { // post add/sub
-            if (it.object.type.type != myBuiltin.IntType || !it.object.isAssignable()) {
+            if (!it.object.type.type.equals(myBuiltin.IntType) || !it.object.isAssignable()) {
                 throw new semanticError("Invalid Type in PostAdd/PostSub", it.pos);
             }
             it.type = new TypeNameNode(it.pos, myBuiltin.IntType);
         } else if (it.op.equals("-") || it.op.equals("~") || it.op.equals("+")) {
-            if (it.object.type.type != myBuiltin.IntType) {
+            if (!it.object.type.type.equals(myBuiltin.IntType)) {
                 throw new semanticError("Invalid Type", it.pos);
             }
             it.type = new TypeNameNode(it.pos, myBuiltin.IntType);
         } else if (it.op.equals("!")) {
-            if (it.object.type.type != myBuiltin.BoolType) {
+            if (!it.object.type.type.equals(myBuiltin.BoolType)) {
                 throw new semanticError("Invalid Type in Anti", it.pos);
             }
             it.type = new TypeNameNode(it.pos, myBuiltin.BoolType);
@@ -456,7 +500,7 @@ public class SemanticChecker implements ASTVisitor {
         if (it.object.type == null) {
             throw new semanticError("Wrong Object Type", it.pos);
         }
-        if (it.object.type.type != myBuiltin.IntType || !it.object.isAssignable()) {
+        if (!it.object.type.type.equals(myBuiltin.IntType) || !it.object.isAssignable()) {
             throw new semanticError("Type Error in PreAdd/PreSub", it.pos);
         }
         it.type = new TypeNameNode(it.pos, myBuiltin.IntType);

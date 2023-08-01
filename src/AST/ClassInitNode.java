@@ -15,6 +15,10 @@ public class ClassInitNode extends ASTNode {
         this.stmts = _stmts;
     }
 
+    public ClassInitNode() {
+        super(null);
+    }
+
     @Override
     public void accept(ASTVisitor visitor) {
         visitor.visit(this);

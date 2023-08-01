@@ -45,9 +45,15 @@ public class SymbolCollector implements ASTVisitor {
     public void visit(ParameterListNode it) {}
 
     @Override public void visit(RootNode it) {
-        it.funcDef.forEach(sd -> sd.accept(this));
-        it.varDef.forEach(sd -> sd.accept(this));
-        it.classDef.forEach(sd -> sd.accept(this));
+        if (it.funcDef.size() > 0) {
+            it.funcDef.forEach(sd -> sd.accept(this));
+        }
+        if (it.varDef.size() > 0) {
+            it.varDef.forEach(sd -> sd.accept(this));
+        }
+        if (it.classDef.size() > 0) {
+            it.classDef.forEach(sd -> sd.accept(this));
+        }
     }
 
     @Override

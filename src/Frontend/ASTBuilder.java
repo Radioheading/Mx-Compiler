@@ -8,16 +8,24 @@ import Util.*;
 import Util.error.semanticError;
 
 public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
+    globalScope gScope;
+    public ASTBuilder(globalScope _gScope) {
+        this.gScope = _gScope;
+    }
     @Override
     public ASTNode visitProgram(MxParser.ProgramContext ctx) {
         RootNode root = new RootNode(new position(ctx));
         for (var line : ctx.children) {
+            System.out.println(line.getText());
             if (line instanceof MxParser.FuncDefContext) {
                 root.funcDef.add((FuncDefNode) visit(line));
+                System.out.println("Function!");
             } else if (line instanceof MxParser.ClassDefContext) {
                 root.classDef.add((ClassDefNode) visit(line));
-            } else {
+                System.out.println("Class!");
+            } else if (line instanceof MxParser.VarDefContext) {
                 root.varDef.add((VarDefNode) visit(line));
+                System.out.println("Variable!");
             }
         }
         return root;
@@ -107,11 +115,14 @@ public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
     public ASTNode visitVarDef(MxParser.VarDefContext ctx) {
         VarDefNode varDefNode = new VarDefNode(new position(ctx));
         for (var assign : ctx.varDefAssign()) {
+            System.out.println(assign.Identifier().getText());
+            System.out.println(ctx.typeName().getText());
             if (assign.expr() == null) {
                 varDefNode.varAssigns.add(new VarDefAssignNode(new position(ctx), assign.Identifier().getText(), (TypeNameNode) visit(ctx.typeName()), null));
             } else {
                 varDefNode.varAssigns.add(new VarDefAssignNode(new position(ctx), assign.Identifier().getText(), (TypeNameNode) visit(ctx.typeName()), (ExpressionNode) visit(assign.expr())));
             }
+            System.out.println(varDefNode.varAssigns.get(varDefNode.varAssigns.size() - 1).typeName.type.name);
         }
         return varDefNode;
     }
@@ -129,8 +140,6 @@ public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
     @Override
     public ASTNode visitIfStatement(MxParser.IfStatementContext ctx) {
         IfStmtNode ifStmt = new IfStmtNode((ExpressionNode) visit(ctx.expr()), new position(ctx));
-        ifStmt.thenStmt = null;
-        ifStmt.elseStmt = null;
         if (ctx.statement(0).suite() != null) {
             for (var stmt : ctx.statement(0).suite().statement()) {
                 ifStmt.thenStmt.add((BaseStmtNode) visit(stmt));
@@ -227,9 +236,9 @@ public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitFuncCallParameters(MxParser.FuncCallParametersContext ctx) {
-        CallParametersExprNode call = new CallParametersExprNode(new position(ctx));
+        ParaListExprNode call = new ParaListExprNode(new position(ctx));
         for (var expr : ctx.expr()) {
-            call.expr.add((ExpressionNode) visit(expr));
+            call.parameters.add((ExpressionNode) visit(expr));
         }
         return call;
     }

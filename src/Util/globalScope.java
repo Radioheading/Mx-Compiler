@@ -7,12 +7,12 @@ import java.util.HashMap;
 import AST.*;
 
 public class globalScope extends Scope {
-    BuiltinElements myBuiltin;
+    BuiltinElements myBuiltin = new BuiltinElements();
     public HashMap<String, FuncDefNode> funcMember = new HashMap<>();
     public HashMap<String, ClassDefNode> classMember = new HashMap<>();
     // todo: builtin types
     public globalScope(Scope parentScope) {
-        super(parentScope);
+        // super(parentScope);
         funcMember.put("print", myBuiltin.printFunc);
         funcMember.put("println", myBuiltin.printlnFunc);
         funcMember.put("printInt", myBuiltin.printIntFunc);
@@ -36,6 +36,7 @@ public class globalScope extends Scope {
         funcMember.put(name, t);
     }
     public FuncDefNode getFuncNode(String name, position pos) {
+        System.out.println("getting " + name);
         if (funcMember.containsKey(name)) return funcMember.get(name);
         throw new semanticError("no such function type: " + name, pos);
     }

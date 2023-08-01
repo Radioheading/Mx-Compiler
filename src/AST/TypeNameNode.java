@@ -28,8 +28,9 @@ public class TypeNameNode extends ASTNode {
             return true;
         }
         if (!(obj instanceof TypeNameNode)) {
+            System.out.println("wrong type");
             return false;
         }
-        return ((TypeNameNode) obj).type == this.type;
+        return ((TypeNameNode) obj).type.equals(this.type);
     }
 }

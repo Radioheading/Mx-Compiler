@@ -9,7 +9,7 @@ import java.security.PublicKey;
 import java.util.ArrayList;
 
 public class NewExprNode extends ExpressionNode {
-    public ArrayList<ExpressionNode> sizes;
+    public ArrayList<ExpressionNode> sizes = new ArrayList<>();
     public String newType;
     public int dim = 0;
     public NewExprNode(position pos, String _newType) {

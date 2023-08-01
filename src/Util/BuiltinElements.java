@@ -16,7 +16,7 @@ public class BuiltinElements {
     ParameterListNode para_1 = new ParameterListNode(null, StringType, "str");
     ParameterListNode para_2 = new ParameterListNode(null, IntType, "n");
     public FuncDefNode printFunc = new FuncDefNode(null, new TypeNameNode(null, "null", 0), "print", para_1, null);
-    public FuncDefNode printlnFunc = new FuncDefNode(null, new TypeNameNode(null, "null", 0), "print", para_1, null);
+    public FuncDefNode printlnFunc = new FuncDefNode(null, new TypeNameNode(null, "null", 0), "println", para_1, null);
     public FuncDefNode printIntFunc = new FuncDefNode(null, new TypeNameNode(null, "null", 0), "printInt", para_2, null);
     public FuncDefNode printlnIntFunc = new FuncDefNode(null, new TypeNameNode(null, "null", 0), "printlnInt", para_2, null);
     public FuncDefNode getStringFunc = new FuncDefNode(null, new TypeNameNode(null, "string", 0), "getString", null, null);
