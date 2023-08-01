@@ -60,7 +60,11 @@ public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitReturnType(MxParser.ReturnTypeContext ctx) {
-        return visit(ctx.typeName());
+        if (ctx.Void() != null) { // void isn't an typeName
+            return new TypeNameNode(new position(ctx), new Type(ctx.getText()));
+        } else {
+            return visit(ctx.typeName());
+        }
     }
 
     @Override
@@ -92,9 +96,9 @@ public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
         for (var line : ctx.children) {
             if (line instanceof MxParser.FuncDefContext) {
                 classDef.funcList.add((FuncDefNode) visit(line));
-            } else if (line instanceof MxParser.ClassDefContext) {
+            } else if (line instanceof MxParser.ClassConstructContext) {
                 classDef.classInit = (ClassInitNode) visit(line);
-            } else {
+            } else if (line instanceof MxParser.VarDefContext) {
                 classDef.varList.add((VarDefNode) visit(line));
             }
         }
@@ -103,6 +107,7 @@ public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitClassConstruct(MxParser.ClassConstructContext ctx) {
+        System.out.println("Init Name init: " + ctx.Identifier().getText());
         return new ClassInitNode(new position(ctx), ctx.Identifier().getText(), (SuiteNode) visit(ctx.suite()));
     }
 
@@ -283,7 +288,7 @@ public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitMemberExpr(MxParser.MemberExprContext ctx) {
-        MemberExprNode memberExpr = new MemberExprNode(new position(ctx), (ExpressionNode) visit(ctx.expr()), ctx.Member().getText());
+        MemberExprNode memberExpr = new MemberExprNode(new position(ctx), (ExpressionNode) visit(ctx.expr()), ctx.Identifier().getText());
         memberExpr.str = ctx.getText();
 
         return memberExpr;

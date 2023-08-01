@@ -6,27 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="16f78ac0-0f93-476a-9efb-c5ad74ca15d0" name="更改" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AST/ClassDefNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AST/ClassDefNode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AST/ClassInitNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AST/ClassInitNode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AST/Expressions/CallParametersExprNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AST/Expressions/CallParametersExprNode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AST/Expressions/NewExprNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AST/Expressions/NewExprNode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AST/Expressions/ParaListExprNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AST/Expressions/ParaListExprNode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AST/Statements/IfStmtNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AST/Statements/IfStmtNode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AST/TypeNameNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AST/TypeNameNode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AST/VarDefNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AST/VarDefNode.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Frontend/ASTBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Frontend/ASTBuilder.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Frontend/SemanticChecker.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Frontend/SemanticChecker.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Frontend/SymbolCollector.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Frontend/SymbolCollector.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Parser/MxLexer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Parser/MxLexer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Parser/MxParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Parser/MxParser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Parser/MxParserBaseListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Parser/MxParserBaseListener.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Parser/MxParserBaseVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Parser/MxParserBaseVisitor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Parser/MxParserListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Parser/MxParserListener.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Parser/MxParserVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Parser/MxParserVisitor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Util/BuiltinElements.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Util/BuiltinElements.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Util/Scope.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Util/Scope.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Util/globalScope.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Util/globalScope.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Util/error/error.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Util/error/error.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/test.mx" beforeDir="false" afterPath="$PROJECT_DIR$/src/test.mx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -147,7 +130,7 @@
       <workItem from="1690618224589" duration="22000" />
       <workItem from="1690618821925" duration="17471000" />
       <workItem from="1690710948526" duration="33497000" />
-      <workItem from="1690869968910" duration="18077000" />
+      <workItem from="1690869968910" duration="24462000" />
     </task>
     <servers />
   </component>

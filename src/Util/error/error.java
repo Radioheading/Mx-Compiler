@@ -11,6 +11,10 @@ abstract public class error extends RuntimeException {
     }
 
     public String toString() {
-        return message + ": " + pos.toString();
+        if (pos != null) {
+            return message + ": " + pos.toString();
+        } else {
+            return message;
+        }
     }
 }
