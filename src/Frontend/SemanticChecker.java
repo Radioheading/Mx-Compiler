@@ -257,10 +257,68 @@ public class SemanticChecker implements ASTVisitor {
     public void visit(BinaryExprNode it) {
         it.lhs.accept(this);
         it.rhs.accept(this);
-        if (it.lhs.type == null || it.rhs.type == null) {
+        if (it.lhs.type == null || it.rhs.type == null
+                || it.lhs.type.type == myBuiltin.VoidType || it.rhs.type.type == myBuiltin.VoidType) {
             throw new semanticError("Invalid Type in Binary Expression", it.pos);
         }
-
+        if (it.lhs.type.type == myBuiltin.NullType || it.rhs.type.type == myBuiltin.NullType) {
+            if (Objects.equals(it.op, "==") || Objects.equals(it.op, "!=")) {
+                if (it.lhs.type.type.isReference || it.rhs.type.type.isReference) {
+                    it.type = new TypeNameNode(it.pos, myBuiltin.BoolType);
+                    return;
+                } else {
+                    throw new semanticError("Wrong Comparing Concerning null", it.pos);
+                }
+            } else {
+                throw new semanticError("Wrong Binary Expression Concerning Null", it.pos);
+            }
+        }
+        if (it.lhs.type != it.rhs.type) {
+            throw new semanticError("Wrong Binary Expression: Type Mismatch", it.pos);
+        }
+        switch (it.op) {
+            case "==":
+            case "!=":
+                it.type = new TypeNameNode(it.pos, myBuiltin.BoolType);
+                break;
+            case "&&":
+            case "||":
+                if (it.lhs.type.type == myBuiltin.BoolType) {
+                    it.type = new TypeNameNode(it.pos, myBuiltin.BoolType);
+                    break;
+                } else {
+                    throw new semanticError("Type Error in Binary Expression", it.pos);
+                }
+            case "-":
+            case "*":
+            case "/":
+            case "%":
+            case ">>":
+            case "<<":
+            case "&":
+            case "|":
+            case "^":
+                if (it.lhs.type.type == myBuiltin.IntType) {
+                    it.type = new TypeNameNode(it.pos, myBuiltin.IntType);
+                    break;
+                } else {
+                    throw new semanticError("Type Error in Binary Expression", it.pos);
+                }
+            case "+":
+            case ">":
+            case "<":
+            case ">=":
+            case "<=":
+                if (it.lhs.type.type == myBuiltin.IntType) {
+                    it.type = new TypeNameNode(it.pos, myBuiltin.IntType);
+                    break;
+                } else if (it.lhs.type.type == myBuiltin.StringType) {
+                    it.type = new TypeNameNode(it.pos, myBuiltin.StringType);
+                    break;
+                } else {
+                    throw new semanticError("Type Error in Binary Expression", it.pos);
+                }
+        }
     }
 
     @Override
@@ -268,19 +326,56 @@ public class SemanticChecker implements ASTVisitor {
         it.expr.forEach(sd -> sd.accept(this));
     }
 
-    @Override
-    public void visit(ExpressionNode it) { // do not need
-    }
 
     @Override
     public void visit(FuncCallExprNode it) {
-        it.parameter.accept(this);
-        // todo
+        if (it.parameter != null) {
+            it.parameter.accept(this);
+        }
+        it.funcName.accept(this);
+        if (it.funcName.funcDefGuess == null) {
+            throw new semanticError("Can't be Interpreted as a Function", it.pos);
+        } else {
+            if (it.funcName.funcDefGuess.parameterList == null && it.parameter == null) {
+                it.type = new TypeNameNode(it.pos, it.funcDefGuess.returnType.type);
+                return;
+            }
+            if (it.funcName.funcDefGuess.parameterList == null || it.parameter == null
+                    || it.funcName.funcDefGuess.parameterList.parameters.size() != it.parameter.parameters.size()) {
+                throw new semanticError("Function Parameter Number Mismatch", it.pos);
+            }
+            for (int i = 0; i < it.parameter.parameters.size(); ++i) {
+                var guess = it.parameter.parameters.get(i);
+                var real = it.funcName.funcDefGuess.parameterList.parameters.get(i);
+                if (guess.type != real.typeName && !real.typeName.type.isReference || guess.type.type != myBuiltin.NullType) {
+                    throw new semanticError("Type Mismatch in Parameter: " + new String(String.valueOf(i)), it.pos);
+                }
+            }
+            it.type = new TypeNameNode(it.pos, it.funcDefGuess.returnType.type);
+        }
     }
 
     @Override
     public void visit(MemberExprNode it) {
         // todo
+        it.object.accept(this);
+        if (it.object.type == null) {
+            throw new semanticError("Null Type Error", it.pos);
+        }
+        if (!it.object.type.type.isReference || !(it.object.type.type == myBuiltin.StringType)) {
+            throw new semanticError("Member Access in non-Class element", it.pos);
+        }
+        var classObj = gScope.getClassNode(it.object.type.type.name, it.object.pos);
+        if (it.object.type.type.dim > 0) { // an array
+            if (it.member.equals("size")) {
+                it.funcDefGuess = myBuiltin.sizeFunc;
+            } else {
+                throw new semanticError("Invalid Member Access in an Array", it.pos);
+            }
+        } else {
+            it.type = new TypeNameNode(it.pos, classObj.getVarType(it.member));
+            it.funcDefGuess = classObj.funcMap.get(it.member);
+        }
     }
 
     @Override

@@ -1,5 +1,6 @@
 package AST;
 
+import Util.Type;
 import Util.position;
 
 import java.util.ArrayList;
@@ -16,6 +17,12 @@ public class ClassDefNode extends ASTNode {
     public ClassDefNode(position pos, String _className) {
         super(pos);
         this.className = _className;
+    }
+
+    public Type getVarType(String _typeName) {
+        var ans = varMap.get(_typeName);
+        if (ans == null) return null;
+        return ans.typeName.type;
     }
 
     @Override

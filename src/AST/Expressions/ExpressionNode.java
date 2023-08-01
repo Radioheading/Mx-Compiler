@@ -14,9 +14,5 @@ abstract public class ExpressionNode extends ASTNode {
         super(pos);
     }
 
-    public void accept(ASTVisitor visitor) {
-        visitor.visit(this);
-    }
-
     public abstract boolean isAssignable();
 }

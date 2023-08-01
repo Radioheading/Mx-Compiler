@@ -7,30 +7,13 @@
     <list default="true" id="16f78ac0-0f93-476a-9efb-c5ad74ca15d0" name="更改" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/AST/ASTVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AST/ASTVisitor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AST/Expressions/AssignExprNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AST/Expressions/AssignExprNode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AST/Expressions/BaseExprNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AST/Expressions/BaseExprNode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AST/Expressions/BinaryExprNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AST/Expressions/BinaryExprNode.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AST/ClassDefNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AST/ClassDefNode.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/AST/Expressions/ExpressionNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AST/Expressions/ExpressionNode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AST/Expressions/FuncCallExprNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AST/Expressions/FuncCallExprNode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AST/Expressions/MemberExprNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AST/Expressions/MemberExprNode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AST/Expressions/NewExprNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AST/Expressions/NewExprNode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AST/Expressions/ParaListExprNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AST/Expressions/ParaListExprNode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AST/Expressions/SubscriptExprNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AST/Expressions/SubscriptExprNode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AST/Expressions/TernaryExprNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AST/Expressions/TernaryExprNode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AST/Expressions/UnaryExprNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AST/Expressions/UnaryExprNode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AST/TypeNameNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AST/TypeNameNode.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Frontend/ASTBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Frontend/ASTBuilder.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Frontend/SemanticChecker.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Frontend/SemanticChecker.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Parser/MxLexer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Parser/MxLexer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Parser/MxParser.g4" beforeDir="false" afterPath="$PROJECT_DIR$/src/Parser/MxParser.g4" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Frontend/SymbolCollector.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Frontend/SymbolCollector.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Parser/MxParser.interp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Parser/MxParser.interp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Parser/MxParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Parser/MxParser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Parser/MxParserBaseListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Parser/MxParserBaseListener.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Parser/MxParserBaseVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Parser/MxParserBaseVisitor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Parser/MxParserListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Parser/MxParserListener.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Parser/MxParserVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Parser/MxParserVisitor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Util/BuiltinElements.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Util/BuiltinElements.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Util/Type.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Util/Type.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -133,7 +116,8 @@
       <workItem from="1690599539123" duration="9912000" />
       <workItem from="1690618224589" duration="22000" />
       <workItem from="1690618821925" duration="17471000" />
-      <workItem from="1690710948526" duration="25071000" />
+      <workItem from="1690710948526" duration="33497000" />
+      <workItem from="1690869968910" duration="2696000" />
     </task>
     <servers />
   </component>

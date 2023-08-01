@@ -87,9 +87,6 @@ public class SymbolCollector implements ASTVisitor {
     public void visit(WhileStmtNode it) {}
 
     @Override
-    public void visit(ExpressionNode it) {}
-
-    @Override
     public void visit(FuncCallExprNode it) {}
 
     @Override
@@ -109,6 +106,11 @@ public class SymbolCollector implements ASTVisitor {
 
     @Override
     public void visit(UnaryExprNode it) {}
+
+    @Override
+    public void visit(LeftUnaryExprNode it) {
+
+    }
 
     @Override
     public void visit(AssignExprNode it) {}

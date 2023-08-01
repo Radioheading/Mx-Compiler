@@ -58,8 +58,8 @@ public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
     @Override
     public ASTNode visitParameterList(MxParser.ParameterListContext ctx) {
         ParameterListNode parameterList = new ParameterListNode(new position(ctx));
-        for (var parameter : ctx.typeName()) {
-            parameterList.parameters.add((VarDefAssignNode) visit(parameter));
+        for (int i = 0; i < ctx.typeName().size(); ++i) { // problem, credit to @polaris_dane
+            parameterList.parameters.add(new VarDefAssignNode(new position(ctx.typeName(i)), ctx.Identifier(i).getText(), (TypeNameNode) visit(ctx.typeName(i)), null));
         }
         return parameterList;
     }
@@ -220,6 +220,7 @@ public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
     @Override
     public ASTNode visitBaseExpr(MxParser.BaseExprContext ctx) {
         BaseExprNode baseExpr = new BaseExprNode(new position(ctx));
+        baseExpr.str = ctx.getText();
         baseExpr.isIdentifier = (ctx.Identifier() != null);
         return baseExpr;
     }
@@ -275,6 +276,7 @@ public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
     public ASTNode visitMemberExpr(MxParser.MemberExprContext ctx) {
         MemberExprNode memberExpr = new MemberExprNode(new position(ctx), (ExpressionNode) visit(ctx.expr()), ctx.Member().getText());
         memberExpr.str = ctx.getText();
+
         return memberExpr;
     }
 
