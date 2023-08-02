@@ -46,14 +46,8 @@ public class SymbolCollector implements ASTVisitor {
     public void visit(ParameterListNode it) {}
 
     @Override public void visit(RootNode it) {
-        if (it.funcDef.size() > 0) {
-            it.funcDef.forEach(sd -> sd.accept(this));
-        }
-        if (it.varDef.size() > 0) {
-            it.varDef.forEach(sd -> sd.accept(this));
-        }
-        if (it.classDef.size() > 0) {
-            it.classDef.forEach(sd -> sd.accept(this));
+        for (var sd: it.Defs) {
+            sd.accept(this);
         }
     }
 
@@ -65,9 +59,6 @@ public class SymbolCollector implements ASTVisitor {
 
     @Override
     public void visit(VarDefNode it) {}
-
-    @Override
-    public void visit(BaseStmtNode it) {}
 
     @Override
     public void visit(BreakStmtNode it) {}

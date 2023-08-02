@@ -18,13 +18,13 @@ public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
         for (var line : ctx.children) {
             System.out.println(line.getText());
             if (line instanceof MxParser.FuncDefContext) {
-                root.funcDef.add((FuncDefNode) visit(line));
+                root.Defs.add((FuncDefNode) visit(line));
                 System.out.println("Function!");
             } else if (line instanceof MxParser.ClassDefContext) {
-                root.classDef.add((ClassDefNode) visit(line));
+                root.Defs.add((ClassDefNode) visit(line));
                 System.out.println("Class!");
             } else if (line instanceof MxParser.VarDefContext) {
-                root.varDef.add((VarDefNode) visit(line));
+                root.Defs.add((VarDefNode) visit(line));
                 System.out.println("Variable!");
             }
         }

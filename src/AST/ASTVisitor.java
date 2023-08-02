@@ -12,7 +12,6 @@ public interface ASTVisitor {
     void visit(TypeNameNode it);
     void visit(VarDefAssignNode it);
     void visit(VarDefNode it);
-    void visit(BaseStmtNode it);
     void visit(BreakStmtNode it);
     void visit(ContinueStmtNode it);
     void visit(ExprStmtNode it);
