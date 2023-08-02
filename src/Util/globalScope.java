@@ -28,6 +28,10 @@ public class globalScope extends Scope {
         stringClass.funcList.add(myBuiltin.substringFunc);
         stringClass.funcList.add(myBuiltin.parseIntFunc);
         stringClass.funcList.add(myBuiltin.ordFunc);
+        stringClass.funcMap.put("length", myBuiltin.lengthFunc);
+        stringClass.funcMap.put("substring", myBuiltin.substringFunc);
+        stringClass.funcMap.put("parseInt", myBuiltin.parseIntFunc);
+        stringClass.funcMap.put("ord", myBuiltin.ordFunc);
         classMember.put("string", stringClass);
     }
     public void addFunc(String name, FuncDefNode t, position pos) {

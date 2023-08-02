@@ -26,7 +26,7 @@ public class BuiltinElements {
     ParameterListNode para_3 = new ParameterListNode(null, IntType, "left", IntType, "right");
     ParameterListNode para_4 = new ParameterListNode(null, IntType, "pos");
     public FuncDefNode lengthFunc = new FuncDefNode(null, new TypeNameNode(null, "int", 0), "length", null, null);
-    public FuncDefNode substringFunc = new FuncDefNode(null, new TypeNameNode(null, "string", 0), "substring", null, null);
+    public FuncDefNode substringFunc = new FuncDefNode(null, new TypeNameNode(null, "string", 0), "substring", para_3, null);
     public FuncDefNode parseIntFunc = new FuncDefNode(null, new TypeNameNode(null, "int", 0), "parseInt", null, null);
     public FuncDefNode ordFunc = new FuncDefNode(null, new TypeNameNode(null, "int", 0), "ord", para_4, null);
     // builtin function (array)

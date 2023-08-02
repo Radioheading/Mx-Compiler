@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="MxCompiler:jar">
+    <output-path>$PROJECT_DIR$</output-path>
+    <root id="archive" name="MxCompiler.jar">
+      <element id="module-output" name="MxCompiler" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/antlr-runtime-4.12.0.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
