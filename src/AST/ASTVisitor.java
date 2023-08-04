@@ -31,5 +31,4 @@ public interface ASTVisitor {
     void visit(TernaryExprNode it);
     void visit(UnaryExprNode it);
     void visit(LeftUnaryExprNode it);
-    void visit(CallParametersExprNode callParametersExprNode);
 }

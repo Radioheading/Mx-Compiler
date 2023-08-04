@@ -9,9 +9,11 @@ import Util.error.semanticError;
 
 public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
     globalScope gScope;
+
     public ASTBuilder(globalScope _gScope) {
         this.gScope = _gScope;
     }
+
     @Override
     public ASTNode visitProgram(MxParser.ProgramContext ctx) {
         RootNode root = new RootNode(new position(ctx));
@@ -262,7 +264,9 @@ public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
         for (var size : ctx.newArrayUnit()) {
             if (size.expr() == null) {
                 validCheck = true;
-            } else if (validCheck) {
+                continue;
+            }
+            if (validCheck) {
                 throw new semanticError("Wrong Size Definition in New Statement", newExpr.pos);
             } else {
                 newExpr.sizes.add((ExpressionNode) visit(size.expr()));

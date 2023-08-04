@@ -3,6 +3,8 @@ package Util;
 // import MIR.register;
 import AST.*;
 import AST.Statements.ForStmtNode;
+import AST.Statements.WhileStmtNode;
+import MIR.Entity.IRRegister;
 import Util.error.semanticError;
 
 import java.util.HashMap;
@@ -10,11 +12,13 @@ import java.util.HashMap;
 public class Scope {
 
     public HashMap<String, Type> varMember = new HashMap<>();
-    // public HashMap<String, register> entities = new HashMap<>();
+    public HashMap<String, IRRegister> entities = new HashMap<>();
     public Scope parentScope = null;
     public TypeNameNode returnType = null;
     public ClassDefNode fatherClass = null;
     public ForStmtNode fatherFor = null;
+    public WhileStmtNode fatherWhile = null;
+    public int fatherLoop = 0; // 0 for neither, 1 for "For", 2 for "While"
     public boolean inLoop = false;
     public boolean hasReturned = false; // check only for functions
     public Scope() {}
@@ -23,6 +27,8 @@ public class Scope {
         this.inLoop = parentScope.inLoop;
         this.fatherClass = parentScope.fatherClass;
         this.fatherFor = parentScope.fatherFor;
+        this.fatherWhile = parentScope.fatherWhile;
+        this.fatherLoop = parentScope.fatherLoop;
         this.parentScope = parentScope;
     }
 
@@ -51,10 +57,10 @@ public class Scope {
             return parentScope.getVarType(name, true);
         return null;
     }
-//    public register getEntity(String name, boolean lookUpon) {
-//        if (entities.containsKey(name)) return entities.get(name);
-//        else if (parentScope != null && lookUpon)
-//            return parentScope.getEntity(name, true);
-//        return null;
-//    }
+    public IRRegister getEntity(String name, boolean lookUpon) {
+        if (entities.containsKey(name)) return entities.get(name);
+        else if (parentScope != null && lookUpon)
+            return parentScope.getEntity(name, true);
+        return null;
+    }
 }

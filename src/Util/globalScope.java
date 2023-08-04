@@ -3,6 +3,7 @@ package Util;
 import Util.error.semanticError;
 import Util.BuiltinElements;
 import java.util.HashMap;
+import MIR.type.*;
 
 import AST.*;
 
@@ -10,7 +11,8 @@ public class globalScope extends Scope {
     BuiltinElements myBuiltin = new BuiltinElements();
     public HashMap<String, FuncDefNode> funcMember = new HashMap<>();
     public HashMap<String, ClassDefNode> classMember = new HashMap<>();
-    // todo: builtin types
+    public HashMap<String, IRBaseType> IRMap = new HashMap<>();
+
     public globalScope(Scope parentScope) {
         // super(parentScope);
         funcMember.put("print", myBuiltin.printFunc);
@@ -53,5 +55,13 @@ public class globalScope extends Scope {
     public ClassDefNode getClassNode(String name, position pos) {
         if (classMember.containsKey(name)) return classMember.get(name);
         throw new semanticError("no such class type: " + name, pos);
+    }
+
+    public void IRStart() {
+        IRMap.put("int", new IRIntType(32));
+        IRMap.put("bool", new IRIntType(1));
+        IRMap.put("null", new IRNullType());
+        IRMap.put("void", new IRVoidType());
+
     }
 }

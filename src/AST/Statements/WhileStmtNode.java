@@ -2,6 +2,7 @@ package AST.Statements;
 
 import AST.ASTVisitor;
 import AST.Expressions.ExpressionNode;
+import MIR.BasicBlock;
 import Util.position;
 
 import java.util.ArrayList;
@@ -9,6 +10,8 @@ import java.util.ArrayList;
 public class WhileStmtNode extends BaseStmtNode {
     public ExpressionNode condition;
     public ArrayList<BaseStmtNode> doStmt = new ArrayList<>();
+
+    public BasicBlock cond, body, end;
 
     public WhileStmtNode(ExpressionNode _condition, position pos) {
         super(pos);

@@ -75,14 +75,6 @@ public class SemanticChecker implements ASTVisitor {
     public void visit(RootNode it) {
         FuncDefNode main = gScope.getFuncNode("main", null);
         if (main.parameterList != null || !main.returnType.type.equals(myBuiltin.IntType)) {
-            if (main.parameterList != null) {
-                //System.out.println("shit");
-            }
-            if (!main.returnType.type.equals(myBuiltin.IntType)) {
-                //System.out.println("fuck");
-            }
-            //System.out.println(main.returnType.type.name);
-            //System.out.println(myBuiltin.IntType.name);
             throw new semanticError("Wrong main function definition", it.pos);
         }
         for (var sd : it.Defs) {
@@ -109,7 +101,7 @@ public class SemanticChecker implements ASTVisitor {
         if (nowScope.containsVariable(it.varName, false)) {
             throw new semanticError("Multiple Definition of Variable: " + it.varName, it.pos);
         }
-        System.out.println("shit in varDef: " + it.varName + ", type:" + it.typeName.type.name);
+        System.out.println("varDef: " + it.varName + ", type:" + it.typeName.type.name);
         nowScope.varMember.put(it.varName, it.typeName.type);
     }
 
@@ -364,12 +356,6 @@ public class SemanticChecker implements ASTVisitor {
                 }
         }
     }
-
-    @Override
-    public void visit(CallParametersExprNode it) {
-        it.expr.forEach(sd -> sd.accept(this));
-    }
-
 
     @Override
     public void visit(FuncCallExprNode it) {

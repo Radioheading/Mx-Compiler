@@ -3,6 +3,7 @@ package AST.Statements;
 import AST.ASTVisitor;
 import AST.Expressions.ExpressionNode;
 import AST.VarDefNode;
+import MIR.BasicBlock;
 import Util.position;
 
 import java.util.ArrayList;
@@ -13,6 +14,8 @@ public class ForStmtNode extends BaseStmtNode {
     public ExpressionNode condition;
     public ExpressionNode iteration;
     public ArrayList<BaseStmtNode> loop = new ArrayList<>();
+
+    public BasicBlock cond, body, inc, end; // based on clang 15.0.0
     public ForStmtNode(position pos) {
         super(pos);
         exprInit = null;

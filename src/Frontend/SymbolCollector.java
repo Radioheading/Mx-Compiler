@@ -118,7 +118,4 @@ public class SymbolCollector implements ASTVisitor {
 
     @Override
     public void visit(BinaryExprNode it) {}
-
-    @Override
-    public void visit(CallParametersExprNode it) {}
 }
