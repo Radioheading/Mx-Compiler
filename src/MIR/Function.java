@@ -1,5 +1,6 @@
 package MIR;
 
+import MIR.Entity.IRRegister;
 import MIR.Entity.entity;
 import MIR.Inst.IRAlloca;
 import MIR.type.IRBaseType;
@@ -14,6 +15,8 @@ public class Function {
     public LinkedList<BasicBlock> blockList;
     public ArrayList<entity> parameterList;
     public ArrayList<IRAlloca> init; // put the initializations at the front;
+    public BasicBlock entranceBlock, exitBlock;
+    public IRRegister retReg;
 
     public Function(String _name, IRBaseType _retType) {
         blockList.getFirst();

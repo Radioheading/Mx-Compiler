@@ -13,6 +13,10 @@ public class BasicBlock {
     public LinkedList<IRBaseInst> stmts = new LinkedList<>();
     public IRBaseInst terminal;
 
+    public BasicBlock(String _label) {
+        label = _label;
+    }
+
     public void push(IRBaseInst stmt) {
         stmts.add(stmt);
     }
