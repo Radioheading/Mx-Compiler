@@ -4,7 +4,7 @@ import MIR.type.IRBaseType;
 
 public abstract class entity {
     String name;
-    IRBaseType type;
+    public IRBaseType type;
 
     public entity(String _name, IRBaseType _type) {
         this.name = _name;

@@ -1,6 +1,7 @@
 /*
  * todo: 1、把有思路的东西全写了
  *       2、思考一下entity，如果我们使用一个不能立刻求出entity的东西（不是常量），那么就需要load，可以进行封装！
+ *       3、补充一下trunc和zext指令（between boolType and condType）(√)，可以考虑封装？
  */
 
 package Backend;
@@ -9,11 +10,11 @@ import AST.*;
 import AST.Expressions.*;
 import AST.Statements.*;
 import MIR.BasicBlock;
+import MIR.Entity.*;
 import MIR.Function;
-import MIR.Inst.IRBranch;
-import MIR.Inst.IRJump;
-import MIR.Inst.IRStore;
+import MIR.Inst.*;
 import MIR.type.*;
+import Util.BuiltinElements;
 import Util.Scope;
 import Util.globalScope;
 
@@ -21,6 +22,7 @@ import java.util.HashMap;
 import java.util.Objects;
 
 public class IRBuilder implements ASTVisitor {
+    private BuiltinElements myBuiltin;
     private Scope nowScope;
     private globalScope gScope;
     private Function nowFunc;
@@ -29,6 +31,35 @@ public class IRBuilder implements ASTVisitor {
 
     public IRBuilder(globalScope _gScope) {
         this.gScope = _gScope;
+    }
+
+    private void pushStore(IRRegister ptr, ExpressionNode valueNode) {
+        if (Objects.equals(getValue(valueNode, false).type.name, "int") && getValue(valueNode, false).type.size == 1) {
+            IRRegister toZext = new IRRegister("frombool", new IRIntType(8));
+            nowBlock.push_back(new IRZext(nowBlock, getValue(valueNode, false), new IRIntType(8), toZext));
+            nowBlock.push_back(new IRStore(nowBlock, toZext, ptr));
+        } else {
+            nowBlock.push_back(new IRStore(nowBlock, valueNode.address, ptr));
+        }
+    }
+
+    private entity getValue(ExpressionNode expr, boolean is_i1) { // maybe we need to load certain thing before we use it
+        IRRegister dest = new IRRegister("", new IRIntType(1));
+        if (expr.entity != null) {
+            if (is_i1 && expr.entity.type.size == 8) {
+                nowBlock.push_back(new IRTrunc(nowBlock, expr.entity, new IRIntType(1), dest));
+                return dest;
+            }
+            return expr.entity;
+        }
+        IRRegister ptr = new IRRegister("", expr.address.type);
+        nowBlock.push_back(new IRLoad(nowBlock, expr.address.type, ptr, expr.address));
+        expr.entity = ptr;
+        if (is_i1 && expr.entity.type.size == 8) {
+            nowBlock.push_back(new IRTrunc(nowBlock, expr.entity, new IRIntType(1), dest));
+            return dest;
+        }
+        return expr.entity;
     }
 
     @Override
@@ -47,7 +78,11 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(ParameterListNode it) {
-
+        for (var parameter : it.parameters) {
+            parameter.accept(this); // we have it in the function scope
+            // what's more, we need to store parameter then
+            // todo
+        }
     }
 
     @Override
@@ -102,6 +137,7 @@ public class IRBuilder implements ASTVisitor {
         } else {
             nowBlock.terminal = new IRJump(nowBlock, nowScope.fatherWhile.end);
         }
+        nowBlock.hasReturned = true;
     }
 
     @Override
@@ -111,6 +147,7 @@ public class IRBuilder implements ASTVisitor {
         } else {
             nowBlock.terminal = new IRJump(nowBlock, nowScope.fatherWhile.cond);
         }
+        nowBlock.hasReturned = true;
     }
 
     @Override
@@ -137,7 +174,7 @@ public class IRBuilder implements ASTVisitor {
         nowBlock = it.cond;
         if (it.condition != null) {
             it.condition.accept(this);
-            nowBlock.terminal = new IRBranch(nowBlock, it.condition.entity, it.body, it.end);
+            nowBlock.terminal = new IRBranch(nowBlock, getValue(it.condition, true), it.body, it.end);
         } else {
             nowBlock.terminal = new IRJump(nowBlock, it.body);
         }
@@ -169,7 +206,7 @@ public class IRBuilder implements ASTVisitor {
         it.thenStmt.forEach(sd -> sd.accept(this));
         nowScope = nowScope.parentScope;
         nowBlock.terminal = new IRJump(nowBlock, endStmt);
-        prev.terminal = new IRBranch(prev, it.condition.entity, thenBranch, endStmt);
+        prev.terminal = new IRBranch(prev, getValue(it.condition, true), thenBranch, endStmt);
         if (it.elseStmt != null) {
             nowFunc.blockList.add(elseBranch);
             nowBlock = elseBranch;
@@ -177,7 +214,7 @@ public class IRBuilder implements ASTVisitor {
             it.elseStmt.forEach(sd -> sd.accept(this));
             nowScope = nowScope.parentScope;
             nowBlock.terminal = new IRJump(nowBlock, endStmt);
-            prev.terminal = new IRBranch(prev, it.condition.entity, thenBranch, endStmt);
+            prev.terminal = new IRBranch(prev, getValue(it.condition, true), thenBranch, endStmt);
         }
         nowFunc.blockList.add(endStmt);
         nowBlock = endStmt;
@@ -187,9 +224,10 @@ public class IRBuilder implements ASTVisitor {
     public void visit(ReturnStmtNode it) {
         if (it.expr != null) {
             it.expr.accept(this);
-            nowBlock.stmts.add(new IRStore(nowBlock, it.expr.entity, nowFunc.retReg));
+            pushStore(nowFunc.retReg, it.expr);
         }
         nowBlock.terminal = new IRJump(nowBlock, nowFunc.exitBlock);
+        nowBlock.hasReturned = true;
     }
     /*
      * beware: according to LLVM-IR, each statement has ONLY ONE
@@ -217,7 +255,7 @@ public class IRBuilder implements ASTVisitor {
         nowFunc.blockList.add(it.cond);
         nowBlock = it.cond;
         it.condition.accept(this);
-        nowBlock.terminal = new IRBranch(nowBlock, it.condition.entity, it.body, it.end);
+        nowBlock.terminal = new IRBranch(nowBlock, getValue(it.condition, true), it.body, it.end);
         nowFunc.blockList.add(it.body);
         nowBlock = it.body;
         it.doStmt.forEach(sd -> sd.accept(this));
@@ -235,7 +273,20 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(BaseExprNode it) {
         if (!it.isIdentifier) {
-            // know what to do
+            if (it.type.type.equals(myBuiltin.StringType)) { // to be implemented
+
+            } else if (it.type.type.equals(myBuiltin.IntType)) {
+                int val = Integer.parseInt(it.str);
+                it.entity = new IRIntConst(val);
+            } else if (it.type.type.equals(myBuiltin.BoolType)) {
+                it.entity = Objects.equals(it.str, "true") ? new IRCondConst(true) : new IRCondConst(false);
+            } else if (it.type.type.equals(myBuiltin.NullType)) {
+                it.entity = new IRNullConst();
+            } else if (Objects.equals(it.str, "this")) { // to be implemented
+
+            }
+        } else {
+
         }
     }
 
@@ -243,9 +294,104 @@ public class IRBuilder implements ASTVisitor {
     public void visit(BinaryExprNode it) {
         it.lhs.accept(this);
         if (!Objects.equals(it.op, "&&") && !Objects.equals(it.op, "||")) {
-            // know what to do
+            it.rhs.accept(this);
+            if (it.lhs.type.equals(myBuiltin.StringType) || it.rhs.type.equals(myBuiltin.StringType)) {
+                // todo: deal with string
+            } else {
+                String operation;
+                IRRegister dest = null;
+                switch (it.op) {
+                    case "==":
+                        operation = "eq";
+                    case "!=":
+                        operation = "ne";
+                        break; // todo: not just bool/int
+                    case "+":
+                        operation = "add";
+                    case "-":
+                        operation = "sub";
+                    case "*":
+                        operation = "mul";
+                    case "/":
+                        operation = "sdiv";
+                    case "%":
+                        operation = "srem";
+                    case ">>":
+                        operation = "ashr";
+                    case "<<":
+                        operation = "shl";
+                    case "&":
+                        operation = "and";
+                    case "|":
+                        operation = "or";
+                    case "^":
+                        operation = "xor";
+                        dest = new IRRegister("binaryCalc_", new IRIntType(32));
+                        nowBlock.push_back(new IRBinOp(nowBlock, new IRIntType(32), operation, getValue(it.lhs, false), getValue(it.rhs, false), dest));
+                        break;
+                    case "<":
+                        operation = "slt";
+                    case ">":
+                        operation = "sgt";
+                    case "<=":
+                        operation = "sle";
+                    case ">=":
+                        operation = "sge";
+                        dest = new IRRegister("binaryCmp_", new IRIntType(1));
+                        nowBlock.push_back(new IRBinOp(nowBlock, new IRIntType(32), operation, getValue(it.lhs, false), getValue(it.rhs, false), dest));
+                        break;
+                }
+                it.entity = dest;
+            }
         } else { // deal with short-circuit eval
 
+            BasicBlock rhsBlock = new BasicBlock("_short_rhs"), endBlock = new BasicBlock("_short_end"), quickBlock = new BasicBlock("_short_quick");
+            IRRegister cond = new IRRegister("_shortCircuit_cond", new IRIntType(8));
+            nowBlock.push_back(new IRAlloca(nowBlock, new IRIntType(1)));
+            if (it.op.equals("&&"))  {
+                /*
+             about &&
+             c1 && c2
+             if (c1 == true) {
+                res = c2;
+             } else {
+                res = false;
+             }
+             */
+                nowBlock.terminal = new IRBranch(nowBlock, getValue(it.lhs, true), rhsBlock, quickBlock);
+                nowBlock = rhsBlock;
+                it.rhs.accept(this);
+                pushStore(cond, it.rhs);
+                nowBlock.terminal = new IRJump(nowBlock, endBlock);
+                nowBlock = quickBlock;
+                ExpressionNode falseExpr = new BaseExprNode(null);
+                falseExpr.entity = new IRBoolConst(false);
+                pushStore(cond, falseExpr);
+                nowBlock.terminal = new IRJump(nowBlock, endBlock);
+                nowBlock = endBlock;
+            } else {
+                /*
+             about ||
+             c1 || c2
+             if (c1 == true) {
+                res = true;
+             } else {
+                res = c2;
+             }
+             */
+                nowBlock.terminal = new IRBranch(nowBlock, getValue(it.lhs, true), quickBlock, rhsBlock);
+                nowBlock = quickBlock;
+                ExpressionNode trueExpr = new BaseExprNode(null);
+                trueExpr.entity = new IRBoolConst(true);
+                pushStore(cond, trueExpr);
+                nowBlock.terminal = new IRJump(nowBlock, endBlock);
+                nowBlock = rhsBlock;
+                it.rhs.accept(this);
+                pushStore(cond, it.rhs);
+                nowBlock.terminal = new IRJump(nowBlock, endBlock);
+                nowBlock = endBlock;
+            }
+            // todo: deal with the calculated value
         }
     }
 
@@ -271,21 +417,85 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(SubscriptExprNode it) {
-
+        it.name.accept(this);
+        it.subscript.accept(this);
+        IRRegister dest = new IRRegister("arrayidx", getValue(it.name, false).type);
+        // nowBlock.push_back(new IRGetElementPtr(nowBlock, it.name.getValue(), ));
     }
 
     @Override
     public void visit(TernaryExprNode it) {
-
+        /*
+          about ternary: a ? b : c
+          if (a) {
+            value = b;
+          } else {
+            value = c;
+          }
+         */
+        it.condition.accept(this);
+        it.jump_1.accept(this);
+        // 后面类似，但要考虑更多的类型
     }
 
     @Override
     public void visit(UnaryExprNode it) {
-        // know what to do
+        it.object.accept(this);
+        var one = new IRIntConst(1);
+        var minusOne = new IRIntConst(-1);
+        var zero = new IRIntConst(0);
+        var real = new IRBoolConst(true);
+        switch (it.op) {
+            case "+":
+                it.entity = getValue(it.object, false);
+                break;
+            case "-":
+                var dest = new IRRegister("minus", new IRIntType(32));
+                nowBlock.push_back(new IRBinOp(nowBlock, new IRIntType(32), "sub", zero, getValue(it.object, false), dest));
+                it.entity = dest;
+                break;
+            case "!":
+                var not_dest = new IRRegister("lnot", new IRIntType(1));
+                nowBlock.push_back(new IRBinOp(nowBlock, new IRIntType(1), "xor", real, getValue(it.object, true), not_dest));
+                it.entity = not_dest;
+                break;
+            case "~":
+                var no_dest = new IRRegister("neg", new IRIntType(32));
+                nowBlock.push_back(new IRBinOp(nowBlock, new IRIntType(32), "xor", real, getValue(it.object, false), no_dest));
+                it.entity = no_dest;
+                break;
+            case "++":
+                IRRegister addRes = new IRRegister("inc", new IRIntType(32));
+                it.entity = addRes;
+                nowBlock.push_back(new IRBinOp(nowBlock, new IRIntType(32), "add", getValue(it.object, false), one, addRes));
+                nowBlock.push_back(new IRStore(nowBlock, addRes, it.object.address));
+                break;
+            case "--":
+                IRRegister subRes = new IRRegister("dec", new IRIntType(32));
+                it.entity = subRes;
+                nowBlock.push_back(new IRBinOp(nowBlock, new IRIntType(32), "sub", getValue(it.object, false), one, subRes));
+                nowBlock.push_back(new IRStore(nowBlock, subRes, it.object.address));
+                it.entity = subRes;
+        }
     }
 
     @Override
     public void visit(LeftUnaryExprNode it) {
-        // know what to do
+        it.object.accept(this);
+        var one = new IRIntConst(1);
+        switch (it.op) {// preAdd can be decomposed into +1 & store
+            case "++":
+                IRRegister addRes = new IRRegister("inc", new IRIntType(32));
+                nowBlock.push_back(new IRBinOp(nowBlock, new IRIntType(32), "add", getValue(it.object, false), one, addRes));
+                nowBlock.push_back(new IRStore(nowBlock, addRes, it.object.address));
+                it.entity = addRes;
+                break;
+            case "--":
+                IRRegister subRes = new IRRegister("dec", new IRIntType(32));
+                nowBlock.push_back(new IRBinOp(nowBlock, new IRIntType(32), "sub", getValue(it.object, false), one, subRes));
+                nowBlock.push_back(new IRStore(nowBlock, subRes, it.object.address));
+                it.entity = subRes;
+        }
+        it.address = it.object.address;
     }
 }

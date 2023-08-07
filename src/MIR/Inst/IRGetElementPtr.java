@@ -11,7 +11,8 @@ import java.util.ArrayList;
 
 public class IRGetElementPtr extends IRBaseInst {
     public IRBaseType type;
-    public IRRegister ptr;
+    public IRRegister dest;
+    public entity ptr;
     public ArrayList<entity> indexes = new ArrayList<>();
 
     public IRGetElementPtr(BasicBlock _parent, IRBaseType _type, IRRegister _ptr) {

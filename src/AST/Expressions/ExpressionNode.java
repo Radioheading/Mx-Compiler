@@ -1,12 +1,15 @@
 package AST.Expressions;
 
 import AST.*;
+import MIR.Entity.IRRegister;
 import MIR.Entity.entity;
+import MIR.type.IRIntType;
 import Util.position;
 
 abstract public class ExpressionNode extends ASTNode {
     public entity entity;
     public TypeNameNode type;
+    public IRRegister address;
 
     public FuncDefNode funcDefGuess; // Variable or Function?
 
@@ -17,4 +20,5 @@ abstract public class ExpressionNode extends ASTNode {
     }
 
     public abstract boolean isAssignable();
+
 }

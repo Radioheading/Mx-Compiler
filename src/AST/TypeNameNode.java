@@ -1,10 +1,12 @@
 package AST;
 
+import MIR.type.IRBaseType;
 import Util.position;
 import Util.Type;
 
 public class TypeNameNode extends ASTNode {
     public Type type;
+    public IRBaseType IRType;
 
     public TypeNameNode(position pos, String _typeName, int dim) {
         super(pos);

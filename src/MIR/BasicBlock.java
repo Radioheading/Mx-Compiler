@@ -10,6 +10,8 @@ import MIR.Inst.*;
 
 public class BasicBlock {
     public String label;
+
+    public boolean hasReturned = false;
     public LinkedList<IRBaseInst> stmts = new LinkedList<>();
     public IRBaseInst terminal;
 
@@ -17,7 +19,9 @@ public class BasicBlock {
         label = _label;
     }
 
-    public void push(IRBaseInst stmt) {
-        stmts.add(stmt);
+    public void push_back(IRBaseInst stmt) {
+        if (!hasReturned) {
+            stmts.add(stmt);
+        }
     }
 }
