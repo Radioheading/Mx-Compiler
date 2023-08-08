@@ -12,4 +12,9 @@ public class IRStringConst extends IRConst {
         super("const_string", new IRPtrType(new IRIntType(8), 0));
         value = _value;
     }
+
+    @Override
+    public String toString() {
+        return null;
+    }
 }

@@ -18,16 +18,16 @@ public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
     public ASTNode visitProgram(MxParser.ProgramContext ctx) {
         RootNode root = new RootNode(new position(ctx));
         for (var line : ctx.children) {
-            System.out.println(line.getText());
+            // System.out.println(line.getText());
             if (line instanceof MxParser.FuncDefContext) {
                 root.Defs.add((FuncDefNode) visit(line));
-                System.out.println("Function!");
+                // System.out.println("Function!");
             } else if (line instanceof MxParser.ClassDefContext) {
                 root.Defs.add((ClassDefNode) visit(line));
-                System.out.println("Class!");
+                // System.out.println("Class!");
             } else if (line instanceof MxParser.VarDefContext) {
                 root.Defs.add((VarDefNode) visit(line));
-                System.out.println("Variable!");
+                // System.out.println("Variable!");
             }
         }
         return root;
@@ -109,7 +109,7 @@ public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitClassConstruct(MxParser.ClassConstructContext ctx) {
-        System.out.println("Init Name init: " + ctx.Identifier().getText());
+        // System.out.println("Init Name init: " + ctx.Identifier().getText());
         return new ClassInitNode(new position(ctx), ctx.Identifier().getText(), (SuiteNode) visit(ctx.suite()));
     }
 
@@ -122,14 +122,14 @@ public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
     public ASTNode visitVarDef(MxParser.VarDefContext ctx) {
         VarDefNode varDefNode = new VarDefNode(new position(ctx));
         for (var assign : ctx.varDefAssign()) {
-            System.out.println(assign.Identifier().getText());
-            System.out.println(ctx.typeName().getText());
+            // System.out.println(assign.Identifier().getText());
+            // System.out.println(ctx.typeName().getText());
             if (assign.expr() == null) {
                 varDefNode.varAssigns.add(new VarDefAssignNode(new position(ctx), assign.Identifier().getText(), (TypeNameNode) visit(ctx.typeName()), null));
             } else {
                 varDefNode.varAssigns.add(new VarDefAssignNode(new position(ctx), assign.Identifier().getText(), (TypeNameNode) visit(ctx.typeName()), (ExpressionNode) visit(assign.expr())));
             }
-            System.out.println(varDefNode.varAssigns.get(varDefNode.varAssigns.size() - 1).typeName.type.name);
+            // System.out.println(varDefNode.varAssigns.get(varDefNode.varAssigns.size() - 1).typeName.type.name);
         }
         return varDefNode;
     }

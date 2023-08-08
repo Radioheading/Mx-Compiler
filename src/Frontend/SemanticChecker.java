@@ -31,8 +31,8 @@ public class SemanticChecker implements ASTVisitor {
         it.varList.forEach(sd -> sd.accept(this));
         // scan the variables first to fit all the functions(including init)
         if (it.classInit != null && it.classInit.name != null) {
-            System.out.println("className: " + it.className);
-            System.out.println("InitName: " + it.classInit.name);
+            // System.out.println("className: " + it.className);
+            // System.out.println("InitName: " + it.classInit.name);
             if (Objects.equals(it.classInit.name, it.className)) {
                 it.classInit.accept(this);
             } else {
@@ -101,13 +101,13 @@ public class SemanticChecker implements ASTVisitor {
         if (nowScope.containsVariable(it.varName, false)) {
             throw new semanticError("Multiple Definition of Variable: " + it.varName, it.pos);
         }
-        System.out.println("varDef: " + it.varName + ", type:" + it.typeName.type.name);
+        // System.out.println("varDef: " + it.varName + ", type:" + it.typeName.type.name);
         nowScope.varMember.put(it.varName, it.typeName.type);
     }
 
     @Override
     public void visit(VarDefNode it) {
-        System.out.println("shit to varDef: " + it.varName);
+        // System.out.println("shit to varDef: " + it.varName);
         it.varAssigns.forEach(sd -> sd.accept(this));
     }
 
@@ -145,7 +145,7 @@ public class SemanticChecker implements ASTVisitor {
         }
         if (it.condition != null) {
             it.condition.accept(this);
-            System.out.println("For cond: " + it.condition.type.type.name);
+            // System.out.println("For cond: " + it.condition.type.type.name);
             if (!it.condition.type.type.equals(myBuiltin.BoolType)) {
                 throw new semanticError("Wrong Type of For Condition statement", it.condition.pos);
             }
@@ -183,7 +183,7 @@ public class SemanticChecker implements ASTVisitor {
                 if (it.expr != null) {
                     if (it.expr.type == null || !iterScope.returnType.type.equals(it.expr.type.type)
                             && (!iterScope.returnType.type.isReference || it.expr.type.type != myBuiltin.NullType)) {
-                        // System.out.println(it.expr.type.type.name);
+                        // // System.out.println(it.expr.type.type.name);
                         throw new semanticError("Return Type Mismatch", it.pos);
                     }
                 } else {
@@ -224,15 +224,15 @@ public class SemanticChecker implements ASTVisitor {
         if (it.lhs.type == null || it.rhs.type == null || it.rhs.type.type.equals(myBuiltin.VoidType) || it.lhs.type.type.equals(myBuiltin.VoidType)) {
 
             if (it.lhs.type == null) {
-                System.out.println("Invalid Expression: left is null");
+                // System.out.println("Invalid Expression: left is null");
             }
             if (it.rhs.type == null) {
-                System.out.println("Invalid Expression: right is null");
+                // System.out.println("Invalid Expression: right is null");
             }
             throw new semanticError("Invalid Expression: null/void Appearance", it.pos);
         }
-        System.out.println("left type: " + it.lhs.type.type.name);
-        System.out.println("right type: " + it.rhs.type.type.name);
+        // System.out.println("left type: " + it.lhs.type.type.name);
+        // System.out.println("right type: " + it.rhs.type.type.name);
         if (!it.lhs.type.equals(it.rhs.type) && !it.rhs.type.type.equals(myBuiltin.NullType)) {
             throw new semanticError("Invalid Expression: Type Mismatch", it.pos);
         } else if (it.rhs.type.type.equals(myBuiltin.NullType) && !it.lhs.type.type.isReference) {
@@ -240,7 +240,7 @@ public class SemanticChecker implements ASTVisitor {
         }
         if (!it.lhs.isAssignable() || it.lhs.type.type.equals(myBuiltin.StringType) && it.rhs.type.type.equals(myBuiltin.NullType)) {
             if (!it.lhs.isAssignable()) {
-                System.out.println("Wrong in Subscript! ");
+                // System.out.println("Wrong in Subscript! ");
             }
             throw new semanticError("Invalid Expression: Only Left Value Objects Can Be Assigned", it.pos);
         }
@@ -262,14 +262,14 @@ public class SemanticChecker implements ASTVisitor {
                 }
                 it.type = new TypeNameNode(it.pos, nowScope.fatherClass.className, 0);
             } else {
-                //System.out.println("intType");
+                // System.out.println("intType");
                 it.type = new TypeNameNode(it.pos, myBuiltin.IntType);
             }
         } else {
-            System.out.println("Finding: " + it.str);
+            // System.out.println("Finding: " + it.str);
             if (nowScope.containsVariable(it.str, true)) {
                 it.type = new TypeNameNode(it.pos, nowScope.getVarType(it.str, true));
-                System.out.println("I got: " + it.type.type.name);
+                // System.out.println("I got: " + it.type.type.name);
             }
             if (nowScope.fatherClass != null && nowScope.fatherClass.funcMap.containsKey(it.str)) {
                 it.funcDefGuess = nowScope.fatherClass.funcMap.get(it.str);
@@ -302,8 +302,8 @@ public class SemanticChecker implements ASTVisitor {
             }
         }
         if (!it.lhs.type.equals(it.rhs.type)) {
-            System.out.println("left type: " + it.lhs.type.type.name);
-            System.out.println("right type: " + it.rhs.type.type.name);
+            // System.out.println("left type: " + it.lhs.type.type.name);
+            // System.out.println("right type: " + it.rhs.type.type.name);
             throw new semanticError("Wrong Binary Expression: Type Mismatch", it.pos);
         }
         switch (it.op) {
@@ -363,7 +363,7 @@ public class SemanticChecker implements ASTVisitor {
             it.parameter.accept(this);
         }
         it.funcName.accept(this);
-        System.out.println(it.funcName.str);
+        // System.out.println(it.funcName.str);
         if (it.funcName.funcDefGuess == null) {
             throw new semanticError("Can't be Interpreted as a Function", it.pos);
         } else {
@@ -378,19 +378,19 @@ public class SemanticChecker implements ASTVisitor {
             for (int i = 0; i < it.parameter.parameters.size(); ++i) {
                 var guess = it.parameter.parameters.get(i);
                 var real = it.funcName.funcDefGuess.parameterList.parameters.get(i);
-                System.out.println(guess.type.type.name);
-                System.out.println(real.typeName.type.name);
-                System.out.println(guess.type.type.dim);
-                System.out.println(real.typeName.type.dim);
+                // System.out.println(guess.type.type.name);
+                // System.out.println(real.typeName.type.name);
+                // System.out.println(guess.type.type.dim);
+                // System.out.println(real.typeName.type.dim);
                 if (!guess.type.equals(real.typeName) && (!real.typeName.type.isReference || !guess.type.type.equals(myBuiltin.NullType))) {
                     if (guess.type.equals(real.typeName)) {
-                        System.out.println("ok in type matching");
+                        // System.out.println("ok in type matching");
                     }
                     if (!real.typeName.type.isReference) {
-                        System.out.println("really not reference");
+                        // System.out.println("really not reference");
                     }
                     if (!guess.type.type.equals(myBuiltin.NullType)) {
-                        System.out.println("not null");
+                        // System.out.println("not null");
                     }
                     throw new semanticError("Type Mismatch in Parameter: " + new String(String.valueOf(i)), it.pos);
                 }
@@ -406,7 +406,7 @@ public class SemanticChecker implements ASTVisitor {
         if (it.object.type == null) {
             throw new semanticError("Null Type Error", it.pos);
         }
-        System.out.println("Type is: " + it.object.type.type.name);
+        // System.out.println("Type is: " + it.object.type.type.name);
         if (!it.object.type.type.isReference && !it.object.type.type.equals(myBuiltin.StringType)) {
             throw new semanticError("Member Access in non-Class element", it.pos);
         }
@@ -418,9 +418,9 @@ public class SemanticChecker implements ASTVisitor {
                 throw new semanticError("Invalid Member Access in an Array", it.pos);
             }
         } else {
-            System.out.println("member: " + it.member);
+            // System.out.println("member: " + it.member);
             it.type = new TypeNameNode(it.pos, classObj.getVarType(it.member));
-            // System.out.println("member type:" + it.type.type.name);
+             // System.out.println("member type:" + it.type.type.name);
             it.funcDefGuess = classObj.funcMap.get(it.member);
         }
     }

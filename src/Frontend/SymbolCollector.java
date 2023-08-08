@@ -25,7 +25,7 @@ public class SymbolCollector implements ASTVisitor {
         }
         for (var varDef : it.varList) {
             for (var var : varDef.varAssigns) {
-                System.out.println("collecting: " + var.varName);
+                // System.out.println("collecting: " + var.varName);
                 if (it.varMap.containsKey(var.varName)) {
                     throw new semanticError("multi definitions of a variable, name: " + var.varName, var.pos);
                 }

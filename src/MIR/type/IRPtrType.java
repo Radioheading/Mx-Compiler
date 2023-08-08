@@ -12,7 +12,10 @@ public class IRPtrType extends IRBaseType {
 
     @Override
     public String toString() {
-        return baseType.name + "*" + dim;
+        if (dim > 0) {
+            return baseType.name + "*" + dim;
+        }
+        return baseType.name;
     }
 
     @Override

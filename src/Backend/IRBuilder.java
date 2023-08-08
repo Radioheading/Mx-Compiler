@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.Objects;
 
 public class IRBuilder implements ASTVisitor {
-    private BuiltinElements myBuiltin;
+    private BuiltinElements myBuiltin = new BuiltinElements();
     private Scope nowScope;
     private globalScope gScope;
     private Function nowFunc;
@@ -31,6 +31,7 @@ public class IRBuilder implements ASTVisitor {
 
     public IRBuilder(globalScope _gScope) {
         this.gScope = _gScope;
+        this.nowScope = _gScope;
     }
 
     private void pushStore(IRRegister ptr, ExpressionNode valueNode) {
@@ -74,8 +75,19 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(FuncDefNode it) {
         nowScope = new Scope(nowScope);
-
-
+        it.IRFunc = new Function("main", new IRIntType(32));
+        it.IRFunc.init.add(new IRAlloca(nowBlock, it.IRFunc.retType));
+        it.IRFunc.init.get(it.IRFunc.init.size() - 1).regDest = it.IRFunc.retReg;
+        nowFunc = it.IRFunc;
+        nowBlock = it.IRFunc.blockList.getFirst();
+        for (var stmt : it.suite.baseStatements) {
+            stmt.accept(this);
+        }
+        IRRegister ret = new IRRegister("", it.IRFunc.retType);
+        it.IRFunc.exitBlock.push_back(new IRLoad(nowBlock, it.IRFunc.retType, ret, it.IRFunc.retReg));
+        it.IRFunc.exitBlock.push_back(new IRRet(nowBlock, ret));
+        it.IRFunc.addAllocate();
+        System.out.println(it.IRFunc);
         nowScope = nowScope.parentScope;
     }
 
@@ -92,11 +104,6 @@ public class IRBuilder implements ASTVisitor {
     public void visit(RootNode it) { // todo: deal with global classes/functions beforehand
         for (var def : it.Defs) {
             def.accept(this);
-            if (def instanceof FuncDefNode) {
-                ((FuncDefNode) def).IRFunc = new Function("main", new IRIntType(32));
-                ((FuncDefNode) def).IRFunc.addAllocate();
-                System.out.println((FuncDefNode) def);
-            }
         }
     }
 
@@ -134,6 +141,7 @@ public class IRBuilder implements ASTVisitor {
     public void visit(VarDefAssignNode it) {
         it.typeName.accept(this);
         IRRegister alloc = new IRRegister(it.varName, new IRPtrType(it.typeName.IRType, 0));
+        nowScope.entities.put(it.varName, alloc);
         IRAlloca order = new IRAlloca(nowBlock, it.typeName.IRType);
         order.regDest = alloc;
         nowFunc.init.add(order);
@@ -308,7 +316,7 @@ public class IRBuilder implements ASTVisitor {
 
             }
         } else {
-
+            it.address = nowScope.entities.get(it.str);
         }
     }
 

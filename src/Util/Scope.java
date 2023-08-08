@@ -39,11 +39,11 @@ public class Scope {
     }
 
     public boolean containsVariable(String name, boolean lookUpon) {
-        System.out.println("new Scope");
+        // System.out.println("new Scope");
         for (var variable : varMember.keySet()) {
-            System.out.println("in this scope: " + variable);
+            // System.out.println("in this scope: " + variable);
             var val = varMember.get(variable);
-            System.out.println("type: " + val.name);
+            // System.out.println("type: " + val.name);
         }
         if (varMember.containsKey(name)) return true;
         else if (parentScope != null && lookUpon)

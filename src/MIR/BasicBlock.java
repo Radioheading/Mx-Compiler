@@ -30,6 +30,7 @@ public class BasicBlock {
         for (var inst : stmts) {
             ret = ret + inst + "\n";
         }
+        ret = ret + terminal + "\n";
         return ret;
     }
 }

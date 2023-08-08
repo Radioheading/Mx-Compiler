@@ -13,6 +13,6 @@ public class IRRegister extends entity {
 
     @Override
     public String toString() {
-        return "%" + name + cnt;
+        return "%" + name + "_" + id;
     }
 }
