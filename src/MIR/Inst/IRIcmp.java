@@ -26,6 +26,6 @@ public class IRIcmp extends IRBaseInst {
 
     @Override
     public String toString() {
-        return null;
+        return dest + " = icmp " + op + " " + type + " " + op1 + ", " + op2;
     }
 }

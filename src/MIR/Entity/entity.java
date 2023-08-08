@@ -14,4 +14,6 @@ public abstract class entity {
     public entity(IRBaseType _type) {
         this.type = _type;
     }
+
+    public abstract String toString();
 }

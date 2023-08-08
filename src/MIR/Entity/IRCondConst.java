@@ -14,4 +14,9 @@ public class IRCondConst extends IRConst {
         super("const_condition", new IRIntType(1));
         value = _value;
     }
+
+    @Override
+    public String toString() {
+        return value ? "true" : "false";
+    }
 }

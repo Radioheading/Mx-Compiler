@@ -16,6 +16,6 @@ public class IRStore extends IRBaseInst {
 
     @Override
     public String toString() {
-        return null;
+        return "store " + value.type + " " + value + ", ptr " + dest;
     }
 }

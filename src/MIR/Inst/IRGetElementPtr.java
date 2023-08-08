@@ -20,7 +20,7 @@ public class IRGetElementPtr extends IRBaseInst {
         this.type = _type;
         this.ptr = _ptr;
     }
-
+    //todo: toString
     @Override
     public String toString() {
         return null;

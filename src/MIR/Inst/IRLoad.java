@@ -22,6 +22,6 @@ public class IRLoad extends IRBaseInst {
 
     @Override
     public String toString() {
-        return null;
+        return dest + " = load " + type + ", ptr " + address;
     }
 }

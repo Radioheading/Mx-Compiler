@@ -26,6 +26,6 @@ public class IRBinOp extends IRBaseInst {
 
     @Override
     public String toString() {
-        return null;
+        return dest + " = " + op + " " + type + " " + op1 + ", " + op2;
     }
 }

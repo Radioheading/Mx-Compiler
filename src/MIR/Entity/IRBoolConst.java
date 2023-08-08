@@ -9,4 +9,9 @@ public class IRBoolConst extends IRConst {
         super("const_bool", new IRIntType(8));
         value = _value;
     }
+
+    @Override
+    public String toString() {
+        return value? "true" : "false";
+    }
 }

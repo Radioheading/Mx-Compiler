@@ -13,6 +13,10 @@ public class IRRet extends IRBaseInst {
 
     @Override
     public String toString() {
-        return null;
+        if (returnValue == null) {
+            return "ret void";
+        } else {
+            return "ret " + returnValue.type + " " + returnValue;
+        }
     }
 }

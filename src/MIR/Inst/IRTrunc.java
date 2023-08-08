@@ -20,6 +20,6 @@ public class IRTrunc extends IRBaseInst {
 
     @Override
     public String toString() {
-        return null;
+        return dest + " = trunc " + value.type + " " + value + " to " + destType;
     }
 }

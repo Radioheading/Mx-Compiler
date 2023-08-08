@@ -15,7 +15,7 @@ public class Function {
     public LinkedList<BasicBlock> blockList;
     public ArrayList<entity> parameterList;
     public ArrayList<IRAlloca> init; // put the initializations at the front;
-    public BasicBlock entranceBlock, exitBlock;
+    public BasicBlock exitBlock;
     public IRRegister retReg;
 
     public Function(String _name, IRBaseType _retType) {
@@ -24,7 +24,18 @@ public class Function {
         this.retType = _retType;
     }
 
+    public void addAllocate() {
+        for (int i = 0; i < init.size(); ++i) {
+            BasicBlock front = blockList.getFirst();
+            front.stmts.addFirst(init.get(i));
+        }
+    }
+
     public String toString() {
-        return null;
+        String ret = null;
+        for (var block : blockList) {
+            ret = ret + block + '\n';
+        }
+        return ret;
     }
 }

@@ -73,7 +73,10 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(FuncDefNode it) {
+        nowScope = new Scope(nowScope);
 
+
+        nowScope = nowScope.parentScope;
     }
 
     @Override
@@ -87,12 +90,19 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(RootNode it) { // todo: deal with global classes/functions beforehand
-
+        for (var def : it.Defs) {
+            def.accept(this);
+            if (def instanceof FuncDefNode) {
+                ((FuncDefNode) def).IRFunc = new Function("main", new IRIntType(32));
+                ((FuncDefNode) def).IRFunc.addAllocate();
+                System.out.println((FuncDefNode) def);
+            }
+        }
     }
 
     @Override
     public void visit(TypeNameNode it) {
-        IRBaseType nodeType;
+        IRBaseType nodeType = null;
         switch (it.type.name) {
             case "int":
                 nodeType = new IRIntType(32);
@@ -111,16 +121,26 @@ public class IRBuilder implements ASTVisitor {
             case "void":
                 nodeType = new IRVoidType();
             default:
-                nodeType = StructInfoMap.get(it.type.name);
+                if (!Objects.equals(it.type.name, "null"))
+                    nodeType = StructInfoMap.get(it.type.name);
                 if (it.type.dim > 0) {
                     nodeType = new IRPtrType(nodeType, it.type.dim);
                 }
         }
+        it.IRType = nodeType;
     }
 
     @Override
     public void visit(VarDefAssignNode it) {
-
+        it.typeName.accept(this);
+        IRRegister alloc = new IRRegister(it.varName, new IRPtrType(it.typeName.IRType, 0));
+        IRAlloca order = new IRAlloca(nowBlock, it.typeName.IRType);
+        order.regDest = alloc;
+        nowFunc.init.add(order);
+        if (it.initValue != null) {
+            it.initValue.accept(this);
+            nowBlock.push_back(new IRStore(nowBlock, it.initValue.entity, alloc));
+        }
     }
 
     @Override
@@ -267,7 +287,9 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(AssignExprNode it) {
-
+        it.lhs.accept(this);
+        it.rhs.accept(this);
+        pushStore(it.lhs.address, it.rhs);
     }
 
     @Override
@@ -295,48 +317,48 @@ public class IRBuilder implements ASTVisitor {
         it.lhs.accept(this);
         if (!Objects.equals(it.op, "&&") && !Objects.equals(it.op, "||")) {
             it.rhs.accept(this);
-            if (it.lhs.type.equals(myBuiltin.StringType) || it.rhs.type.equals(myBuiltin.StringType)) {
+            if (it.lhs.type.type.equals(myBuiltin.StringType) || it.rhs.type.type.equals(myBuiltin.StringType)) {
                 // todo: deal with string
             } else {
-                String operation;
+                String operation = "";
                 IRRegister dest = null;
                 switch (it.op) {
                     case "==":
                         operation = "eq";
                     case "!=":
-                        operation = "ne";
+                        if (it.op.equals("!=")) operation = "ne";
                         break; // todo: not just bool/int
                     case "+":
                         operation = "add";
                     case "-":
-                        operation = "sub";
+                        if (it.op.equals("-")) operation = "sub";
                     case "*":
-                        operation = "mul";
+                        if (it.op.equals("*")) operation = "mul";
                     case "/":
-                        operation = "sdiv";
+                        if (it.op.equals("/")) operation = "sdiv";
                     case "%":
-                        operation = "srem";
+                        if (it.op.equals("%")) operation = "srem";
                     case ">>":
-                        operation = "ashr";
+                        if (it.op.equals(">>")) operation = "ashr";
                     case "<<":
-                        operation = "shl";
+                        if (it.op.equals("<<")) operation = "shl";
                     case "&":
-                        operation = "and";
+                        if (it.op.equals("&")) operation = "and";
                     case "|":
-                        operation = "or";
+                        if (it.op.equals("|")) operation = "or";
                     case "^":
-                        operation = "xor";
+                        if (it.op.equals("^")) operation = "xor";
                         dest = new IRRegister("binaryCalc_", new IRIntType(32));
                         nowBlock.push_back(new IRBinOp(nowBlock, new IRIntType(32), operation, getValue(it.lhs, false), getValue(it.rhs, false), dest));
                         break;
                     case "<":
                         operation = "slt";
                     case ">":
-                        operation = "sgt";
+                        if (it.op.equals(">")) operation = "sgt";
                     case "<=":
-                        operation = "sle";
+                        if (it.op.equals("<=")) operation = "sle";
                     case ">=":
-                        operation = "sge";
+                        if (it.op.equals(">=")) operation = "sge";
                         dest = new IRRegister("binaryCmp_", new IRIntType(1));
                         nowBlock.push_back(new IRBinOp(nowBlock, new IRIntType(32), operation, getValue(it.lhs, false), getValue(it.rhs, false), dest));
                         break;
@@ -348,7 +370,7 @@ public class IRBuilder implements ASTVisitor {
             BasicBlock rhsBlock = new BasicBlock("_short_rhs"), endBlock = new BasicBlock("_short_end"), quickBlock = new BasicBlock("_short_quick");
             IRRegister cond = new IRRegister("_shortCircuit_cond", new IRIntType(8));
             nowBlock.push_back(new IRAlloca(nowBlock, new IRIntType(1)));
-            if (it.op.equals("&&"))  {
+            if (it.op.equals("&&")) {
                 /*
              about &&
              c1 && c2

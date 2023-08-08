@@ -9,4 +9,9 @@ public class IRIntConst extends IRConst {
         super("const_int", new IRIntType(32));
         value = _value;
     }
+
+    @Override
+    public String toString() {
+        return String.valueOf(value);
+    }
 }

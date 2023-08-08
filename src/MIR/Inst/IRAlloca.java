@@ -5,8 +5,8 @@ import MIR.Entity.IRRegister;
 import MIR.type.IRBaseType;
 
 public class IRAlloca extends IRBaseInst {
-    IRBaseType type;
-    IRRegister regDest;
+    public IRBaseType type;
+    public IRRegister regDest;
     int numElement = 0;
 
     public IRAlloca(BasicBlock _parent, IRBaseType _type) {
@@ -17,6 +17,6 @@ public class IRAlloca extends IRBaseInst {
 
     @Override
     public String toString() {
-        return null;
+        return regDest + " = alloca " + type;
     }
 }

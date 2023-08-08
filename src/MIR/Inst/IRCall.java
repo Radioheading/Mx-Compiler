@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 public class IRCall extends IRBaseInst {
     public IRBaseType resultType;
-    // todo: IRFunc
+    // todo: IRFunc, toString
     public ArrayList<entity> arguments;
 
     public IRCall(BasicBlock _parent, IRBaseType _res) {

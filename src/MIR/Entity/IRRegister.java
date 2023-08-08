@@ -10,4 +10,9 @@ public class IRRegister extends entity {
         super(_name, _type);
         this.id = cnt++;
     }
+
+    @Override
+    public String toString() {
+        return "%" + name + cnt;
+    }
 }

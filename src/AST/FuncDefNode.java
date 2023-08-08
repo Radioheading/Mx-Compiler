@@ -1,6 +1,7 @@
 package AST;
 
 import AST.Statements.SuiteNode;
+import MIR.Function;
 import Util.position;
 
 public class FuncDefNode extends ASTNode {
@@ -9,6 +10,8 @@ public class FuncDefNode extends ASTNode {
     public ParameterListNode parameterList;
     public SuiteNode suite;
     public String className;
+
+    public Function IRFunc;
 
     public FuncDefNode(position pos) {
         super(pos);

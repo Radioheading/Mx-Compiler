@@ -1,4 +1,5 @@
 import AST.RootNode;
+import Backend.IRBuilder;
 import Frontend.ASTBuilder;
 import Frontend.SemanticChecker;
 import Frontend.SymbolCollector;
@@ -17,14 +18,14 @@ import java.io.InputStream;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-//        String name = "test.mx";
-//        InputStream input = new FileInputStream(name);
-       CharStream input = CharStreams.fromStream(System.in);
+        String name = "test.mx";
+        InputStream input = new FileInputStream(name);
+//       CharStream input = CharStreams.fromStream(System.in);
         try {
             RootNode ASTRoot;
             globalScope gScope = new globalScope(null);
-//            MxLexer lexer = new MxLexer(CharStreams.fromStream(input));
-            MxLexer lexer = new MxLexer(input);
+            MxLexer lexer = new MxLexer(CharStreams.fromStream(input));
+//            MxLexer lexer = new MxLexer(input);
             lexer.removeErrorListeners();
             lexer.addErrorListener(new MxErrorListener());
             MxParser parser = new MxParser(new CommonTokenStream(lexer));
@@ -36,6 +37,9 @@ public class Main {
             ASTRoot = (RootNode) astBuilder.visit(parseTreeRoot);
             new SymbolCollector(gScope).visit(ASTRoot);
             new SemanticChecker(gScope).visit(ASTRoot);
+
+            new IRBuilder(gScope).visit(ASTRoot);
+
         } catch (error er) {
             System.err.println(er.toString());
             throw new RuntimeException();

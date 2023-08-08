@@ -17,6 +17,6 @@ public class IRBranch extends IRBaseInst {
 
     @Override
     public String toString() {
-        return null;
+        return "br i1 " + condition + ", label" + thenBranch.label + ", " + elseBranch.label;
     }
 }

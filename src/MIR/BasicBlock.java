@@ -24,4 +24,12 @@ public class BasicBlock {
             stmts.add(stmt);
         }
     }
+
+    public String toString() {
+        String ret = label + ":\n";
+        for (var inst : stmts) {
+            ret = ret + inst + "\n";
+        }
+        return ret;
+    }
 }

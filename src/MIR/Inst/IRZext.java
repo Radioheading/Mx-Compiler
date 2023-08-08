@@ -20,6 +20,6 @@ public class IRZext extends IRBaseInst {
 
     @Override
     public String toString() {
-        return null;
+        return dest + " = zext " + value.type + " " + value + " to " + destType;
     }
 }
