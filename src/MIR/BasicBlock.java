@@ -14,9 +14,12 @@ public class BasicBlock {
     public boolean hasReturned = false;
     public LinkedList<IRBaseInst> stmts = new LinkedList<>();
     public IRBaseInst terminal;
+    static int cnt = 0;
+    int id;
 
     public BasicBlock(String _label) {
-        label = _label;
+        id = cnt++;
+        label = _label + id;
     }
 
     public void push_back(IRBaseInst stmt) {
@@ -26,7 +29,7 @@ public class BasicBlock {
     }
 
     public String toString() {
-        String ret = label + ":\n";
+        String ret = "\n" + label + ":\n";
         for (var inst : stmts) {
             ret = ret + inst + "\n";
         }

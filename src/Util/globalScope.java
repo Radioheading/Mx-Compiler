@@ -1,5 +1,6 @@
 package Util;
 
+import MIR.Entity.IRGlobalVar;
 import Util.error.semanticError;
 import Util.BuiltinElements;
 import java.util.HashMap;
@@ -12,7 +13,7 @@ public class globalScope extends Scope {
     public HashMap<String, FuncDefNode> funcMember = new HashMap<>();
     public HashMap<String, ClassDefNode> classMember = new HashMap<>();
     public HashMap<String, IRBaseType> IRMap = new HashMap<>();
-
+    public HashMap<String, IRGlobalVar> globalVarMap = new HashMap<>();
     public globalScope(Scope parentScope) {
         // super(parentScope);
         funcMember.put("print", myBuiltin.printFunc);

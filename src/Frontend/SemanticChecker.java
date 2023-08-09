@@ -59,7 +59,7 @@ public class SemanticChecker implements ASTVisitor {
         if (it.parameterList != null) {
             it.parameterList.accept(this);
         }
-        it.suite.accept(this);
+        it.suite.baseStatements.forEach(sd -> sd.accept(this));
         if (!nowScope.hasReturned && !Objects.equals(it.funcName, "main") && !it.returnType.type.equals(myBuiltin.VoidType)) {
             throw new semanticError("The Function: " + it.funcName + "Doesn't Have Return Statement", it.pos);
         }
@@ -378,6 +378,9 @@ public class SemanticChecker implements ASTVisitor {
             for (int i = 0; i < it.parameter.parameters.size(); ++i) {
                 var guess = it.parameter.parameters.get(i);
                 var real = it.funcName.funcDefGuess.parameterList.parameters.get(i);
+                if (guess.type == null) {
+                    throw new semanticError("Error: can't find such Function", it.pos);
+                }
                 // System.out.println(guess.type.type.name);
                 // System.out.println(real.typeName.type.name);
                 // System.out.println(guess.type.type.dim);

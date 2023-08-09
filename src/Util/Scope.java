@@ -5,6 +5,8 @@ import AST.*;
 import AST.Statements.ForStmtNode;
 import AST.Statements.WhileStmtNode;
 import MIR.Entity.IRRegister;
+import MIR.Function;
+import MIR.type.IRBaseType;
 import Util.error.semanticError;
 
 import java.util.HashMap;
@@ -13,6 +15,7 @@ public class Scope {
 
     public HashMap<String, Type> varMember = new HashMap<>();
     public HashMap<String, IRRegister> entities = new HashMap<>();
+    public HashMap<String, Function> IRFunctions = new HashMap<>();
     public Scope parentScope = null;
     public TypeNameNode returnType = null;
     public ClassDefNode fatherClass = null;

@@ -16,15 +16,16 @@ public class Function {
     public LinkedList<BasicBlock> blockList = new LinkedList<>();
     public ArrayList<entity> parameterList;
     public ArrayList<IRAlloca> init = new ArrayList<>(); // put the initializations at the front;
-    public BasicBlock exitBlock;
+    public BasicBlock exitBlock, enterBlock;
     public IRRegister retReg;
 
     public Function(String _name, IRBaseType _retType) {
         this.name = _name;
         this.retType = _retType;
-        blockList.add(new BasicBlock(""));
-        retReg = new IRRegister("ret_of_" + name, _retType);
-        exitBlock = new BasicBlock("_exit_" + name);
+        enterBlock = new BasicBlock("_enter_of" + name);
+        exitBlock = new BasicBlock("_exit_of" + name);
+        blockList.add(enterBlock);
+        retReg = new IRRegister("_ret_of_" + name, _retType);
     }
 
     public void addAllocate() {
@@ -38,8 +39,12 @@ public class Function {
     public String toString() {
         String ret = "";
         for (var block : blockList) {
+            // System.out.println(block);
+            System.out.println("--------separation-------");
             ret = ret + block + '\n';
+            ret = ret + '\n';
         }
+        ret = ret + exitBlock + '\n';
         return ret;
     }
 }
