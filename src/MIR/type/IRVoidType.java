@@ -16,4 +16,9 @@ public class IRVoidType extends IRBaseType {
     public boolean isEqual(IRBaseType other) {
         return other instanceof IRVoidType;
     }
+
+    @Override
+    public IRBaseType Type() {
+        return this;
+    }
 }

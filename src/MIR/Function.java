@@ -5,6 +5,7 @@ import MIR.Entity.entity;
 import MIR.Inst.IRAlloca;
 import MIR.Inst.IRRet;
 import MIR.type.IRBaseType;
+import MIR.type.IRPtrType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,7 +15,7 @@ public class Function {
     public String name;
     public IRBaseType retType;
     public LinkedList<BasicBlock> blockList = new LinkedList<>();
-    public ArrayList<entity> parameterList;
+    public ArrayList<IRRegister> parameterIn = new ArrayList<>();
     public ArrayList<IRAlloca> init = new ArrayList<>(); // put the initializations at the front;
     public BasicBlock exitBlock, enterBlock;
     public IRRegister retReg;
@@ -22,29 +23,36 @@ public class Function {
     public Function(String _name, IRBaseType _retType) {
         this.name = _name;
         this.retType = _retType;
-        enterBlock = new BasicBlock("_enter_of" + name);
-        exitBlock = new BasicBlock("_exit_of" + name);
+        enterBlock = new BasicBlock("enter_" + name);
+        exitBlock = new BasicBlock("exit_" + name);
         blockList.add(enterBlock);
-        retReg = new IRRegister("_ret_of_" + name, _retType);
+        retReg = new IRRegister("ret_" + name, _retType);
     }
 
     public void addAllocate() {
         if (init.isEmpty()) return;
         for (int i = 0; i < init.size(); ++i) {
-            BasicBlock front = blockList.getFirst();
-            front.stmts.addFirst(init.get(i));
+            System.out.println(init.get(i));
+            enterBlock.stmts.addFirst(init.get(i));
         }
     }
 
     public String toString() {
-        String ret = "";
-        for (var block : blockList) {
-            // System.out.println(block);
-            System.out.println("--------separation-------");
-            ret = ret + block + '\n';
-            ret = ret + '\n';
+        String ret = "define dso_local " + retType + " @" + name + "(";
+        for (int i = 0; i < parameterIn.size() - 1; ++i) {
+            var para = parameterIn.get(i);
+            ret += para.type + " " + para + ",";
         }
-        ret = ret + exitBlock + '\n';
+        if (parameterIn.size() > 0) {
+            var para = parameterIn.get(parameterIn.size() - 1);
+            ret += para.type + " " + para + ") {\n";
+        } else {
+            ret += ") {\n";
+        }
+        for (var block : blockList) {
+            ret += block;
+        }
+        ret += exitBlock + "\n}";
         return ret;
     }
 }

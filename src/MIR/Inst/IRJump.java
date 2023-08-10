@@ -16,6 +16,6 @@ public class IRJump extends IRBaseInst {
 
     @Override
     public String toString() {
-        return "br label " + destination.label;
+        return "br label %" + destination.label;
     }
 }

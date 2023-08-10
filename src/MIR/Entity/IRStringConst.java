@@ -8,8 +8,8 @@ import MIR.type.IRPtrType;
 
 public class IRStringConst extends IRConst {
     public String value;
-    public IRStringConst(String _value) {
-        super("const_string", new IRPtrType(new IRIntType(8), 0));
+    public IRStringConst(String _value, boolean local) {
+        super("const_string", new IRPtrType(new IRIntType(8), 0, local));
         value = _value;
     }
 

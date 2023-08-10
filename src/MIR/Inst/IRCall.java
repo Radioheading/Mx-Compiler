@@ -1,23 +1,42 @@
 package MIR.Inst;
 
 import MIR.BasicBlock;
+import MIR.Entity.IRRegister;
 import MIR.Entity.entity;
 import MIR.type.IRBaseType;
+import MIR.type.IRVoidType;
 
 import java.util.ArrayList;
 
 public class IRCall extends IRBaseInst {
+    String name;
+    public IRRegister dest;
     public IRBaseType resultType;
     // todo: IRFunc, toString
-    public ArrayList<entity> arguments;
+    public ArrayList<entity> arguments = new ArrayList<>();
 
-    public IRCall(BasicBlock _parent, IRBaseType _res) {
+    public IRCall(String _name, BasicBlock _parent, IRBaseType _res) {
         super(_parent);
+        this.name = _name;
         this.resultType = _res;
     }
 
     @Override
     public String toString() {
-        return null;
+        String ret = "";
+        if (resultType == null || resultType instanceof IRVoidType) {
+            ret = "call void @" + name + "(";
+        } else {
+            ret = dest + " = call " + resultType + " @" + name + "(";
+        }
+        for (int i = 0; i < arguments.size() - 1; ++i) {
+            ret += arguments.get(i).type + " %" + arguments.get(i).name + ", ";
+        }
+        if (arguments.size() > 0) {
+            ret += arguments.get(arguments.size() - 1).type + " %" + arguments.get(arguments.size() - 1).name + ")";
+        } else {
+            ret += ")";
+        }
+        return ret;
     }
 }

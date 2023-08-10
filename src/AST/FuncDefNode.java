@@ -7,7 +7,7 @@ import Util.position;
 public class FuncDefNode extends ASTNode {
     public TypeNameNode returnType;
     public String funcName;
-    public ParameterListNode parameterList;
+    public ParameterListNode parameterList = new ParameterListNode(null);
     public SuiteNode suite;
     public String className;
 

@@ -38,8 +38,9 @@ public class Main {
             new SymbolCollector(gScope).visit(ASTRoot);
             new SemanticChecker(gScope).visit(ASTRoot);
 
-            new IRBuilder(gScope).visit(ASTRoot);
-
+            IRBuilder irBuilder = new IRBuilder(gScope);
+            irBuilder.visit(ASTRoot);
+            System.out.println(irBuilder.myProgram);
         } catch (error er) {
             System.err.println(er.toString());
             throw new RuntimeException();

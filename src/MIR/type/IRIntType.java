@@ -22,4 +22,9 @@ public class IRIntType extends IRBaseType {
         }
         return ((IRIntType) other).bitWidth == this.bitWidth;
     }
+
+    @Override
+    public IRBaseType Type() {
+        return this;
+    }
 }

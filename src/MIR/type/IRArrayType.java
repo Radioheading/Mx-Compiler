@@ -22,4 +22,9 @@ public class IRArrayType extends IRBaseType {
         }
         return ((IRArrayType) other).arraySize == this.arraySize && ((IRArrayType) other).baseType == this.baseType;
     }
+
+    @Override
+    public IRBaseType Type() {
+        return this;
+    }
 }

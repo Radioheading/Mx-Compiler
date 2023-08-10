@@ -3,6 +3,7 @@ package MIR.Inst;
 import MIR.BasicBlock;
 import MIR.Entity.IRRegister;
 import MIR.type.IRBaseType;
+import MIR.type.IRPtrType;
 
 public class IRAlloca extends IRBaseInst {
     public IRBaseType type;
@@ -12,7 +13,12 @@ public class IRAlloca extends IRBaseInst {
     public IRAlloca(BasicBlock _parent, IRBaseType _type) {
         super(_parent);
         this.type = _type;
+    }
 
+    public IRAlloca(BasicBlock _parent, IRBaseType _type, IRRegister _regDest) {
+        super(_parent);
+        this.type = _type;
+        this.regDest = _regDest;
     }
 
     @Override

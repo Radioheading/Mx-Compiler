@@ -30,4 +30,9 @@ public class IRStructType extends IRBaseType {
         }
         return Objects.equals(other.name, this.name);
     }
+
+    @Override
+    public IRBaseType Type() {
+        return this;
+    }
 }

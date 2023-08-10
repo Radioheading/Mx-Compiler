@@ -17,4 +17,6 @@ public abstract class IRBaseType {
     public abstract String toString();
 
     public abstract boolean isEqual(IRBaseType other);
+
+    public abstract IRBaseType Type();
 }

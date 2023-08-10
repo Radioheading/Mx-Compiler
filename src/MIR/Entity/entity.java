@@ -3,7 +3,7 @@ package MIR.Entity;
 import MIR.type.IRBaseType;
 
 public abstract class entity {
-    String name;
+    public String name;
     public IRBaseType type;
 
     public entity(String _name, IRBaseType _type) {

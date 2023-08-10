@@ -3,11 +3,13 @@ package MIR.type;
 public class IRPtrType extends IRBaseType {
     public IRBaseType baseType;
     public int dim;
-    public IRPtrType(IRBaseType _baseType, int _dim) {
+    public boolean local;
+
+    public IRPtrType(IRBaseType _baseType, int _dim, boolean _local) {
         super(_baseType.name + "*", 4);
         baseType = _baseType;
         dim = _dim;
-
+        local = _local;
     }
 
     @Override
@@ -22,5 +24,11 @@ public class IRPtrType extends IRBaseType {
     public boolean isEqual(IRBaseType other) {
         // todo
         return false;
+    }
+
+    @Override
+    public IRBaseType Type() { // can either be pointer or pointer to pointer
+        if (dim == 0) return baseType;
+        return new IRPtrType(baseType, dim - 1, local);
     }
 }
