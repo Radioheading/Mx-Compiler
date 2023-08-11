@@ -367,12 +367,21 @@ public class SemanticChecker implements ASTVisitor {
         if (it.funcName.funcDefGuess == null) {
             throw new semanticError("Can't be Interpreted as a Function", it.pos);
         } else {
-            if (it.funcName.funcDefGuess.parameterList == null && it.parameter == null) {
+            if (it.funcName.funcDefGuess.parameterList == null && it.parameter == null
+                    || it.parameter != null && it.funcName.funcDefGuess.parameterList == null && it.parameter.parameters.size() == 0
+                    || it.funcName.funcDefGuess.parameterList != null && it.funcName.funcDefGuess.parameterList.parameters.size() == 0 && it.parameter == null) {
                 it.type = new TypeNameNode(it.pos, it.funcName.funcDefGuess.returnType.type);
                 return;
             }
             if (it.funcName.funcDefGuess.parameterList == null || it.parameter == null
                     || it.funcName.funcDefGuess.parameterList.parameters.size() != it.parameter.parameters.size()) {
+                if (it.funcName.funcDefGuess.parameterList == null) {
+                    System.out.println("Shit 1");
+                }
+                if (it.parameter == null) {
+                    System.out.println("Shit 2");
+                }
+                System.out.println(it.funcName.funcDefGuess.parameterList.parameters.size() + "+" + it.parameter.parameters);
                 throw new semanticError("Function Parameter Number Mismatch", it.pos);
             }
             for (int i = 0; i < it.parameter.parameters.size(); ++i) {
@@ -423,7 +432,7 @@ public class SemanticChecker implements ASTVisitor {
         } else {
             // System.out.println("member: " + it.member);
             it.type = new TypeNameNode(it.pos, classObj.getVarType(it.member));
-             // System.out.println("member type:" + it.type.type.name);
+            // System.out.println("member type:" + it.type.type.name);
             it.funcDefGuess = classObj.funcMap.get(it.member);
         }
     }
@@ -467,7 +476,7 @@ public class SemanticChecker implements ASTVisitor {
         }
         it.jump_1.accept(this);
         it.jump_2.accept(this);
-        if (it.jump_2.type == null || it.jump_1.type == null || it.jump_1.type.type.equals(myBuiltin.VoidType) || it.jump_2.type.type.equals(myBuiltin.VoidType)) {
+        if (it.jump_2.type == null || it.jump_1.type == null) {
             throw new semanticError("Wrong Type in Ternary Expressions", it.pos);
         }
         if (!it.jump_1.type.equals(it.jump_2.type)

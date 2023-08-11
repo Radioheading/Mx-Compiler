@@ -18,14 +18,14 @@ import java.io.InputStream;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        String name = "src/test.mx";
-        InputStream input = new FileInputStream(name);
-//       CharStream input = CharStreams.fromStream(System.in);
+//        String name = "src/test.mx";
+//        InputStream input = new FileInputStream(name);
+       CharStream input = CharStreams.fromStream(System.in);
         try {
             RootNode ASTRoot;
             globalScope gScope = new globalScope(null);
-            MxLexer lexer = new MxLexer(CharStreams.fromStream(input));
-//            MxLexer lexer = new MxLexer(input);
+//            MxLexer lexer = new MxLexer(CharStreams.fromStream(input));
+            MxLexer lexer = new MxLexer(input);
             lexer.removeErrorListeners();
             lexer.addErrorListener(new MxErrorListener());
             MxParser parser = new MxParser(new CommonTokenStream(lexer));
@@ -38,9 +38,9 @@ public class Main {
             new SymbolCollector(gScope).visit(ASTRoot);
             new SemanticChecker(gScope).visit(ASTRoot);
 
-            IRBuilder irBuilder = new IRBuilder(gScope);
-            irBuilder.visit(ASTRoot);
-            System.out.println(irBuilder.myProgram);
+//            IRBuilder irBuilder = new IRBuilder(gScope);
+//            irBuilder.visit(ASTRoot);
+//            System.out.println(irBuilder.myProgram);
         } catch (error er) {
             System.err.println(er.toString());
             throw new RuntimeException();

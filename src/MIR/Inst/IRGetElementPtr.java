@@ -15,10 +15,11 @@ public class IRGetElementPtr extends IRBaseInst {
     public entity ptr;
     public ArrayList<entity> indexes = new ArrayList<>();
 
-    public IRGetElementPtr(BasicBlock _parent, IRBaseType _type, IRRegister _ptr) {
+    public IRGetElementPtr(BasicBlock _parent, IRBaseType _type, IRRegister _ptr, entity _subscript) {
         super(_parent);
-        this.type = _type;
+        this.type = _type.Type();
         this.ptr = _ptr;
+        indexes.add(_subscript);
     }
     //todo: toString
     @Override
