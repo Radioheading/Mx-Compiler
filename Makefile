@@ -1,7 +1,7 @@
 # Change the src to the path of your java source files
 JAVA_SRC = $(shell find src -name '*.java')
 # Change this to the path of your antlr jar
-ANTLR_JAR = /usr/share/java/antlr-4.12.0-complete.jar
+ANTLR_JAR = /usr/share/java/antlr-runtime-4.12.0.jar
 
 .PHONY: all
 all: Compiler
