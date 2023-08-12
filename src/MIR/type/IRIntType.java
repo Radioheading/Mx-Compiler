@@ -3,7 +3,7 @@ package MIR.type;
 // bool is also a type of int
 
 public class IRIntType extends IRBaseType {
-    int bitWidth;
+    public int bitWidth;
 
     public IRIntType(int _size) {
         super("i" + _size, (_size + 7) / 8);

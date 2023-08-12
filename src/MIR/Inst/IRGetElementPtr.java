@@ -15,8 +15,9 @@ public class IRGetElementPtr extends IRBaseInst {
     public entity ptr;
     public ArrayList<entity> indexes = new ArrayList<>();
 
-    public IRGetElementPtr(BasicBlock _parent, IRBaseType _type, IRRegister _ptr, entity _subscript) {
+    public IRGetElementPtr(IRRegister _dest, BasicBlock _parent, IRBaseType _type, IRRegister _ptr, entity _subscript) {
         super(_parent);
+        dest = _dest;
         this.type = _type.Type();
         this.ptr = _ptr;
         indexes.add(_subscript);

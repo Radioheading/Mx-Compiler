@@ -19,6 +19,8 @@ import Util.BuiltinElements;
 import Util.Scope;
 import Util.globalScope;
 
+import java.io.ObjectInputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -51,7 +53,8 @@ public class IRBuilder implements ASTVisitor {
     private entity getValue(ExpressionNode expr, boolean is_i1) { // maybe we need to load certain thing before we use it
         IRRegister dest = new IRRegister("", new IRIntType(1));
         if (expr.entity != null) {
-            if (is_i1 && expr.entity.type.size == 8) {
+            System.out.println(expr.entity.type.size + ".s");
+            if (is_i1 && expr.entity.type instanceof IRIntType && ((IRIntType) expr.entity.type).bitWidth == 8) {
                 nowBlock.push_back(new IRTrunc(nowBlock, expr.entity, new IRIntType(1), dest));
                 return dest;
             }
@@ -61,7 +64,8 @@ public class IRBuilder implements ASTVisitor {
         IRRegister ptr = new IRRegister("", expr.address.type);
         nowBlock.push_back(new IRLoad(nowBlock, expr.address.type, ptr, expr.address));
         expr.entity = ptr;
-        if (is_i1 && expr.entity.type.size == 8) {
+        if (is_i1 && expr.entity.type instanceof IRIntType && ((IRIntType) expr.entity.type).bitWidth == 8) {
+            System.out.println("^: 1");
             nowBlock.push_back(new IRTrunc(nowBlock, expr.entity, new IRIntType(1), dest));
             return dest;
         }
@@ -139,6 +143,83 @@ public class IRBuilder implements ASTVisitor {
 
     private void ClassDeclare() {
 
+    }
+
+    private entity NewDFS(int layer, IRBaseType type, ArrayList<ExpressionNode> initSize) {
+        // zero-based, returning a pointer pointing to the beginning of the array
+        // step 1: calculate the size to malloc: layer_size * sizeof(innerType) + 4;
+        IRBaseType void_star = new IRPtrType(new IRIntType(8), 0, false);
+        int inner_size = type.Type().size;
+        entity layer_size = getValue(initSize.get(layer), false), inner_pointer = new IRIntConst(inner_size);
+        IRRegister tmp = new IRRegister("mul", new IRIntType(32)), malloc_size = new IRRegister("malloc", new IRIntType(32));
+        IRRegister malloc_ptr = new IRRegister("malloc_ptr", void_star);
+        nowBlock.push_back(new IRBinOp(nowBlock, new IRIntType(32), "mul", layer_size, inner_pointer, tmp));
+        nowBlock.push_back(new IRBinOp(nowBlock, new IRIntType(32), "add", tmp, new IRIntConst(4), malloc_size));
+        // step 2: call malloc and store layer_size
+        var CallInst = new IRCall("malloc", nowBlock, void_star);
+        CallInst.arguments.add(malloc_size);
+        CallInst.dest = malloc_ptr;
+        nowBlock.push_back(CallInst);
+        nowBlock.push_back(new IRStore(nowBlock, layer_size, malloc_ptr));
+
+        // step 3: use GetElementPtr to get the head of this array
+        IRRegister array_head = new IRRegister("array_head", type);
+        var GepInst = new IRGetElementPtr(array_head, nowBlock, new IRIntType(32), malloc_ptr, new IRIntConst(1));
+        nowBlock.push_back(GepInst);
+
+        // step 4: malloc recursively, manually implementing FOR
+        if (layer == initSize.size() - 1) {
+            return array_head;
+        }
+
+        nowScope = new Scope(nowScope);
+        IRRegister iter = new IRRegister("iter", new IRPtrType(new IRIntType(32), 0, false));
+        nowScope.entities.put("iter", iter);
+        IRAlloca order = new IRAlloca(nowBlock, new IRPtrType(new IRIntType(32), 0, false));
+        nowFunc.init.add(order); // 加入开头的allocation
+
+        var cond = new BasicBlock("for.cond");
+        var body = new BasicBlock("for.body");
+        var inc = new BasicBlock("for.inc");
+        var end = new BasicBlock("for.end");
+        // int i = 0;
+        nowBlock.push_back(new IRStore(nowBlock, new IRIntConst(0), iter));
+        nowBlock.terminal = new IRJump(nowBlock, cond);
+        nowBlock.hasReturned = true;
+        nowBlock = cond;
+        // i < a
+        IRRegister cmp_1 = new IRRegister("", new IRIntType(32)), cmp_res = new IRRegister("slt", new IRIntType(1));
+        nowBlock.push_back(new IRLoad(nowBlock, new IRIntType(32), cmp_1, iter));
+        nowBlock.push_back(new IRIcmp(nowBlock, new IRIntType(32), "slt", cmp_1, layer_size, cmp_res));
+        nowBlock.terminal = new IRBranch(nowBlock, cmp_res, body, end);
+        nowBlock.hasReturned = true;
+        nowFunc.blockList.add(nowBlock);
+        // call dfs
+        // specifically, load the malloc return value to some register, GEP on ptr, and store
+        nowBlock = body;
+        var mallocRet = NewDFS(layer + 1, type.Type(), initSize);
+        IRRegister GepDest = new IRRegister("gep", type.Type());
+        IRRegister array_i = new IRRegister("", type), i2 = new IRRegister("", new IRIntType(32));
+        nowBlock.push_back(new IRLoad(nowBlock, new IRIntType(32), i2, iter));
+        nowBlock.push_back(new IRGetElementPtr(array_i, nowBlock, type, array_i, i2));
+        nowBlock.push_back(new IRStore(nowBlock, GepDest, array_i));
+        nowBlock.terminal = new IRJump(nowBlock, inc);
+        nowBlock.hasReturned = true;
+        nowFunc.blockList.add(nowBlock);
+        // i = i + 1;
+        nowBlock = inc;
+        IRRegister add_one = new IRRegister("", new IRIntType(32)), i3 = new IRRegister("", new IRIntType(32));
+        nowBlock.push_back(new IRLoad(nowBlock, new IRIntType(32), i3, iter));
+        nowBlock.push_back(new IRBinOp(nowBlock, new IRIntType(32), "add", i3, new IRIntConst(1), add_one));
+        nowBlock.push_back(new IRStore(nowBlock, add_one, iter));
+        nowBlock.terminal = new IRJump(nowBlock, cond);
+        nowBlock.hasReturned = true;
+        nowFunc.blockList.add(nowBlock);
+        // out of loop
+        nowBlock = end;
+        nowFunc.blockList.add(nowBlock);
+        nowScope = nowScope.parentScope;
+        return array_head;
     }
 
     @Override
@@ -517,7 +598,7 @@ public class IRBuilder implements ASTVisitor {
 
             BasicBlock rhsBlock = new BasicBlock("_short_rhs"), endBlock = new BasicBlock("_short_end"), quickBlock = new BasicBlock("_short_quick");
             IRRegister cond = new IRRegister("_shortCircuit_cond", new IRIntType(8));
-            nowBlock.push_back(new IRAlloca(nowBlock, new IRIntType(1)));
+            nowFunc.init.add(new IRAlloca(nowBlock, new IRIntType(8), cond));
             if (it.op.equals("&&")) {
                 /*
              about &&
@@ -531,17 +612,20 @@ public class IRBuilder implements ASTVisitor {
                 nowBlock.terminal = new IRBranch(nowBlock, getValue(it.lhs, true), rhsBlock, quickBlock);
                 nowBlock.hasReturned = true;
                 nowBlock = rhsBlock;
+                nowFunc.blockList.add(nowBlock);
                 it.rhs.accept(this);
                 pushStore(cond, it.rhs);
                 nowBlock.terminal = new IRJump(nowBlock, endBlock);
                 nowBlock.hasReturned = true;
                 nowBlock = quickBlock;
+                nowFunc.blockList.add(nowBlock);
                 ExpressionNode falseExpr = new BaseExprNode(null);
                 falseExpr.entity = new IRBoolConst(false);
                 pushStore(cond, falseExpr);
                 nowBlock.terminal = new IRJump(nowBlock, endBlock);
                 nowBlock.hasReturned = true;
                 nowBlock = endBlock;
+                nowFunc.blockList.add(nowBlock);
             } else {
                 /*
              about ||
@@ -555,19 +639,23 @@ public class IRBuilder implements ASTVisitor {
                 nowBlock.terminal = new IRBranch(nowBlock, getValue(it.lhs, true), quickBlock, rhsBlock);
                 nowBlock.hasReturned = true;
                 nowBlock = quickBlock;
+                nowFunc.blockList.add(nowBlock);
                 ExpressionNode trueExpr = new BaseExprNode(null);
                 trueExpr.entity = new IRBoolConst(true);
                 pushStore(cond, trueExpr);
                 nowBlock.terminal = new IRJump(nowBlock, endBlock);
                 nowBlock.hasReturned = true;
                 nowBlock = rhsBlock;
+                nowFunc.blockList.add(nowBlock);
                 it.rhs.accept(this);
                 pushStore(cond, it.rhs);
                 nowBlock.terminal = new IRJump(nowBlock, endBlock);
                 nowBlock.hasReturned = true;
                 nowBlock = endBlock;
+                nowFunc.blockList.add(nowBlock);
             }
             // todo: deal with the calculated value
+            it.entity = cond;
         }
     }
 
@@ -599,7 +687,10 @@ public class IRBuilder implements ASTVisitor {
             if (it.sizes == null || it.sizes.size() == 0) { // no need for new
                 it.entity = new IRNullConst();
             } else {
-
+                for (var size : it.sizes) {
+                    size.accept(this);
+                }
+                it.entity = NewDFS(0, TypeToIRType(it.type), it.sizes);
             }
         } else { // todo: NEW method for classes
 
@@ -617,8 +708,7 @@ public class IRBuilder implements ASTVisitor {
         it.subscript.accept(this);
         IRRegister dest = new IRRegister("arrayidx", getValue(it.name, false).type);
         it.address = dest;
-        nowBlock.push_back(new IRGetElementPtr(nowBlock, it.name.type.IRType, dest, getValue(it.subscript, false)));
-
+        nowBlock.push_back(new IRGetElementPtr(dest, nowBlock, Objects.requireNonNull(TypeToIRType(it.name.type)), it.name.address, getValue(it.subscript, false)));
     }
 
     @Override
