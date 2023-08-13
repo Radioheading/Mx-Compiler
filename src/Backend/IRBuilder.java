@@ -38,6 +38,13 @@ public class IRBuilder implements ASTVisitor {
         this.nowScope = _gScope;
     }
 
+    private String noEscape(String obj) {
+        String inner = obj.substring(1, obj.length() - 1);
+        return inner.replace("\\n", "\n")
+                    .replace("\\\"", "\"")
+                    .replace("\\t", "\t");
+    }
+
     private void pushStore(IRRegister ptr, ExpressionNode valueNode) {
         if (Objects.equals(getValue(valueNode, false).type.name, "int") && getValue(valueNode, false).type.size == 1) {
             IRRegister toZext = new IRRegister("frombool", new IRIntType(8));
@@ -518,7 +525,11 @@ public class IRBuilder implements ASTVisitor {
     public void visit(BaseExprNode it) {
         if (!it.isIdentifier) {
             if (it.type.type.equals(myBuiltin.StringType)) { // to be implemented
-
+               String toAdd = noEscape(it.str);
+               if (!myProgram.gStrings.containsKey(toAdd)) {
+                   myProgram.gStrings.put(toAdd, new IRStringConst(toAdd, false));
+               }
+               it.entity = myProgram.gStrings.get(toAdd);
             } else if (it.type.type.equals(myBuiltin.IntType)) {
                 int val = Integer.parseInt(it.str);
                 it.entity = new IRIntConst(val);

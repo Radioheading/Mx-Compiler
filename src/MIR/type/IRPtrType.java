@@ -15,7 +15,7 @@ public class IRPtrType extends IRBaseType {
     @Override
     public String toString() {
         if (dim > 0) {
-            return baseType.name + "*" + dim;
+            return "ptr";
         }
         return baseType.name;
     }

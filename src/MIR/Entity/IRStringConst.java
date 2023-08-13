@@ -8,13 +8,21 @@ import MIR.type.IRPtrType;
 
 public class IRStringConst extends IRConst {
     public String value;
+    public int id;
+    public static int cnt = 0;
+
     public IRStringConst(String _value, boolean local) {
-        super("const_string", new IRPtrType(new IRIntType(8), 0, local));
+        super(new IRPtrType(new IRIntType(8), 0, local));
         value = _value;
+        id = cnt++;
     }
 
     @Override
     public String toString() {
-        return null;
+        return "@str." + id;
+    }
+
+    public String toIR() {
+        return value.replace("\n", "\\0A").replace("\"", "\\22").replace("\\", "\\\\");
     }
 }
