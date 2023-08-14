@@ -15,10 +15,11 @@ public class IRCall extends IRBaseInst {
     // todo: IRFunc, toString
     public ArrayList<entity> arguments = new ArrayList<>();
 
-    public IRCall(String _name, BasicBlock _parent, IRBaseType _res) {
+    public IRCall(IRRegister _dest, String _name, BasicBlock _parent, IRBaseType _res) {
         super(_parent);
         this.name = _name;
         this.resultType = _res;
+        this.dest = _dest;
     }
 
     @Override

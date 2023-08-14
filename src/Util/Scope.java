@@ -7,6 +7,7 @@ import AST.Statements.WhileStmtNode;
 import MIR.Entity.IRRegister;
 import MIR.Function;
 import MIR.type.IRBaseType;
+import MIR.type.IRStructType;
 import Util.error.semanticError;
 
 import java.util.HashMap;
@@ -19,6 +20,7 @@ public class Scope {
     public Scope parentScope = null;
     public TypeNameNode returnType = null;
     public ClassDefNode fatherClass = null;
+    public IRStructType fatherIRClass = null;
     public ForStmtNode fatherFor = null;
     public WhileStmtNode fatherWhile = null;
     public int fatherLoop = 0; // 0 for neither, 1 for "For", 2 for "While"

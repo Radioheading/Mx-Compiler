@@ -6,7 +6,7 @@ import java.util.Objects;
 
 public class IRStructType extends IRBaseType {
 
-    public ArrayList<IRBaseType> memberType = new ArrayList<>();
+    public HashMap<String, IRBaseType> memberType = new HashMap<>();
     public HashMap<String, Integer> memberIndex = new HashMap<>();
 
     public IRStructType(String _name, int _size) {
@@ -14,8 +14,16 @@ public class IRStructType extends IRBaseType {
     }
 
     public void putMember(String _key, IRBaseType _type) {
-        memberType.add(_type);
+        memberType.put(_key, _type);
         memberIndex.put(_key, memberType.size() - 1);
+    }
+
+    public int getIndex(String _key) {
+        return memberIndex.get(_key);
+    }
+
+    public IRBaseType getType(String _key) {
+        return memberType.get(_key);
     }
 
     @Override

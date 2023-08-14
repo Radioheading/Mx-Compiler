@@ -413,7 +413,6 @@ public class SemanticChecker implements ASTVisitor {
 
     @Override
     public void visit(MemberExprNode it) {
-        // todo
         it.object.accept(this);
         if (it.object.type == null) {
             throw new semanticError("Null Type Error", it.pos);

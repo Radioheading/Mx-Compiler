@@ -14,7 +14,7 @@ public class IRNullType extends IRBaseType {
 
     @Override
     public boolean isEqual(IRBaseType other) {
-        return other instanceof IRVoidType;
+        return other instanceof IRNullType;
     }
 
     @Override
