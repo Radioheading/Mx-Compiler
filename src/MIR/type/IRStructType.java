@@ -17,7 +17,10 @@ public class IRStructType extends IRBaseType {
     public void putMember(String _key, IRBaseType _type) {
         memberType.put(_key, _type);
         memberIndex.put(_key, memberType.size() - 1);
+        all_size += 4;
     }
+
+    public int all_size = 0;
 
     public int getIndex(String _key) {
         return memberIndex.get(_key);
