@@ -6,7 +6,7 @@ public class IRPtrType extends IRBaseType {
     public boolean local;
 
     public IRPtrType(IRBaseType _baseType, int _dim, boolean _local) {
-        super(_baseType.name + "*", 4);
+        super(_baseType.name, 4);
         baseType = _baseType;
         dim = _dim;
         local = _local;
@@ -14,10 +14,7 @@ public class IRPtrType extends IRBaseType {
 
     @Override
     public String toString() {
-        if (dim > 0) {
-            return "ptr";
-        }
-        return baseType.name;
+        return "ptr";
     }
 
     @Override

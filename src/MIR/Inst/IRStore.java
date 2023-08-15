@@ -1,6 +1,7 @@
 package MIR.Inst;
 
 import MIR.BasicBlock;
+import MIR.Entity.IRNullConst;
 import MIR.Entity.IRRegister;
 import MIR.Entity.entity;
 import MIR.type.IRNullType;
@@ -16,7 +17,7 @@ public class IRStore extends IRBaseInst {
         this.dest = _dest;
         if (value == null) {
             System.out.println("Let's keep pushing");
-            this.value.type = new IRNullType();
+            this.value = new IRNullConst();
         }
     }
 

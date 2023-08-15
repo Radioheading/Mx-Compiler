@@ -10,17 +10,21 @@ import java.util.Arrays;
 public class IRFuncDeclare {
     IRBaseType retType;
     String funcName;
-    ArrayList<IRBaseType> parameters;
+    ArrayList<IRBaseType> parameters = new ArrayList<>();
 
     public IRFuncDeclare(String _funcName, IRBaseType _type, IRBaseType ... paramType) {
         funcName = _funcName;
         retType = _type;
-        parameters.addAll(Arrays.asList(paramType));
+        if (paramType != null) {
+            for (var i : paramType) {
+                parameters.add(i);
+            }
+        }
     }
 
     @Override
     public String toString() {
-        String ret = "declare " + retType + "@" + funcName + "(";
+        String ret = "declare " + retType + " " + "@" + funcName + "(";
         for (int i = 0; i < parameters.size() - 1; ++i) {
             ret += parameters.get(i) + ", ";
         }

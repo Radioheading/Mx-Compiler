@@ -23,6 +23,6 @@ public class IRAlloca extends IRBaseInst {
 
     @Override
     public String toString() {
-        return regDest + " = alloca " + type;
+        return regDest + " = alloca " + type.Type();
     }
 }

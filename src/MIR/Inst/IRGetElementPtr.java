@@ -25,6 +25,10 @@ public class IRGetElementPtr extends IRBaseInst {
     //todo: toString
     @Override
     public String toString() {
-        return null;
+        String ret = dest + " = getelementptr " + type + ", " + ptr.type + " " + ptr;
+        for (var index : indexes) {
+            ret += "," + index.type + " " + index;
+        }
+        return ret;
     }
 }

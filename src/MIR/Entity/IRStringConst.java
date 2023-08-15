@@ -23,6 +23,6 @@ public class IRStringConst extends IRConst {
     }
 
     public String toIR() {
-        return value.replace("\n", "\\0A").replace("\"", "\\22").replace("\\", "\\\\");
+        return value.replace("\n", "\\0A").replace("\"", "\\22").replace("\\", "\\\\") + "\\00";
     }
 }

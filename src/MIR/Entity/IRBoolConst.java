@@ -12,6 +12,6 @@ public class IRBoolConst extends IRConst {
 
     @Override
     public String toString() {
-        return value? "true" : "false";
+        return value? "1" : "0";
     }
 }

@@ -14,6 +14,7 @@ public class globalScope extends Scope {
     public HashMap<String, ClassDefNode> classMember = new HashMap<>();
     public HashMap<String, IRBaseType> IRMap = new HashMap<>();
     public HashMap<String, IRGlobalVar> globalVarMap = new HashMap<>();
+    public HashMap<String, IRStructType> IRClassMap = new HashMap<>();
     public globalScope(Scope parentScope) {
         // super(parentScope);
         funcMember.put("print", myBuiltin.printFunc);

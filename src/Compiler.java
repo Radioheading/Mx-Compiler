@@ -15,10 +15,11 @@ import Util.globalScope;
 import Util.Scope;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.io.PrintStream;
 
 public class Compiler {
     public static void main(String[] args) throws Exception {
-        String name = "src/test.mx";
+        String name = "src/easy-test/e2.mx";
         InputStream input = new FileInputStream(name);
 //       CharStream input = CharStreams.fromStream(System.in);
         try {
@@ -37,9 +38,10 @@ public class Compiler {
             ASTRoot = (RootNode) astBuilder.visit(parseTreeRoot);
             new SymbolCollector(gScope).visit(ASTRoot);
             new SemanticChecker(gScope).visit(ASTRoot);
-
             IRBuilder irBuilder = new IRBuilder(gScope);
             irBuilder.visit(ASTRoot);
+            PrintStream output = new PrintStream("output.ll");
+            System.setOut(output);
             System.out.println(irBuilder.myProgram);
         } catch (error er) {
             System.err.println(er.toString());

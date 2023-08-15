@@ -94,6 +94,7 @@ public class SemanticChecker implements ASTVisitor {
 
     @Override
     public void visit(VarDefAssignNode it) {
+        System.out.println("&scanning name : " + it.varName);
         it.typeName.accept(this);
         if (it.initValue != null) {
             it.initValue.accept(this);
@@ -249,6 +250,7 @@ public class SemanticChecker implements ASTVisitor {
 
     @Override
     public void visit(BaseExprNode it) {
+        System.out.println(it.str);
         if (!it.isIdentifier) {
             if (it.str.matches("\".*\"")) {
                 it.type = new TypeNameNode(it.pos, myBuiltin.StringType);
@@ -266,7 +268,7 @@ public class SemanticChecker implements ASTVisitor {
                 it.type = new TypeNameNode(it.pos, myBuiltin.IntType);
             }
         } else {
-            // System.out.println("Finding: " + it.str);
+            System.out.println("Finding: " + it.str);
             if (nowScope.containsVariable(it.str, true)) {
                 it.type = new TypeNameNode(it.pos, nowScope.getVarType(it.str, true));
                 // System.out.println("I got: " + it.type.type.name);
@@ -276,6 +278,7 @@ public class SemanticChecker implements ASTVisitor {
             } else {
                 if (gScope.funcMember.containsKey(it.str)) {
                     it.funcDefGuess = gScope.getFuncNode(it.str, it.pos);
+                    System.out.println("got' ya");
                 }
             }
         }

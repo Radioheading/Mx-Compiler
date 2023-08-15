@@ -9,6 +9,7 @@ public class IRStructType extends IRBaseType {
     public HashMap<String, IRBaseType> memberType = new HashMap<>();
     public HashMap<String, Integer> memberIndex = new HashMap<>();
 
+    public boolean hasConstruct = false;
     public IRStructType(String _name, int _size) {
         super(_name, _size);
     }

@@ -31,10 +31,10 @@ public class IRCall extends IRBaseInst {
             ret = dest + " = call " + resultType + " @" + name + "(";
         }
         for (int i = 0; i < arguments.size() - 1; ++i) {
-            ret += arguments.get(i).type + " %" + arguments.get(i).name + ", ";
+            ret += arguments.get(i).type + " " + arguments.get(i).toString() + ", ";
         }
         if (arguments.size() > 0) {
-            ret += arguments.get(arguments.size() - 1).type + " %" + arguments.get(arguments.size() - 1).name + ")";
+            ret += arguments.get(arguments.size() - 1).type + " " + arguments.get(arguments.size() - 1).toString() + ")";
         } else {
             ret += ")";
         }

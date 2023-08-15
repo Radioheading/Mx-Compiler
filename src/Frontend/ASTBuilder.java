@@ -124,6 +124,7 @@ public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
         for (var assign : ctx.varDefAssign()) {
             // System.out.println(assign.Identifier().getText());
             // System.out.println(ctx.typeName().getText());
+            System.out.println("$reach: " + assign.Identifier().getText());
             if (assign.expr() == null) {
                 varDefNode.varAssigns.add(new VarDefAssignNode(new position(ctx), assign.Identifier().getText(), (TypeNameNode) visit(ctx.typeName()), null));
             } else {
@@ -183,9 +184,7 @@ public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
     public ASTNode visitForStatement(MxParser.ForStatementContext ctx) {
         ForStmtNode forStmt = new ForStmtNode(new position(ctx));
         if (ctx.statement().suite() != null) {
-            for (var stmt : ctx.statement().suite().statement()) {
-                forStmt.loop.add((BaseStmtNode) visit(ctx.statement().suite()));
-            }
+                forStmt.loop = ((SuiteNode) visit(ctx.statement().suite())).baseStatements;
         } else {
             forStmt.loop.add((BaseStmtNode) visit(ctx.statement()));
         }
