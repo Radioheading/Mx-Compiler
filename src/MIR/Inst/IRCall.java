@@ -9,7 +9,7 @@ import MIR.type.IRVoidType;
 import java.util.ArrayList;
 
 public class IRCall extends IRBaseInst {
-    String name;
+    public String name;
     public IRRegister dest;
     public IRBaseType resultType;
     // todo: IRFunc, toString

@@ -14,6 +14,7 @@ import Util.Scope;
 import Util.globalScope;
 
 import java.io.ObjectInputStream;
+import java.lang.reflect.Member;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
@@ -329,7 +330,6 @@ public class IRBuilder implements ASTVisitor {
         nowFunc = nowScope.IRFunctions.get(it.name);
         nowScope = new Scope(nowScope);
         nowBlock = nowFunc.enterBlock;
-        // todo: add "this" pointer
 
         IRPtrType classType = new IRPtrType(nowClass, 0, false);
         IRRegister thisAddr = new IRRegister("this.addr", new IRPtrType(classType, 0, true));
@@ -666,8 +666,20 @@ public class IRBuilder implements ASTVisitor {
         } else {
             // System.out.println(it.str);
             it.address = nowScope.getEntity(it.str, true);
-            if (it.address == null) { // todo: possibility: member or member function
-                System.out.println("Sorry guys");
+            if (it.address == null) { // possibilities: member or member function
+                // only need to deal with one case: member variable, others can be resolved in funcCallExprNode
+                if (it.funcDefGuess == null) { // is member variable
+                    var thisPtr = nowScope.getEntity("this", true);
+                    var thisVal = new IRRegister("this", thisPtr.type.Type());
+                    var innerType = thisVal.type.Type();
+                    nowBlock.push_back(new IRLoad(nowBlock, thisVal.type, thisVal, thisPtr));
+                    var memberType = ((IRStructType)innerType).getType(it.str);
+                    var memberIndex = ((IRStructType)innerType).getIndex(it.str);
+                    it.address = new IRRegister("this." + it.str, new IRPtrType(memberType, 0, false));
+                    IRGetElementPtr gep = new IRGetElementPtr(it.address, nowBlock, innerType, thisVal, intZero);
+                    gep.indexes.add(new IRIntConst(memberIndex));
+                    nowBlock.push_back(gep);
+                }
             }
         }
     }
@@ -880,6 +892,34 @@ public class IRBuilder implements ASTVisitor {
         FuncDefNode func = it.funcName.funcDefGuess;
         func.returnType.IRType = TypeToIRType(func.returnType);
         IRCall call = new IRCall(new IRRegister("", func.returnType.IRType), func.funcName, nowBlock, func.returnType.IRType);
+        if (func.className != null) {
+            // add this pointer as the first parameter
+            // case 1: calling a member function like a.foo()
+            if (it.funcName instanceof MemberExprNode memberExpr) {
+                call.arguments.add(getValue(memberExpr.object, false));
+            } else { // case 2: calling a member function within the class
+                // load this first
+                IRRegister thisPtr = nowScope.getEntity("this", true);
+                IRRegister newThis = new IRRegister("this", (thisPtr.type).Type());
+                nowBlock.push_back(new IRLoad(nowBlock, (thisPtr.type).Type(), newThis, thisPtr));
+                call.arguments.add(newThis);
+            }
+        } else {
+            // can be the builtin member functions
+            if (func == myBuiltin.sizeFunc) {
+                // have written in builtin.ll, call directly
+                call.name = "__array_size";
+            } else if (func == myBuiltin.lengthFunc) {
+                call.name = "__str_length";
+            } else if (func == myBuiltin.ordFunc) {
+                call.name = "__str_ord";
+            } else if (func == myBuiltin.substringFunc) {
+                call.name = "__str_substring";
+            } else if (func == myBuiltin.parseIntFunc) {
+                call.name = "__str_parseInt";
+            }
+            call.arguments.add(getValue(((MemberExprNode)it.funcName).object, false));
+        }
         if (it.parameter != null) {
             it.parameter.parameters.forEach(sd -> sd.accept(this));
         }
@@ -894,7 +934,18 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(MemberExprNode it) {
-
+        it.object.accept(this);
+        var innerType = TypeToIRType(it.object.type).Type();
+        // only need to deal with one case: member variable, others can be resolved in funcCallExprNode
+        // in this case, innerType is StructType, and this class does contain it.member
+        if (innerType instanceof IRStructType && ((IRStructType)innerType).memberIndex.containsKey(it.member)) {
+            var memberType = ((IRStructType)innerType).getType(it.member);
+            var memberIndex = ((IRStructType)innerType).getIndex(it.member);
+            it.address = new IRRegister("", new IRPtrType(memberType, 0, false));
+            IRGetElementPtr gep = new IRGetElementPtr(it.address, nowBlock, innerType, (IRRegister) getValue(it.object, false), intZero);
+            gep.indexes.add(new IRIntConst(memberIndex));
+            nowBlock.push_back(gep);
+        }
     }
 
     @Override
@@ -908,7 +959,7 @@ public class IRBuilder implements ASTVisitor {
                 }
                 it.entity = NewDFS(0, TypeToIRType(it.type), it.sizes);
             }
-        } else { // todo: NEW method for classes
+        } else {
             it.entity = new IRRegister("malloc_dest", TypeToIRType(it.type));
             var callInst = new IRCall((IRRegister) it.entity, "__malloc", nowBlock, TypeToIRType(it.type));
             IRStructType classType = (IRStructType) (TypeToIRType(it.type).Type());

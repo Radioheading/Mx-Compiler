@@ -91,3 +91,7 @@ int __str_parseInt(char *s) {
 int __str_ord(char *s, int p) {
     return s[p];
 }
+
+int __array_size(void *head) {
+    return ((int*)head)[-1];
+}
