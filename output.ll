@@ -2,6 +2,8 @@
 source_filename = "for-test.c"
 target datalayout = "e-m:e-p:32:32-p270:32:32-p271:32:32-p272:64:64-f64:32:64-f80:32-n8:16:32-S128"
 target triple = "i386-pc-linux-gnu"
+@str.0 = private unnamed_addr constant [2 x i8] c" \00"
+@str.1 = private unnamed_addr constant [8 x i8] c"Total: \00"
 declare void @print(ptr)
 declare void @println(ptr)
 declare void @printInt(i32)
@@ -10,6 +12,7 @@ declare ptr @getString()
 declare i32 @getInt()
 declare ptr @toString(i32)
 declare ptr @__malloc(i32)
+declare i32 @__array_size(ptr)
 declare ptr @__str_add(ptr, ptr)
 declare i8 @__str_eq(ptr, ptr)
 declare i8 @__str_ne(ptr, ptr)
@@ -21,193 +24,160 @@ declare i32 @__str_length(ptr)
 declare ptr @__str_substring(ptr, i32, i32)
 declare i32 @__str_parseInt(ptr)
 declare i32 @__str_ord(ptr, i32)
-@n = dso_local global i32 0
-@a = dso_local global ptr null
-@i = dso_local global i32 0
-define dso_local i32 @jud(i32 %x_4) {
+@N = dso_local global i32 15000
+@b = dso_local global ptr null
+@resultCount = dso_local global i32 0
+define dso_local i32 @main() {
 
-enter_jud_0:
-%flag_28 = alloca i8
-%j_16 = alloca i32
-%i_15 = alloca i32
-%ret_jud_3 = alloca i32
-%x_13 = alloca i32
-store i32 %x_4, ptr %x_13
-store i32 0, ptr %i_15
+enter_main_0:
+call void @__cxx_global_var_init()
+%short_cond_0 = alloca i8
+%count_0 = alloca i32
+%i_0 = alloca i32
+%ret_main_0 = alloca i32
+store i32 1, ptr %i_0
 br label %for.cond_0
 
 for.cond_0:
-%_20 = load i32, ptr @n
-%_22 = load i32, ptr %x_13
-%sdiv_18 = sdiv i32 %_20, %_22
-%_25 = load i32, ptr %i_15
-%slt_23 = icmp slt i32 %_25, %sdiv_18
-br i1 %slt_23, label %for.body_0, label %for.end_0
+%_5 = load i32, ptr %i_0
+%_7 = load i32, ptr @N
+%sle_0 = icmp sle i32 %_5, %_7
+br i1 %sle_0, label %for.body_0, label %for.end_0
 
 for.body_0:
-store i1 false, ptr %flag_28
-store i32 0, ptr %j_16
+%_10 = load ptr, ptr @b
+%_12 = load i32, ptr %i_0
+%arrayidx_0 = getelementptr i8, ptr %_10,i32 %_12
+%frombool_0 = zext i1 true to i8
+store i8 %frombool_0, ptr %arrayidx_0
+br label %for.inc_0
+
+for.inc_0:
+%_16 = load i32, ptr %i_0
+%inc_0 = add i32 %_16, 1
+store i32 %inc_0, ptr %i_0
+br label %for.cond_0
+
+for.end_0:
+store i32 2, ptr %i_0
 br label %for.cond_1
 
 for.cond_1:
-%_32 = load i32, ptr %x_13
-%sub_30 = sub i32 %_32, 1
-%_36 = load i32, ptr %j_16
-%slt_34 = icmp slt i32 %_36, %sub_30
-br i1 %slt_34, label %for.body_1, label %for.end_1
+%_20 = load i32, ptr %i_0
+%_22 = load i32, ptr @N
+%sle_1 = icmp sle i32 %_20, %_22
+br i1 %sle_1, label %for.body_1, label %for.end_1
 
 for.body_1:
-%_41 = load i32, ptr %i_15
-%_43 = load i32, ptr %x_13
-%mul_39 = mul i32 %_41, %_43
-%_47 = load i32, ptr %j_16
-%add_44 = add i32 %mul_39, %_47
-%_49 = load ptr, ptr @a
-%arrayidx_50 = getelementptr i32, ptr %_49,i32 %add_44
-%_54 = load i32, ptr %i_15
-%_56 = load i32, ptr %x_13
-%mul_52 = mul i32 %_54, %_56
-%_60 = load i32, ptr %j_16
-%add_57 = add i32 %mul_52, %_60
-%add_61 = add i32 %add_57, 1
-%_65 = load ptr, ptr @a
-%arrayidx_66 = getelementptr i32, ptr %_65,i32 %add_61
-%_70 = load i32, ptr %arrayidx_50
-%_72 = load i32, ptr %arrayidx_66
-%sgt_68 = icmp sgt i32 %_70, %_72
-br i1 %sgt_68, label %if.then_0, label %if.else_0
+%_25 = load ptr, ptr @b
+%_27 = load i32, ptr %i_0
+%arrayidx_1 = getelementptr i8, ptr %_25,i32 %_27
+br i1 %_85, label %if.then_0, label %if.else_0
 
 if.then_0:
-%frombool_74 = zext i1 true to i8
-store i8 %frombool_74, ptr %flag_28
+store i32 2, ptr %count_0
+%_30 = load i32, ptr %i_0
+%sgt_0 = icmp sgt i32 %_30, 3
+br i1 %sgt_0, label %short.rhs_0, label %short.quick_0
+
+short.rhs_0:
+%_34 = load i32, ptr %i_0
+%sub_0 = sub i32 %_34, 2
+%_37 = load ptr, ptr @b
+%arrayidx_2 = getelementptr i8, ptr %_37,i32 %sub_0
+%_40 = load i8, ptr %arrayidx_2
+store i8 %_40, ptr %short_cond_0
+br label %short.end_0
+
+short.quick_0:
+store i8 0, ptr %short_cond_0
+br label %short.end_0
+
+short.end_0:
+%_42 = load i8, ptr %short_cond_0
+br i1 %_64, label %if.then_1, label %if.else_1
+
+if.then_1:
+%_44 = load i32, ptr @resultCount
+%inc_1 = add i32 %_44, 1
+store i32 %inc_1, ptr @resultCount
+%_49 = load i32, ptr %i_0
+%sub_1 = sub i32 %_49, 2
+%_47 = call ptr @toString(i32 %sub_1)
+%_53 = call ptr @__str_add(ptr %_47, ptr @str.0)
+%_58 = load i32, ptr %i_0
+%_56 = call ptr @toString(i32 %_58)
+%_60 = call ptr @__str_add(ptr %_53, ptr %_56)
+call void @println(ptr %_60)
+br label %if.end_1
+
+if.else_1:
+%_64 = trunc i8 %_42 to i1
+br label %if.end_1
+
+if.end_1:
+br label %while.cond_0
+
+while.cond_0:
+%_66 = load i32, ptr %i_0
+%_68 = load i32, ptr %count_0
+%mul_1 = mul i32 %_66, %_68
+%_71 = load i32, ptr @N
+%sle_2 = icmp sle i32 %mul_1, %_71
+br i1 %sle_2, label %while.body_0, label %while.end_0
+
+while.body_0:
+%_74 = load i32, ptr %i_0
+%_76 = load i32, ptr %count_0
+%mul_2 = mul i32 %_74, %_76
+%_78 = load ptr, ptr @b
+%arrayidx_3 = getelementptr i8, ptr %_78,i32 %mul_2
+%frombool_1 = zext i1 false to i8
+store i8 %frombool_1, ptr %arrayidx_3
+%_83 = load i32, ptr %count_0
+%inc_2 = add i32 %_83, 1
+store i32 %inc_2, ptr %count_0
+br label %while.cond_0
+
+while.end_0:
 br label %if.end_0
 
 if.else_0:
+%_86 = load i8, ptr %arrayidx_1
+%_85 = trunc i8 %_86 to i1
 br label %if.end_0
 
 if.end_0:
 br label %for.inc_1
 
 for.inc_1:
-%_80 = load i32, ptr %j_16
-%inc_78 = add i32 %_80, 1
-store i32 %inc_78, ptr %j_16
+%_88 = load i32, ptr %i_0
+%inc_3 = add i32 %_88, 1
+store i32 %inc_3, ptr %i_0
 br label %for.cond_1
 
 for.end_1:
-%_84 = load i8, ptr %flag_28
-%_83 = trunc i8 %_84 to i1
-%lnot_82 = xor i1 true, %_83
-br i1 %lnot_82, label %if.then_1, label %if.else_1
-
-if.then_1:
-store i32 1, ptr %ret_jud_3
-br label %exit_jud_0
-
-if.else_1:
-br label %if.end_1
-
-if.end_1:
-br label %for.inc_0
-
-for.inc_0:
-%_90 = load i32, ptr %i_15
-%inc_88 = add i32 %_90, 1
-store i32 %inc_88, ptr %i_15
-br label %for.cond_0
-
-for.end_0:
-store i32 0, ptr %ret_jud_3
-br label %exit_jud_0
-
-exit_jud_0:
-%_14 = load i32, ptr %ret_jud_3
-ret i32 %_14
-
-}
-define dso_local i32 @main() {
-
-enter_main_0:
-call void @__cxx_global_var_init()
-%ret_main_5 = alloca i32
-%_94 = call i32 @getInt()
-store i32 %_94, ptr @n
-store i32 0, ptr @i
-br label %for.cond_2
-
-for.cond_2:
-%_99 = load i32, ptr @i
-%_101 = load i32, ptr @n
-%slt_97 = icmp slt i32 %_99, %_101
-br i1 %slt_97, label %for.body_2, label %for.end_2
-
-for.body_2:
-%_104 = load ptr, ptr @a
-%_107 = load i32, ptr @i
-%arrayidx_105 = getelementptr i32, ptr %_104,i32 %_107
-%_108 = call i32 @getInt()
-store i32 %_108, ptr %arrayidx_105
-br label %for.inc_2
-
-for.inc_2:
-%_112 = load i32, ptr @i
-%inc_110 = add i32 %_112, 1
-store i32 %inc_110, ptr @i
-br label %for.cond_2
-
-for.end_2:
-%_115 = load i32, ptr @n
-store i32 %_115, ptr @i
-br label %for.cond_3
-
-for.cond_3:
-%_118 = load i32, ptr @i
-%sgt_116 = icmp sgt i32 %_118, 0
-br i1 %sgt_116, label %for.body_3, label %for.end_3
-
-for.body_3:
-%_123 = load i32, ptr @i
-%_121 = call i32 @jud(i32 %_123)
-%sgt_124 = icmp sgt i32 %_121, 0
-br i1 %sgt_124, label %if.then_2, label %if.else_2
-
-if.then_2:
-%_130 = load i32, ptr @i
-%_128 = call ptr @toString(i32 %_130)
-call void @print(ptr %_128)
-store i32 0, ptr %ret_main_5
-br label %exit_main_0
-
-if.else_2:
-br label %if.end_2
-
-if.end_2:
-br label %for.inc_3
-
-for.inc_3:
-%_137 = load i32, ptr @i
-%sdiv_135 = sdiv i32 %_137, 2
-store i32 %sdiv_135, ptr @i
-br label %for.cond_3
-
-for.end_3:
-store i32 0, ptr %ret_main_5
+%_93 = load i32, ptr @resultCount
+%_91 = call ptr @toString(i32 %_93)
+%_95 = call ptr @__str_add(ptr @str.1, ptr %_91)
+call void @println(ptr %_95)
+store i32 0, ptr %ret_main_0
 br label %exit_main_0
 
 exit_main_0:
-%_93 = load i32, ptr %ret_main_5
-ret i32 %_93
+%_2 = load i32, ptr %ret_main_0
+ret i32 %_2
 
 }
 define dso_local void @__cxx_global_var_init() {
 
 enter___cxx_global_var_init_0:
-%mul_8 = mul i32 20, 4
-%malloc_9 = add i32 %mul_8, 4
-%malloc_ptr_10 = call ptr @__malloc(i32 %malloc_9)
-store i32 20, ptr %malloc_ptr_10
-%array_head_11 = getelementptr i32, ptr %malloc_ptr_10,i32 1
-store ptr %array_head_11, ptr @a
+%mul_0 = mul i32 15001, 1
+%malloc_0 = add i32 %mul_0, 4
+%malloc_ptr_0 = call ptr @__malloc(i32 %malloc_0)
+store i32 15001, ptr %malloc_ptr_0
+%array_head_0 = getelementptr i32, ptr %malloc_ptr_0,i32 1
+store ptr %array_head_0, ptr @b
 br label %exit___cxx_global_var_init_0
 
 exit___cxx_global_var_init_0:

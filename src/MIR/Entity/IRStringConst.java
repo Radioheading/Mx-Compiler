@@ -4,8 +4,6 @@ import MIR.type.IRBaseType;
 import MIR.type.IRIntType;
 import MIR.type.IRPtrType;
 
-// todo: what do we need in ptr?
-
 public class IRStringConst extends IRConst {
     public String value;
     public int id;
@@ -23,6 +21,6 @@ public class IRStringConst extends IRConst {
     }
 
     public String toIR() {
-        return value.replace("\n", "\\0A").replace("\"", "\\22").replace("\\", "\\\\") + "\\00";
+        return value.replace("\\", "\\\\").replace("\n", "\\0A").replace("\"", "\\22") + "\\00";
     }
 }

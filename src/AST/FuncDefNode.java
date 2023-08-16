@@ -9,7 +9,7 @@ public class FuncDefNode extends ASTNode {
     public String funcName;
     public ParameterListNode parameterList = new ParameterListNode(null);
     public SuiteNode suite;
-    public String className;
+    public String className = null;
 
     public Function IRFunc;
 

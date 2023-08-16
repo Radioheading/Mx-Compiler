@@ -32,7 +32,7 @@ public class Function {
     public void addAllocate() {
         if (init.isEmpty()) return;
         for (int i = 0; i < init.size(); ++i) {
-            System.out.println(init.get(i));
+            // System.out.println(init.get(i));
             enterBlock.stmts.addFirst(init.get(i));
         }
     }

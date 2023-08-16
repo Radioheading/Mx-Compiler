@@ -124,7 +124,7 @@ public class ASTBuilder extends MxParserBaseVisitor<ASTNode> {
         for (var assign : ctx.varDefAssign()) {
             // System.out.println(assign.Identifier().getText());
             // System.out.println(ctx.typeName().getText());
-            System.out.println("$reach: " + assign.Identifier().getText());
+            // System.out.println("$reach: " + assign.Identifier().getText());
             if (assign.expr() == null) {
                 varDefNode.varAssigns.add(new VarDefAssignNode(new position(ctx), assign.Identifier().getText(), (TypeNameNode) visit(ctx.typeName()), null));
             } else {

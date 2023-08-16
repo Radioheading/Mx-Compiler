@@ -19,7 +19,7 @@ import java.io.PrintStream;
 
 public class Compiler {
     public static void main(String[] args) throws Exception {
-        String name = "src/easy-test/e2.mx";
+        String name = "testcases/codegen/t60.mx";
         InputStream input = new FileInputStream(name);
 //       CharStream input = CharStreams.fromStream(System.in);
         try {

@@ -5,3 +5,7 @@ MxCompiler.iml
 MxCompiler.jar
 .idea/
 gen/
+code
+res.out
+output.ll
+out/

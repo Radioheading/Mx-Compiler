@@ -29,7 +29,6 @@ public class SemanticChecker implements ASTVisitor {
         nowScope = new Scope(nowScope);
         nowScope.fatherClass = it;
         it.varList.forEach(sd -> sd.accept(this));
-        // scan the variables first to fit all the functions(including init)
         if (it.classInit != null && it.classInit.name != null) {
             // System.out.println("className: " + it.className);
             // System.out.println("InitName: " + it.classInit.name);
@@ -94,7 +93,7 @@ public class SemanticChecker implements ASTVisitor {
 
     @Override
     public void visit(VarDefAssignNode it) {
-        System.out.println("&scanning name : " + it.varName);
+        // System.out.println("&scanning name : " + it.varName);
         it.typeName.accept(this);
         if (it.initValue != null) {
             it.initValue.accept(this);
@@ -250,7 +249,7 @@ public class SemanticChecker implements ASTVisitor {
 
     @Override
     public void visit(BaseExprNode it) {
-        System.out.println(it.str);
+        // System.out.println(it.str);
         if (!it.isIdentifier) {
             if (it.str.matches("\".*\"")) {
                 it.type = new TypeNameNode(it.pos, myBuiltin.StringType);
@@ -268,7 +267,7 @@ public class SemanticChecker implements ASTVisitor {
                 it.type = new TypeNameNode(it.pos, myBuiltin.IntType);
             }
         } else {
-            System.out.println("Finding: " + it.str);
+            // System.out.println("Finding: " + it.str);
             if (nowScope.containsVariable(it.str, true)) {
                 it.type = new TypeNameNode(it.pos, nowScope.getVarType(it.str, true));
                 // System.out.println("I got: " + it.type.type.name);
@@ -278,7 +277,7 @@ public class SemanticChecker implements ASTVisitor {
             } else {
                 if (gScope.funcMember.containsKey(it.str)) {
                     it.funcDefGuess = gScope.getFuncNode(it.str, it.pos);
-                    System.out.println("got' ya");
+                    // System.out.println("got' ya");
                 }
             }
         }
@@ -379,12 +378,12 @@ public class SemanticChecker implements ASTVisitor {
             if (it.funcName.funcDefGuess.parameterList == null || it.parameter == null
                     || it.funcName.funcDefGuess.parameterList.parameters.size() != it.parameter.parameters.size()) {
                 if (it.funcName.funcDefGuess.parameterList == null) {
-                    System.out.println("Shit 1");
+                    // System.out.println("Shit 1");
                 }
                 if (it.parameter == null) {
-                    System.out.println("Shit 2");
+                    // System.out.println("Shit 2");
                 }
-                System.out.println(it.funcName.funcDefGuess.parameterList.parameters.size() + "+" + it.parameter.parameters);
+                // System.out.println(it.funcName.funcDefGuess.parameterList.parameters.size() + "+" + it.parameter.parameters);
                 throw new semanticError("Function Parameter Number Mismatch", it.pos);
             }
             for (int i = 0; i < it.parameter.parameters.size(); ++i) {

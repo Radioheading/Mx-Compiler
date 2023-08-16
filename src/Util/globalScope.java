@@ -44,7 +44,7 @@ public class globalScope extends Scope {
         funcMember.put(name, t);
     }
     public FuncDefNode getFuncNode(String name, position pos) {
-        System.out.println("getting " + name);
+        // System.out.println("getting " + name);
         if (funcMember.containsKey(name)) return funcMember.get(name);
         throw new semanticError("no such function type: " + name, pos);
     }

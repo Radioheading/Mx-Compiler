@@ -1,5 +1,5 @@
+string s = "abs";
 int main() {
-    bool a = true, b = false;
-    bool c = a && b;
-    return 0;
+
+	return 0;
 }
