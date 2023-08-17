@@ -37,12 +37,6 @@ public class Scope {
         this.parentScope = parentScope;
     }
 
-    public void defineVariable(String name, Type t, position pos) {
-        if (varMember.containsKey(name))
-            throw new semanticError("Semantic Error: variable redefine", pos);
-        varMember.put(name, t);
-    }
-
     public boolean containsVariable(String name, boolean lookUpon) {
         // System.out.println("new Scope");
         for (var variable : varMember.keySet()) {

@@ -13,6 +13,7 @@ import Util.BuiltinElements;
 import Util.Scope;
 import Util.globalScope;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
@@ -148,9 +149,7 @@ public class IRBuilder implements ASTVisitor {
 
     private IRBaseType TypeToReturnType(TypeNameNode type) {
         var IRType = TypeToIRType(type);
-        if (IRType instanceof IRPtrType && ((IRPtrType)IRType).baseType instanceof IRStructType) {
-            return new IRPtrType(IRType, 0, false);
-        } else if (Objects.equals(type.type.name, "string")) {
+        if (IRType instanceof IRPtrType) {
             return new IRPtrType(IRType, 0, false);
         } else {
             return IRType;
@@ -228,12 +227,11 @@ public class IRBuilder implements ASTVisitor {
             if (func.parameterList != null) {
                 func.parameterList.parameters.forEach(sd -> IRFunc.parameterIn.add(new IRRegister(sd.varName, TypeToIRType(sd.typeName))));
             }
-
-            IRFunc.name = classDef.className + "__" + func.funcName;
+            IRFunc.name = classDef.className + "." + func.funcName;
             myProgram.functions.add(IRFunc);
-            // System.out.println("class: " + classDef.className + " func: " + func.funcName);
+            // System.out.println("memberName: " + IRFunc.name);
             nowScope = nowScope.parentScope;
-            nowScope.IRFunctions.put(classDef.className + "__" + func.funcName, IRFunc);
+            nowScope.IRFunctions.put(classDef.className + "." + func.funcName, IRFunc);
             nowFunc = null;
             nowBlock = null;
         }
@@ -324,12 +322,11 @@ public class IRBuilder implements ASTVisitor {
         nowScope = new Scope(nowScope);
         nowScope.fatherIRClass = StructInfoMap.get(it.className);
         nowClass = nowScope.fatherIRClass;
-//        for (var varDef : it.varList) {
-//            varDef.accept(this);
-//        }
         for (var funcDef : it.funcList) {
             funcDef.className = it.className;
-            funcDef.funcName = it.className + "__" + funcDef.funcName;
+            funcDef.funcName = it.className + "." + funcDef.funcName;
+        }
+        for (var funcDef : it.funcList) {
             funcDef.accept(this);
         }
         if (it.classInit != null && it.classInit.stmts != null) {
@@ -343,7 +340,7 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(ClassInitNode it) {
         var constructor = new Function(it.name, new IRVoidType());
-        constructor.name = it.name + "__" + it.name;
+        constructor.name = it.name + "." + it.name;
         // System.out.println("constructor: " + it.name);
         myProgram.functions.add(constructor);
         // System.out.println(constructor);
@@ -407,6 +404,7 @@ public class IRBuilder implements ASTVisitor {
         it.IRFunc.addAllocate();
         if (Objects.equals(it.funcName, "main")) { // void init()
             it.IRFunc.enterBlock.stmts.addFirst(new IRCall(null, "__cxx_global_var_init", nowBlock, null));
+            it.IRFunc.enterBlock.stmts.addFirst(new IRStore(nowBlock, intZero, it.IRFunc.retReg));
         }
         nowScope = nowScope.parentScope;
     }
@@ -940,9 +938,16 @@ public class IRBuilder implements ASTVisitor {
             // case 1: calling a member function like a.foo()
             if (it.funcName instanceof MemberExprNode memberExpr) {
                 call.arguments.add(getValue(memberExpr.object, false, nowBlock));
+                // System.out.println(nowFunc.name);
+                if (!func.funcName.matches(".*\\..*")) {
+                    call.name = func.className + "." + func.funcName;
+                }
+                // System.out.println("$guess: " + func.funcName);
             } else { // case 2: calling a member function within the class
                 // load this first
                 IRRegister thisPtr = nowFunc.thisPtr;
+                // System.out.println(nowFunc.name);
+                // System.out.println("guess: " + func.funcName);
                 IRRegister newThis = new IRRegister("this", (thisPtr.type).Type());
                 nowBlock.push_back(new IRLoad(nowBlock, thisPtr.type, newThis, thisPtr));
                 call.arguments.add(newThis);
@@ -1010,7 +1015,7 @@ public class IRBuilder implements ASTVisitor {
             callInst.arguments.add(new IRIntConst(classType.all_size));
             nowBlock.push_back(callInst);
             if (classType.hasConstruct) {
-                var callConstruct = new IRCall(null, classType.name + "__" + classType.name, nowBlock, voidType);
+                var callConstruct = new IRCall(null, classType.name + "." + classType.name, nowBlock, voidType);
                 callConstruct.arguments.add(it.entity);
                 nowBlock.push_back(callConstruct);
             }
@@ -1046,13 +1051,15 @@ public class IRBuilder implements ASTVisitor {
         it.condition.accept(this);
 
         var res = TypeToIRPtr(it.type);
+        // System.out.println(res.dim);
         IRRegister alloc = new IRRegister("res", res);
-        nowScope.entities.put("res", alloc); // 变量名对应寄存器
-        // System.out.println("*" + res.baseType);
-        IRAlloca order = new IRAlloca(nowBlock, res.baseType, alloc);
-        // System.out.println(order.regDest);
-        nowFunc.init.add(order); // 加入开头的allocation
-
+        if (!res.baseType.isEqual(voidType)) {
+            nowScope.entities.put("res", alloc); // 变量名对应寄存器
+            // System.out.println("*" + res.baseType);
+            IRAlloca order = new IRAlloca(nowBlock, res.baseType, alloc);
+            // System.out.println(order.regDest);
+            nowFunc.init.add(order); // 加入开头的allocation
+        }
         BasicBlock thenBranch = new BasicBlock("if.then");
         BasicBlock elseBranch = new BasicBlock("if.else");
         BasicBlock endStmt = new BasicBlock("if.end");
@@ -1064,8 +1071,9 @@ public class IRBuilder implements ASTVisitor {
         nowScope = new Scope(nowScope);
         // System.out.println("$");
         it.jump_1.accept(this);
-        nowBlock.push_back(new IRStore(nowBlock, it.jump_1.entity, alloc));
-
+        if (!res.baseType.isEqual(voidType)) {
+            nowBlock.push_back(new IRStore(nowBlock, it.jump_1.entity, alloc));
+        }
         nowScope = nowScope.parentScope;
         nowBlock.terminal = new IRJump(nowBlock, endStmt);
         nowBlock.hasReturned = true;
@@ -1074,8 +1082,9 @@ public class IRBuilder implements ASTVisitor {
         nowScope = new Scope(nowScope);
 
         it.jump_2.accept(this);
-        nowBlock.push_back(new IRStore(nowBlock, it.jump_2.entity, alloc));
-
+        if (!res.baseType.isEqual(voidType)) {
+            nowBlock.push_back(new IRStore(nowBlock, it.jump_2.entity, alloc));
+        }
         nowScope = nowScope.parentScope;
         nowBlock.terminal = new IRJump(nowBlock, endStmt);
         nowBlock.hasReturned = true;
@@ -1083,7 +1092,11 @@ public class IRBuilder implements ASTVisitor {
         prev.hasReturned = true;
         nowFunc.blockList.add(endStmt);
         nowBlock = endStmt;
-        it.address = alloc;
+
+        if (!res.baseType.isEqual(voidType)) {
+            it.entity = new IRRegister("", res.Type());
+            nowBlock.push_back(new IRLoad(nowBlock, res, (IRRegister) it.entity, alloc));
+        }
     }
 
     @Override
