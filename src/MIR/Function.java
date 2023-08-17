@@ -20,6 +20,8 @@ public class Function {
     public BasicBlock exitBlock, enterBlock;
     public IRRegister retReg;
 
+    public IRRegister thisPtr;
+
     public Function(String _name, IRBaseType _retType) {
         this.name = _name;
         this.retType = _retType;

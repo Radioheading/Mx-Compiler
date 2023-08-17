@@ -19,14 +19,14 @@ import java.io.PrintStream;
 
 public class Compiler {
     public static void main(String[] args) throws Exception {
-        String name = "testcases/codegen/t60.mx";
-        InputStream input = new FileInputStream(name);
-//       CharStream input = CharStreams.fromStream(System.in);
+//        String name = "testcases/codegen/t4.mx";
+//        InputStream input = new FileInputStream(name);
+        CharStream input = CharStreams.fromStream(System.in);
         try {
             RootNode ASTRoot;
             globalScope gScope = new globalScope(null);
-            MxLexer lexer = new MxLexer(CharStreams.fromStream(input));
-//            MxLexer lexer = new MxLexer(input);
+//            MxLexer lexer = new MxLexer(CharStreams.fromStream(input));
+            MxLexer lexer = new MxLexer(input);
             lexer.removeErrorListeners();
             lexer.addErrorListener(new MxErrorListener());
             MxParser parser = new MxParser(new CommonTokenStream(lexer));
@@ -40,8 +40,8 @@ public class Compiler {
             new SemanticChecker(gScope).visit(ASTRoot);
             IRBuilder irBuilder = new IRBuilder(gScope);
             irBuilder.visit(ASTRoot);
-            PrintStream output = new PrintStream("output.ll");
-            System.setOut(output);
+//            PrintStream output = new PrintStream("output.ll");
+//            System.setOut(output);
             System.out.println(irBuilder.myProgram);
         } catch (error er) {
             System.err.println(er.toString());

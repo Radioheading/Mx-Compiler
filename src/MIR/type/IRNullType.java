@@ -9,7 +9,7 @@ public class IRNullType extends IRBaseType {
 
     @Override
     public String toString() {
-        return "null";
+        return "ptr";
     }
 
     @Override

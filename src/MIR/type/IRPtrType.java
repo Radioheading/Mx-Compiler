@@ -25,7 +25,7 @@ public class IRPtrType extends IRBaseType {
 
     @Override
     public IRBaseType Type() { // can either be pointer or pointer to pointer
-        if (dim == 0) return baseType;
+        if (dim <= 0) return baseType;
         return new IRPtrType(baseType, dim - 1, local);
     }
 }
