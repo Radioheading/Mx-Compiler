@@ -16,9 +16,7 @@ public class IRFuncDeclare {
         funcName = _funcName;
         retType = _type;
         if (paramType != null) {
-            for (var i : paramType) {
-                parameters.add(i);
-            }
+            parameters.addAll(Arrays.asList(paramType));
         }
     }
 

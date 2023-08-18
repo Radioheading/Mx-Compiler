@@ -18,7 +18,6 @@ public class IRRegister extends entity {
             id = 0;
             WordCnt.put(_name, 1);
         }
-//        System.out.println("*new register: " + name + "_" + id);
     }
 
     @Override

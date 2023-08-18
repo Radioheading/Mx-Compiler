@@ -16,7 +16,6 @@ public class IRStore extends IRBaseInst {
         this.value = _value;
         this.dest = _dest;
         if (value == null) {
-//            System.out.println("Let's keep pushing");
             this.value = new IRNullConst();
         }
     }

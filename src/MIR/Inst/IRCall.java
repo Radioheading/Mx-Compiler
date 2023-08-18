@@ -24,7 +24,7 @@ public class IRCall extends IRBaseInst {
 
     @Override
     public String toString() {
-        String ret = "";
+        String ret;
         if (resultType == null || resultType instanceof IRVoidType) {
             ret = "call void @" + name + "(";
         } else {

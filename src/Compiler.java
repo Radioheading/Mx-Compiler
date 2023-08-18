@@ -1,5 +1,5 @@
 import AST.RootNode;
-import Backend.IRBuilder;
+import Frontend.IRBuilder;
 import Frontend.ASTBuilder;
 import Frontend.SemanticChecker;
 import Frontend.SymbolCollector;

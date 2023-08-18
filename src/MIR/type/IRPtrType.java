@@ -19,7 +19,6 @@ public class IRPtrType extends IRBaseType {
 
     @Override
     public boolean isEqual(IRBaseType other) {
-        // todo
         return false;
     }
 

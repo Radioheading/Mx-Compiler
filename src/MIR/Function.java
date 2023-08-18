@@ -40,7 +40,7 @@ public class Function {
     }
 
     public String toString() {
-        String ret = "define dso_local " + retType + " @" + name + "(";
+        String ret = "define dso_local " + retType.Type() + " @" + name + "(";
         for (int i = 0; i < parameterIn.size() - 1; ++i) {
             var para = parameterIn.get(i);
             ret += para.type + " " + para + ",";

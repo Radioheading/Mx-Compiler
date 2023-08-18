@@ -31,11 +31,7 @@ public class BasicBlock {
 
     public void push_back(IRBaseInst stmt) {
         if (!hasReturned) {
-//            System.out.println(stmt);
             stmts.add(stmt);
-        } else {
-//            System.out.println(label + id);
-//            System.out.println("has already finished");
         }
     }
 
