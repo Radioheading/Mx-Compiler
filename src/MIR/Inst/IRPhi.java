@@ -4,6 +4,7 @@ package MIR.Inst;
 import MIR.BasicBlock;
 import MIR.Entity.IRRegister;
 import MIR.Entity.entity;
+import MIR.IRVisitor;
 import MIR.type.IRBaseType;
 
 import java.util.ArrayList;
@@ -21,5 +22,10 @@ public class IRPhi extends IRBaseInst {
     @Override
     public String toString() {
         return null;
+    }
+
+    @Override
+    public void accept(IRVisitor visitor) {
+        visitor.visit(this);
     }
 }

@@ -4,6 +4,7 @@ import MIR.BasicBlock;
 import MIR.Entity.IRNullConst;
 import MIR.Entity.IRRegister;
 import MIR.Entity.entity;
+import MIR.IRVisitor;
 import MIR.type.IRNullType;
 import MIR.type.IRPtrType;
 
@@ -23,5 +24,10 @@ public class IRStore extends IRBaseInst {
     @Override
     public String toString() {
         return "store " + value.type + " " + value + ", ptr " + dest;
+    }
+
+    @Override
+    public void accept(IRVisitor visitor) {
+        visitor.visit(this);
     }
 }

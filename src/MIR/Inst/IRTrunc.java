@@ -3,6 +3,7 @@ package MIR.Inst;
 import MIR.BasicBlock;
 import MIR.Entity.IRRegister;
 import MIR.Entity.entity;
+import MIR.IRVisitor;
 import MIR.Inst.IRBaseInst;
 import MIR.type.IRBaseType;
 
@@ -21,5 +22,10 @@ public class IRTrunc extends IRBaseInst {
     @Override
     public String toString() {
         return dest + " = trunc " + value.type + " " + value + " to " + destType;
+    }
+
+    @Override
+    public void accept(IRVisitor visitor) {
+        visitor.visit(this);
     }
 }

@@ -1,5 +1,6 @@
 package ASM.Instruction;
 
+import ASM.ASMVisitor;
 import ASM.Operand.*;
 
 public class ITypeInst extends BaseInst {
@@ -16,6 +17,11 @@ public class ITypeInst extends BaseInst {
 
     @Override
     public String toString() {
-        return op + "i " + rd + ", " + rs1 + ", " + imm;
+        return op + '\t' + rd + ", " + rs1 + ", " + imm;
+    }
+
+    @Override
+    public void accept(ASMVisitor visitor) {
+        visitor.visit(this);
     }
 }

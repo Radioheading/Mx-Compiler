@@ -1,5 +1,6 @@
 package ASM.Instruction;
 
+import ASM.ASMVisitor;
 import ASM.Operand.*;
 
 public class MoveInst extends BaseInst {
@@ -13,6 +14,11 @@ public class MoveInst extends BaseInst {
 
     @Override
     public String toString() {
-        return "mv " + dest + ", " + src;
+        return "mv\t" + dest + ", " + src;
+    }
+
+    @Override
+    public void accept(ASMVisitor visitor) {
+        visitor.visit(this);
     }
 }

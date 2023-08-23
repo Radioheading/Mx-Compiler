@@ -1,5 +1,7 @@
 package MIR;
 
+import ASM.Operand.VReg;
+import Backend.InstSelector;
 import MIR.Entity.IRRegister;
 import MIR.Entity.entity;
 import MIR.Inst.IRAlloca;
@@ -56,5 +58,9 @@ public class Function {
         }
         ret += exitBlock + "\n}";
         return ret;
+    }
+
+    public void accept(IRVisitor visitor) {
+        visitor.visit(this);
     }
 }

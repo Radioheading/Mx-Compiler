@@ -1,22 +1,27 @@
 package ASM.Instruction;
 
+import ASM.ASMVisitor;
 import ASM.Compound.ASMBlock;
 import ASM.Operand.*;
 
 public class BTypeInst extends BaseInst {
     public String op;
-    public Reg rs1, rs2;
+    public Reg rs;
     public ASMBlock to;
 
-    public BTypeInst(String _op, Reg _rs1, Reg _rs2, ASMBlock _to) {
+    public BTypeInst(String _op, Reg _rs, ASMBlock _to) {
         op = _op;
-        rs1 = _rs1;
-        rs2 = _rs2;
+        rs = _rs;
         to = _to;
     }
 
     @Override
     public String toString() {
-        return "b" + op + " " + rs1 + ", " + rs2 + ", " + to;
+        return op + "\t" + rs + ", " + to.name;
+    }
+
+    @Override
+    public void accept(ASMVisitor visitor) {
+        visitor.visit(this);
     }
 }

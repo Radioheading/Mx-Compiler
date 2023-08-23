@@ -13,11 +13,12 @@ public interface IRVisitor {
     void visit(IRJump inst);
     void visit(IRLoad inst);
     void visit(IRIcmp inst);
-    void visit(IRFuncDeclare inst);
     void visit(IRGetElementPtr inst);
     void visit(IRRet inst);
     void visit(IRPhi inst);
     void visit(IRStore inst);
+
     void visit(IRTrunc inst);
+
     void visit(IRZext inst);
 }

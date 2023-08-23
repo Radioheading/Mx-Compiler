@@ -1,5 +1,6 @@
 package ASM.Instruction;
 
+import ASM.ASMVisitor;
 import ASM.Operand.*;
 
 import java.util.ArrayList;
@@ -14,6 +15,11 @@ public class CallInst extends BaseInst {
 
     @Override
     public String toString() {
-        return "call " + funcName;
+        return "call\t" + funcName;
+    }
+
+    @Override
+    public void accept(ASMVisitor visitor) {
+        visitor.visit(this);
     }
 }

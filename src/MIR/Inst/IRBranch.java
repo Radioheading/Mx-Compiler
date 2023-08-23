@@ -2,6 +2,7 @@ package MIR.Inst;
 
 import MIR.BasicBlock;
 import MIR.Entity.entity;
+import MIR.IRVisitor;
 
 public class IRBranch extends IRBaseInst {
     public entity condition;
@@ -18,5 +19,10 @@ public class IRBranch extends IRBaseInst {
     @Override
     public String toString() {
         return "br i1 " + condition + ", label %" + thenBranch.label + "_" + thenBranch.id + ", label %" + elseBranch.label + "_" + elseBranch.id;
+    }
+
+    @Override
+    public void accept(IRVisitor visitor) {
+        visitor.visit(this);
     }
 }

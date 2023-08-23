@@ -1,5 +1,6 @@
 package MIR;
 
+import Backend.InstSelector;
 import Util.error.internalError;
 import Util.position;
 
@@ -44,5 +45,9 @@ public class BasicBlock {
             ret = ret + terminal + "\n";
         }
         return ret;
+    }
+
+    public void accept(IRVisitor visitor) {
+        visitor.visit(this);
     }
 }

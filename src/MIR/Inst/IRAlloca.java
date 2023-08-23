@@ -2,6 +2,7 @@ package MIR.Inst;
 
 import MIR.BasicBlock;
 import MIR.Entity.IRRegister;
+import MIR.IRVisitor;
 import MIR.type.IRBaseType;
 import MIR.type.IRPtrType;
 
@@ -24,5 +25,10 @@ public class IRAlloca extends IRBaseInst {
     @Override
     public String toString() {
         return regDest + " = alloca " + type.Type();
+    }
+
+    @Override
+    public void accept(IRVisitor visitor) {
+        visitor.visit(this);
     }
 }

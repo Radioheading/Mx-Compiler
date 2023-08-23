@@ -5,6 +5,7 @@ package MIR.Inst;
 import MIR.BasicBlock;
 import MIR.Entity.IRRegister;
 import MIR.Entity.entity;
+import MIR.IRVisitor;
 import MIR.type.IRBaseType;
 
 import java.util.ArrayList;
@@ -30,5 +31,10 @@ public class IRGetElementPtr extends IRBaseInst {
             ret += "," + index.type + " " + index;
         }
         return ret;
+    }
+
+    @Override
+    public void accept(IRVisitor visitor) {
+        visitor.visit(this);
     }
 }

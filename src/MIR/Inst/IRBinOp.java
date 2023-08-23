@@ -5,6 +5,7 @@ package MIR.Inst;
 import MIR.BasicBlock;
 import MIR.Entity.IRRegister;
 import MIR.Entity.entity;
+import MIR.IRVisitor;
 import MIR.type.IRBaseType;
 
 import java.util.ArrayList;
@@ -27,5 +28,10 @@ public class IRBinOp extends IRBaseInst {
     @Override
     public String toString() {
         return dest + " = " + op + " " + type + " " + op1 + ", " + op2;
+    }
+
+    @Override
+    public void accept(IRVisitor visitor) {
+        visitor.visit(this);
     }
 }

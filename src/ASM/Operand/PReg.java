@@ -10,6 +10,6 @@ public class PReg extends Reg {
 
     @Override
     public String toString() {
-        return "%" + id;
+        return "%" + name;
     }
 }

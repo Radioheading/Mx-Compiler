@@ -2,6 +2,7 @@ package MIR.Inst;
 
 import MIR.BasicBlock;
 import MIR.Entity.entity;
+import MIR.IRVisitor;
 
 public class IRRet extends IRBaseInst {
     public entity returnValue;
@@ -18,5 +19,10 @@ public class IRRet extends IRBaseInst {
         } else {
             return "ret " + returnValue.type + " " + returnValue;
         }
+    }
+
+    @Override
+    public void accept(IRVisitor visitor) {
+        visitor.visit(this);
     }
 }

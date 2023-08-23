@@ -1,5 +1,5 @@
-string s = "abs";
 int main() {
-
+	bool [] a = new bool[10];
+	a[0] = true;
 	return 0;
 }

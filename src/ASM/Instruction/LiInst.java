@@ -3,10 +3,18 @@ package ASM.Instruction;
 import ASM.ASMVisitor;
 import ASM.Operand.*;
 
-public class RetInst extends BaseInst {
+public class LiInst extends BaseInst {
+    public Reg rd;
+    public Imm imm;
+
+    public LiInst(Reg _rd, Imm _imm) {
+        rd = _rd;
+        imm = _imm;
+    }
+
     @Override
     public String toString() {
-        return "ret";
+        return "li\t" + rd + ", " + imm;
     }
 
     @Override

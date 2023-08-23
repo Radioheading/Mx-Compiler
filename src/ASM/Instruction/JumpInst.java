@@ -1,5 +1,6 @@
 package ASM.Instruction;
 
+import ASM.ASMVisitor;
 import ASM.Compound.ASMBlock;
 import ASM.Operand.*;
 
@@ -12,6 +13,11 @@ public class JumpInst extends BaseInst {
 
     @Override
     public String toString() {
-        return "j " + to;
+        return "j\t" + to.name;
+    }
+
+    @Override
+    public void accept(ASMVisitor visitor) {
+        visitor.visit(this);
     }
 }

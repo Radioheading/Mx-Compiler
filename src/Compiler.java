@@ -1,4 +1,7 @@
+import ASM.Compound.ASMProgram;
 import AST.RootNode;
+import Backend.InstSelector;
+import Backend.RegAlloc;
 import Frontend.IRBuilder;
 import Frontend.ASTBuilder;
 import Frontend.SemanticChecker;
@@ -19,14 +22,14 @@ import java.io.PrintStream;
 
 public class Compiler {
     public static void main(String[] args) throws Exception {
-//        String name = "testcases/codegen/t4.mx";
-//        InputStream input = new FileInputStream(name);
-        CharStream input = CharStreams.fromStream(System.in);
+        String name = "testcases/codegen/e1.mx";
+        InputStream input = new FileInputStream(name);
+//       CharStream input = CharStreams.fromStream(System.in);
         try {
             RootNode ASTRoot;
             globalScope gScope = new globalScope(null);
-//            MxLexer lexer = new MxLexer(CharStreams.fromStream(input));
-            MxLexer lexer = new MxLexer(input);
+            MxLexer lexer = new MxLexer(CharStreams.fromStream(input));
+//            MxLexer lexer = new MxLexer(input);
             lexer.removeErrorListeners();
             lexer.addErrorListener(new MxErrorListener());
             MxParser parser = new MxParser(new CommonTokenStream(lexer));
@@ -42,7 +45,15 @@ public class Compiler {
             irBuilder.visit(ASTRoot);
 //            PrintStream output = new PrintStream("output.ll");
 //            System.setOut(output);
-            System.out.println(irBuilder.myProgram);
+//            System.out.println(irBuilder.myProgram);
+
+            ASMProgram asmProgram = new ASMProgram();
+            new InstSelector(asmProgram).visit(irBuilder.myProgram);
+            new RegAlloc().visit(asmProgram);
+
+            PrintStream asmOutput = new PrintStream("output.s");
+            System.setOut(asmOutput);
+            System.out.println(asmProgram);
         } catch (error er) {
             System.err.println(er.toString());
             throw new RuntimeException();

@@ -3,6 +3,7 @@ package MIR.Inst;
 import MIR.BasicBlock;
 import MIR.Entity.IRRegister;
 import MIR.Entity.entity;
+import MIR.IRVisitor;
 import MIR.type.IRBaseType;
 import MIR.type.IRVoidType;
 
@@ -12,7 +13,6 @@ public class IRCall extends IRBaseInst {
     public String name;
     public IRRegister dest;
     public IRBaseType resultType;
-    // todo: IRFunc, toString
     public ArrayList<entity> arguments = new ArrayList<>();
 
     public IRCall(IRRegister _dest, String _name, BasicBlock _parent, IRBaseType _res) {
@@ -39,5 +39,10 @@ public class IRCall extends IRBaseInst {
             ret += ")";
         }
         return ret;
+    }
+
+    @Override
+    public void accept(IRVisitor visitor) {
+        visitor.visit(this);
     }
 }
