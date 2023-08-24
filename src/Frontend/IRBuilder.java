@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Objects;
 
 public class IRBuilder implements ASTVisitor {
+    private boolean hasInit = false;
     private final BuiltinElements myBuiltin = new BuiltinElements();
     private Scope nowScope;
     private final globalScope gScope;
@@ -364,11 +365,13 @@ public class IRBuilder implements ASTVisitor {
         if (!nowBlock.hasReturned) { // jump to the return block;
             nowBlock.push_back(new IRJump(nowBlock, nowFunc.exitBlock));
         }
-        it.IRFunc.addAllocate();
         if (Objects.equals(it.funcName, "main")) { // void init()
-            it.IRFunc.enterBlock.stmts.addFirst(new IRCall(null, "__mx_global_var_init", nowBlock, null));
+            if (hasInit) {
+                it.IRFunc.enterBlock.stmts.addFirst(new IRCall(null, "__mx_global_var_init", nowBlock, null));
+            }
             it.IRFunc.enterBlock.stmts.addFirst(new IRStore(nowBlock, intZero, it.IRFunc.retReg));
         }
+        it.IRFunc.addAllocate();
         nowScope = nowScope.parentScope;
     }
 
@@ -393,6 +396,7 @@ public class IRBuilder implements ASTVisitor {
                 }
             }
             if (def instanceof VarDefNode) {
+                hasInit = true;
                 VarDeclare(((VarDefNode) def));
             }
         }
@@ -418,7 +422,9 @@ public class IRBuilder implements ASTVisitor {
         nowBlock = nowFunc.exitBlock;
         nowBlock.push_back(new IRRet(nowBlock, null));
         nowFunc.addAllocate();
-        myProgram.functions.add(nowFunc);
+        if (hasInit) {
+            myProgram.functions.add(nowFunc);
+        }
         nowBlock = null;
         nowFunc = null;
         for (var def : it.Defs) {

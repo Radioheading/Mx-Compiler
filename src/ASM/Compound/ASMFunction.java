@@ -26,7 +26,7 @@ public class ASMFunction {
 
     @Override
     public String toString() {
-        String ret = ".text\n\t.globl\n" + name + ":\n";
+        String ret = "\t.text\n\t.globl\t" + name + "\n" + name + ":\n";
         for (var block : blocks) {
             ret += block + "\n";
         }
@@ -48,7 +48,7 @@ public class ASMFunction {
     }
 
     public void addAlloc(VReg reg) {
-        placeMap.put(reg, paramUsage + allocaUsage);
+//         placeMap.put(reg, paramUsage + allocaUsage);
         allocaUsage += reg.size;
     }
 }

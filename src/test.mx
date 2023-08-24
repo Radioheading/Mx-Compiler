@@ -1,5 +1,5 @@
 int main() {
-	bool [] a = new bool[10];
-	a[0] = true;
+	int a = 0, b = 1;
+	printInt(a + b);
 	return 0;
 }

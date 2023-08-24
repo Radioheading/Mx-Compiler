@@ -9,7 +9,7 @@ public class GlobalString extends GlobalValue {
     }
 
     public String toString() {
-        return name + ":\n"  + '\t' + '\"' + value.replace("\\", "\\\\")
+        return name + ":\n"  + ".asciz\t" + '\"' + value.replace("\\", "\\\\")
                                                             .replace("\"", "\\\"")
                                                             .replace("\n", "\\\n")
                                                             .replace("\0", "") + "\"";

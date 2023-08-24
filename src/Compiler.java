@@ -22,9 +22,9 @@ import java.io.PrintStream;
 
 public class Compiler {
     public static void main(String[] args) throws Exception {
-        String name = "testcases/codegen/e1.mx";
+        String name = "input.mx";
         InputStream input = new FileInputStream(name);
-//       CharStream input = CharStreams.fromStream(System.in);
+        // CharStream input = CharStreams.fromStream(System.in);
         try {
             RootNode ASTRoot;
             globalScope gScope = new globalScope(null);
@@ -43,16 +43,14 @@ public class Compiler {
             new SemanticChecker(gScope).visit(ASTRoot);
             IRBuilder irBuilder = new IRBuilder(gScope);
             irBuilder.visit(ASTRoot);
-//            PrintStream output = new PrintStream("output.ll");
-//            System.setOut(output);
-//            System.out.println(irBuilder.myProgram);
-
+            PrintStream output = new PrintStream("output.ll");
+            System.setOut(output);
+            System.out.println(irBuilder.myProgram);
+            PrintStream output_1 = new PrintStream("output.s");
+            System.setOut(output_1);
             ASMProgram asmProgram = new ASMProgram();
             new InstSelector(asmProgram).visit(irBuilder.myProgram);
             new RegAlloc().visit(asmProgram);
-
-            PrintStream asmOutput = new PrintStream("output.s");
-            System.setOut(asmOutput);
             System.out.println(asmProgram);
         } catch (error er) {
             System.err.println(er.toString());

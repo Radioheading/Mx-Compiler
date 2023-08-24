@@ -22,10 +22,10 @@ public class RegAlloc implements ASMVisitor {
                 place = nowFunc.placeMap.get(def);
             } else {
                 place = nowFunc.allocaUsage;
-                nowFunc.allocaUsage += def.size;
+                place += nowFunc.paramUsage;
                 nowFunc.placeMap.put(def, place);
+                nowFunc.allocaUsage += def.size;
             }
-            place += nowFunc.paramUsage;
         } else {
             place = def.param_id * 4 + nowFunc.stackSize;
         }
@@ -60,8 +60,7 @@ public class RegAlloc implements ASMVisitor {
     @Override
     public void visit(ASMBlock node) {
         for (var i = node.headInst; i != null && i.next != null; i = i.next) {
-             i.accept(this);
-            System.out.println(i);
+            i.accept(this);
         }
     }
 

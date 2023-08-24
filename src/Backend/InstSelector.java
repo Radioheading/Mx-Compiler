@@ -17,6 +17,7 @@ import Util.error.internalError;
 import java.util.HashMap;
 
 public class InstSelector implements IRVisitor {
+    private int globalLoad = 0;
     private HashMap<BasicBlock, ASMBlock> blockMap = new HashMap<>();
     private HashMap<IRRegister, Reg> regMap = new HashMap<>();
     private int tempUsage = 0;
@@ -31,47 +32,42 @@ public class InstSelector implements IRVisitor {
 
     private Reg getReg(entity obj) {
         var find = regMap.get(obj);
-        if (find != null) {
-            return find;
-        }
+
         if (obj instanceof IRGlobalVar) {
             Reg reg = new VReg(4);
             nowBlock.push_back(new LaInst(reg, obj.name));
+            globalLoad += obj.type.size;
             return reg;
         } else if (obj instanceof IRStringConst) {
             Reg reg = new VReg(4);
             nowBlock.push_back(new LaInst(reg, ".str." + ((IRStringConst) obj).id));
+            globalLoad += obj.type.size;
             return reg;
-        } else if (obj instanceof IRConst) {
-            int value;
-            Reg reg;
-            if (obj instanceof IRIntConst) {
-                value = ((IRIntConst) obj).value;
-                reg = new VReg(4);
-            } else if (obj instanceof IRBoolConst) {
-                value = ((IRBoolConst) obj).value ? 1 : 0;
-                reg = new VReg(1);
-            } else if (obj instanceof IRCondConst) {
-                value = ((IRCondConst) obj).value ? 1 : 0;
-                reg = new VReg(1);
-            } else {
-                value = 0;
-                reg = new VReg(4);
+        } else {
+            if (find != null) {
+                return find;
             }
-            if (value != 0) {
+            if (obj instanceof IRConst) {
+                int value;
+                PReg reg = ASMProgram.registerMap.get("t0");
+                if (obj instanceof IRIntConst) {
+                    value = ((IRIntConst) obj).value;
+                } else if (obj instanceof IRBoolConst) {
+                    value = ((IRBoolConst) obj).value ? 1 : 0;
+                } else if (obj instanceof IRCondConst) {
+                    value = ((IRCondConst) obj).value ? 1 : 0;
+                } else {
+                    value = 0;
+                }
                 nowBlock.push_back(new LiInst(reg, new Imm(value)));
                 return reg;
+            } else {
+                return new VReg(obj.type.size);
             }
-            return myProgram.zero;
-        } else {
-            return new VReg(obj.type.size);
         }
     }
 
     private void addStore(Reg dest, Reg src, Imm imm, int size) {
-        if (dest == null) {
-            String name = dest.name;
-        }
         if (-2048 <= imm.value && imm.value <= 2047) {
             nowBlock.push_back(new StoreInst(dest, src, imm, size));
         } else {
@@ -99,7 +95,7 @@ public class InstSelector implements IRVisitor {
         if (gVar.initValue instanceof IRIntConst) {
             GlobalValue newGVar = new GlobalValue(gVar.name, ((IRIntConst) gVar.initValue).value, 4);
             myProgram.globalVars.add(newGVar);
-        } else if (gVar.initValue instanceof IRBoolConst) {
+        } else if (gVar.initValue instanceof IRBoolConst || gVar.initValue instanceof IRCondConst) {
             GlobalValue newGVar = new GlobalValue(gVar.name, ((IRBoolConst) gVar.initValue).value ? 1 : 0, 1);
             myProgram.globalVars.add(newGVar);
         } else { // pointer type then
@@ -115,7 +111,7 @@ public class InstSelector implements IRVisitor {
 
     private void finish() {
         // use the space on stack, built ret instruction
-        nowFunc.stackSize = tempUsage + regMap.size() + nowFunc.paramUsage;
+        nowFunc.stackSize = tempUsage + regMap.size() * 4 + nowFunc.paramUsage + nowFunc.allocaUsage + globalLoad;
         if (nowFunc.stackSize < 2048 && nowFunc.stackSize >= -2048) {
             nowFunc.pushVeryFront(new ITypeInst("addi", myProgram.sp, myProgram.sp, new Imm(-nowFunc.stackSize)));
             nowFunc.pushVeryBack(new ITypeInst("addi", myProgram.sp, myProgram.sp, new Imm(nowFunc.stackSize)));
@@ -153,7 +149,7 @@ public class InstSelector implements IRVisitor {
         regMap.clear();
         tempUsage = 0;
         maxCallParam = 0;
-
+        globalLoad = 0;
         node.blockList.add(node.exitBlock);
         for (var block : node.blockList) {
             blockMap.put(block, new ASMBlock(".L" + block.label + "_" + block.id));
@@ -177,11 +173,11 @@ public class InstSelector implements IRVisitor {
         int cnt = 0;
         for (var block : node.blockList) {
             nowBlock = blockMap.get(block);
+            nowFunc.blocks.add(nowBlock);
             if (cnt == 0) { // allocation for the return value
                 addStore(myProgram.ra, myProgram.sp, new Imm(maxCallParam), 4);
             }
             block.accept(this);
-            nowFunc.blocks.add(nowBlock);
             cnt++;
         }
         // ask for the space on the stack
@@ -191,20 +187,20 @@ public class InstSelector implements IRVisitor {
     @Override
     public void visit(IRAlloca inst) {
         // current strategy: allocate on stack, load immediate to some reg and add
-        Reg tmp = new VReg(4), dest = new VReg(4);
+        Reg tmp = new VReg(4);
+        VReg dest = new VReg(4);
         tempUsage += 4;
         nowBlock.push_back(new LiInst(tmp, new Imm(nowFunc.allocaUsage + nowFunc.paramUsage)));
         nowBlock.push_back(new RTypeInst("add", dest, myProgram.sp, tmp));
         regMap.put(inst.regDest, dest);
-        nowFunc.addAlloc((VReg) dest);
+        nowFunc.addAlloc(dest);
     }
 
     @Override
     public void visit(IRBinOp inst) {
         Reg ans = new VReg(inst.dest.type.size);
         switch (inst.op) {
-            case "add", "sub", "mul", "and", "or", "xor" ->
-                    nowBlock.push_back(new RTypeInst(inst.op, getReg(inst.dest), getReg(inst.op1), getReg(inst.op2)));
+            case "add", "sub", "mul", "and", "or", "xor" -> nowBlock.push_back(new RTypeInst(inst.op, ans, getReg(inst.op1), getReg(inst.op2)));
             case "sdiv" -> nowBlock.push_back(new RTypeInst("div", ans, getReg(inst.op1), getReg(inst.op2)));
             case "srem" -> nowBlock.push_back(new RTypeInst("rem", ans, getReg(inst.op1), getReg(inst.op2)));
             case "shl" -> nowBlock.push_back(new RTypeInst("sll", ans, getReg(inst.op1), getReg(inst.op2)));
@@ -234,7 +230,7 @@ public class InstSelector implements IRVisitor {
         nowBlock.push_back(new CallInst(inst.name));
         if (inst.dest != null) {
             Reg ans = new VReg(inst.dest.type.size);
-            nowBlock.push_back(new MoveInst(ans, myProgram.ra));
+            nowBlock.push_back(new MoveInst(ans, myProgram.a0));
             regMap.put(inst.dest, ans);
         }
     }
@@ -250,8 +246,9 @@ public class InstSelector implements IRVisitor {
     @Override
     public void visit(IRLoad inst) {
         var vReg = getReg(inst.address);
-        nowBlock.push_back(new LoadInst(vReg, getReg(inst.address), new Imm(0), inst.dest.type.size));
-        regMap.put((IRRegister) inst.dest, vReg);
+        var tmp = new VReg(inst.dest.type.size);
+        nowBlock.push_back(new LoadInst(tmp, getReg(inst.address), new Imm(0), inst.dest.type.size));
+        regMap.put(inst.dest, tmp);
     }
 
     @Override
@@ -321,7 +318,7 @@ public class InstSelector implements IRVisitor {
 
     @Override
     public void visit(IRStore inst) {
-        addStore(getReg(inst.dest), getReg(inst.value), new Imm(0), inst.value.type.size);
+        addStore(getReg(inst.value), getReg(inst.dest), new Imm(0), inst.value.type.size);
         regMap.put(inst.dest, getReg(inst.dest));
     }
 

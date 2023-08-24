@@ -9,3 +9,7 @@ code
 res.out
 output.ll
 out/
+*.in
+*.out
+*.s
+*.ll
