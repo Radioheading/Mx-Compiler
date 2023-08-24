@@ -253,19 +253,19 @@ public class IRBuilder implements ASTVisitor {
         IRRegister array_i = new IRRegister("", type), i2 = new IRRegister("", intType);
         nowBlock.push_back(new IRLoad(nowBlock, intType, i2, iter));
         nowBlock.push_back(new IRGetElementPtr(array_i, nowBlock, type, array_head, i2));
-        if (type.Type() instanceof IRPtrType) {
-            // store null to it
-            nowBlock.push_back(new IRStore(nowBlock, nullValue, array_i));
-        } else {
-            // call constructor
-            if (type.Type() instanceof IRStructType) {
-                if (((IRStructType) type.Type()).hasConstruct) {
-                    var call = new IRCall(null, ((IRStructType) type.Type()).name + "." + ((IRStructType) type.Type()).name, nowBlock, voidType);
-                    call.arguments.add(array_i);
-                    nowBlock.push_back(call);
-                }
-            }
-        }
+//        if (type.Type() instanceof IRPtrType) {
+//            // store null to it
+//            nowBlock.push_back(new IRStore(nowBlock, nullValue, array_i));
+//        } else {
+//            // call constructor
+//            if (type.Type() instanceof IRStructType) {
+//                if (((IRStructType) type.Type()).hasConstruct) {
+//                    var call = new IRCall(null, ((IRStructType) type.Type()).name + "." + ((IRStructType) type.Type()).name, nowBlock, voidType);
+//                    call.arguments.add(array_i);
+//                    nowBlock.push_back(call);
+//                }
+//            }
+//        }
         nowBlock.push_back(new IRStore(nowBlock, mallocRet, array_i));
         nowBlock.terminal = new IRJump(nowBlock, inc);
         nowBlock.hasReturned = true;

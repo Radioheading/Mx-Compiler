@@ -22,14 +22,14 @@ import java.io.PrintStream;
 
 public class Compiler {
     public static void main(String[] args) throws Exception {
-        String name = "input.mx";
-        InputStream input = new FileInputStream(name);
-        // CharStream input = CharStreams.fromStream(System.in);
+//        String name = "testcases/codegen/t7.mx";
+//        InputStream input = new FileInputStream(name);
+         CharStream input = CharStreams.fromStream(System.in);
         try {
             RootNode ASTRoot;
             globalScope gScope = new globalScope(null);
-            MxLexer lexer = new MxLexer(CharStreams.fromStream(input));
-//            MxLexer lexer = new MxLexer(input);
+//            MxLexer lexer = new MxLexer(CharStreams.fromStream(input));
+            MxLexer lexer = new MxLexer(input);
             lexer.removeErrorListeners();
             lexer.addErrorListener(new MxErrorListener());
             MxParser parser = new MxParser(new CommonTokenStream(lexer));
@@ -43,11 +43,11 @@ public class Compiler {
             new SemanticChecker(gScope).visit(ASTRoot);
             IRBuilder irBuilder = new IRBuilder(gScope);
             irBuilder.visit(ASTRoot);
-            PrintStream output = new PrintStream("output.ll");
-            System.setOut(output);
-            System.out.println(irBuilder.myProgram);
-            PrintStream output_1 = new PrintStream("output.s");
-            System.setOut(output_1);
+//            PrintStream output = new PrintStream("output.ll");
+//            System.setOut(output);
+//            System.out.println(irBuilder.myProgram);
+//            PrintStream output_1 = new PrintStream("output.s");
+//            System.setOut(output_1);
             ASMProgram asmProgram = new ASMProgram();
             new InstSelector(asmProgram).visit(irBuilder.myProgram);
             new RegAlloc().visit(asmProgram);

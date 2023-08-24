@@ -11,6 +11,9 @@ public class CallInst extends BaseInst {
 
     public CallInst(String _funcName) {
         funcName = _funcName;
+        if (funcName.equals("__array_size")) {
+            funcName = "__array.size";
+        }
     }
 
     @Override

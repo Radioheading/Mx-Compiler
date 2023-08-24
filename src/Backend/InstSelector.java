@@ -15,6 +15,7 @@ import MIR.type.IRIntType;
 import Util.error.internalError;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 public class InstSelector implements IRVisitor {
     private int globalLoad = 0;
@@ -117,8 +118,8 @@ public class InstSelector implements IRVisitor {
             nowFunc.pushVeryBack(new ITypeInst("addi", myProgram.sp, myProgram.sp, new Imm(nowFunc.stackSize)));
         } else {
             PReg tmp_1 = ASMProgram.registerMap.get("t1"), tmp_2 = ASMProgram.registerMap.get("t2");
-            nowFunc.pushVeryFront(new LiInst(tmp_1, new Imm(-nowFunc.stackSize)));
             nowFunc.pushVeryFront(new RTypeInst("add", myProgram.sp, myProgram.sp, tmp_1));
+            nowFunc.pushVeryFront(new LiInst(tmp_1, new Imm(-nowFunc.stackSize)));
             nowFunc.pushVeryBack(new LiInst(tmp_2, new Imm(nowFunc.stackSize)));
             nowFunc.pushVeryBack(new RTypeInst("add", myProgram.sp, myProgram.sp, tmp_2));
         }
@@ -212,9 +213,6 @@ public class InstSelector implements IRVisitor {
     @Override
     public void visit(IRBranch inst) {
         nowBlock.push_back(new BTypeInst("beqz", getReg(inst.condition), blockMap.get(inst.elseBranch)));
-        if (blockMap.get(inst.thenBranch) == null) {
-            System.out.println("Null Error during IRBranch convention");
-        }
         nowBlock.push_back(new JumpInst(blockMap.get(inst.thenBranch)));
     }
 
@@ -245,7 +243,6 @@ public class InstSelector implements IRVisitor {
 
     @Override
     public void visit(IRLoad inst) {
-        var vReg = getReg(inst.address);
         var tmp = new VReg(inst.dest.type.size);
         nowBlock.push_back(new LoadInst(tmp, getReg(inst.address), new Imm(0), inst.dest.type.size));
         regMap.put(inst.dest, tmp);
@@ -293,7 +290,7 @@ public class InstSelector implements IRVisitor {
         } else { // gep as array
             Reg offset = getReg(inst.indexes.get(0));
             Reg immAdd = new VReg(inst.indexes.get(0).type.size);
-            if (inst.indexes.get(0).type != new IRIntType(8)) {
+            if (!Objects.equals(inst.indexes.get(0).type, new IRIntType(8))) {
                 nowBlock.push_back(new ITypeInst("slli", immAdd, offset, new Imm(2)));
                 nowBlock.push_back(new RTypeInst("add", res, getReg(inst.ptr), immAdd));
                 tempUsage += 4;
@@ -301,6 +298,7 @@ public class InstSelector implements IRVisitor {
                 nowBlock.push_back(new RTypeInst("add", res, getReg(inst.ptr), offset));
             }
         }
+        regMap.put(inst.dest, res);
     }
 
     @Override
@@ -319,7 +317,6 @@ public class InstSelector implements IRVisitor {
     @Override
     public void visit(IRStore inst) {
         addStore(getReg(inst.value), getReg(inst.dest), new Imm(0), inst.value.type.size);
-        regMap.put(inst.dest, getReg(inst.dest));
     }
 
     @Override
