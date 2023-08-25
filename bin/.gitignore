@@ -5,3 +5,4 @@ MIR/
 Parser/
 Util/
 Compiler.class
+ASM/

@@ -1,9 +1,0 @@
-int a, b, i;
-
-int main() {
-	a = 1;
-	b = 2;
-	for (; i < a + b; ++i);
-	println("yes!");
-	return 1;
-}

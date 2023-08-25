@@ -22,9 +22,9 @@ import java.io.PrintStream;
 
 public class Compiler {
     public static void main(String[] args) throws Exception {
-//        String name = "testcases/codegen/t7.mx";
+//        String name = "testcases/codegen/e1.mx";
 //        InputStream input = new FileInputStream(name);
-         CharStream input = CharStreams.fromStream(System.in);
+        CharStream input = CharStreams.fromStream(System.in);
         try {
             RootNode ASTRoot;
             globalScope gScope = new globalScope(null);

@@ -10,8 +10,8 @@ public class GlobalString extends GlobalValue {
 
     public String toString() {
         return name + ":\n"  + ".asciz\t" + '\"' + value.replace("\\", "\\\\")
-                                                            .replace("\"", "\\\"")
                                                             .replace("\n", "\\n")
+                                                            .replace("\"", "\\\"")
                                                             .replace("\0", "") + "\"";
     }
 }

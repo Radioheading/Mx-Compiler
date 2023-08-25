@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Objects;
 
 public class IRBuilder implements ASTVisitor {
-    private boolean hasInit = false;
+    private boolean hasInit = true;
     private final BuiltinElements myBuiltin = new BuiltinElements();
     private Scope nowScope;
     private final globalScope gScope;
@@ -147,7 +147,7 @@ public class IRBuilder implements ASTVisitor {
             if (assign.initValue != null) {
                 assign.initValue.accept(this);
                 // if it's Const, it can be decided before compiling, no need for StoreInst
-                if (assign.initValue.entity instanceof IRConst) {
+                if (assign.initValue.entity instanceof IRConst && !(assign.initValue.entity instanceof IRStringConst)) {
                     gVar.initValue = assign.initValue.entity;
                 } else {
                     gVar.initValue = defaultValue(gVar.type.Type());
@@ -618,6 +618,7 @@ public class IRBuilder implements ASTVisitor {
                     myProgram.gStrings.put(toAdd, new IRStringConst(toAdd, false));
                 }
                 it.entity = myProgram.gStrings.get(toAdd);
+//                System.err.println(((IRStringConst)it.entity).toIR());
             } else if (it.type.type.equals(myBuiltin.IntType)) {
                 int val = Integer.parseInt(it.str);
                 it.entity = new IRIntConst(val);

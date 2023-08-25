@@ -148,21 +148,26 @@ public class InstSelector implements IRVisitor {
 
     @Override
     public void visit(Function node) {
+        // System.err.println("curFunc: " + node.name);
         regMap.clear();
         tempUsage = 0;
         maxCallParam = 0;
         globalLoad = 0;
         node.blockList.add(node.exitBlock);
         for (var block : node.blockList) {
-            blockMap.put(block, new ASMBlock(".L" + block.label + "_" + block.id));
+            blockMap.put(block, new ASMBlock(".BBL" + block.label + "_" + block.id));
             for (var stmt : block.stmts) {
-                if (stmt instanceof IRCall) {
-                    maxCallParam = Integer.max(maxCallParam, ((IRCall) stmt).arguments.size());
+                if (stmt instanceof IRCall call) {
+                    // System.err.println(call.name + " " + call.arguments.size());
+                    maxCallParam = Integer.max(maxCallParam, call.arguments.size());
+                    // System.err.println("cur: " + maxCallParam);
                 }
             }
         }
-
+        // System.err.println("maxCallParam = " + maxCallParam);
         maxCallParam = (maxCallParam > 8 ? maxCallParam - 8 : 0) * 4;
+        nowFunc.paramUsage = maxCallParam;
+        // System.err.println("maxCallParam = " + maxCallParam);
         // find the maximum parameter usage first!
         for (int i = 0; i < Math.min(node.parameterIn.size(), 8); ++i) {
             var parameter = node.parameterIn.get(i);
@@ -170,7 +175,8 @@ public class InstSelector implements IRVisitor {
         }
         for (int i = 8; i < node.parameterIn.size(); ++i) {
             var parameter = node.parameterIn.get(i);
-            regMap.put(parameter, new VReg(4, i - 8));
+            VReg reg = new VReg(4, i - 8);
+            regMap.put(parameter, reg);
         }
         int cnt = 0;
         for (var block : node.blockList) {
@@ -192,6 +198,7 @@ public class InstSelector implements IRVisitor {
         Reg tmp = new VReg(4);
         VReg dest = new VReg(4);
         tempUsage += 4;
+        // System.err.println("alloca place: " + nowFunc.allocaUsage + " " + nowFunc.paramUsage);
         nowBlock.push_back(new LiInst(tmp, new Imm(nowFunc.allocaUsage + nowFunc.paramUsage)));
         nowBlock.push_back(new RTypeInst("add", dest, myProgram.sp, tmp));
         regMap.put(inst.regDest, dest);
@@ -290,8 +297,8 @@ public class InstSelector implements IRVisitor {
             tempUsage += 4;
         } else { // gep as array
             Reg offset = getReg(inst.indexes.get(0));
-            Reg immAdd = new VReg(inst.indexes.get(0).type.size);
-            if (!Objects.equals(inst.indexes.get(0).type, new IRIntType(8))) {
+            Reg immAdd = new VReg(4);
+            if (!(inst.type instanceof IRIntType) || ((IRIntType) inst.type).bitWidth != (new IRIntType(8)).bitWidth) {
                 nowBlock.push_back(new ITypeInst("slli", immAdd, offset, new Imm(2)));
                 nowBlock.push_back(new RTypeInst("add", res, getReg(inst.ptr), immAdd));
                 tempUsage += 4;
