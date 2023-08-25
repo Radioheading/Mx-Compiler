@@ -50,7 +50,7 @@ public class InstSelector implements IRVisitor {
             }
             if (obj instanceof IRConst) {
                 int value;
-                PReg reg = ASMProgram.registerMap.get("t0");
+                VReg reg = new VReg(obj.type.size);
                 if (obj instanceof IRIntConst) {
                     value = ((IRIntConst) obj).value;
                 } else if (obj instanceof IRBoolConst) {
@@ -60,6 +60,7 @@ public class InstSelector implements IRVisitor {
                 } else {
                     value = 0;
                 }
+                tempUsage += 4;
                 nowBlock.push_back(new LiInst(reg, new Imm(value)));
                 return reg;
             } else {

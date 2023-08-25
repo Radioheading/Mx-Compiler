@@ -37,13 +37,13 @@ public class RegAlloc implements ASMVisitor {
             }
         } else {
             if (srcOrDest) {
-                nowBlock.insert_before(new LiInst(t0, new Imm(place)), inst);
-                nowBlock.insert_before(new RTypeInst("add", t0, sp, t0), inst);
-                nowBlock.insert_before(new LoadInst(use, t0, new Imm(0), def.size), inst);
+                nowBlock.insert_before(new LiInst(t3, new Imm(place)), inst);
+                nowBlock.insert_before(new RTypeInst("add", t3, sp, t3), inst);
+                nowBlock.insert_before(new LoadInst(use, t3, new Imm(0), def.size), inst);
             } else {
-                nowBlock.insert_after(new StoreInst(use, t0, new Imm(0), def.size), inst);
-                nowBlock.insert_after(new RTypeInst("add", t0, sp, t0), inst);
-                nowBlock.insert_after(new LiInst(t0, new Imm(place)), inst);
+                nowBlock.insert_after(new StoreInst(use, t3, new Imm(0), def.size), inst);
+                nowBlock.insert_after(new RTypeInst("add", t3, sp, t3), inst);
+                nowBlock.insert_after(new LiInst(t3, new Imm(place)), inst);
             }
         }
         return use;
@@ -106,7 +106,7 @@ public class RegAlloc implements ASMVisitor {
 
     @Override
     public void visit(LaInst inst) {
-        inst.rd = allocateReg(t2, inst.rd, inst, false);
+        inst.rd = allocateReg(t0, inst.rd, inst, false);
     }
 
     @Override

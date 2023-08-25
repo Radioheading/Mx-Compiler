@@ -11,7 +11,7 @@ public class GlobalString extends GlobalValue {
     public String toString() {
         return name + ":\n"  + ".asciz\t" + '\"' + value.replace("\\", "\\\\")
                                                             .replace("\"", "\\\"")
-                                                            .replace("\n", "\\\n")
+                                                            .replace("\n", "\\n")
                                                             .replace("\0", "") + "\"";
     }
 }
