@@ -18,11 +18,13 @@ public class CFG {
 
     private void analyze_function(Function func) {
         func.blockList.add(func.exitBlock);
+        func.exitBlock = null;
         // essential
         for (var block : func.blockList) {
             if (block.terminal == null) {
                 continue;
             }
+            block.stmts.add(block.terminal); // we have terminal now!
             if (block.terminal instanceof IRBranch branch) {
                 block.succ.add(branch.elseBranch);
                 branch.elseBranch.pred.add(block);
@@ -32,14 +34,15 @@ public class CFG {
                 block.succ.add(jump.destination);
                 jump.destination.pred.add(block);
             }
+            block.terminal = null;
         }
         for (var block : func.blockList) {
-            System.out.println(block.label + '.' + block.id);
-            System.out.print("succ: ");
+            System.err.print(block.label + '.' + block.id);
+            System.err.print(", succ: ");
             for (var succ : block.succ) {
-                System.out.print(succ.label + '.' + succ.id + ' ');
+                System.err.print(succ.label + '.' + succ.id + ' ');
             }
-            System.out.println("");
+            System.err.println("");
         }
     }
 }

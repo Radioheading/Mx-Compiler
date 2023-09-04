@@ -39,8 +39,10 @@ public class DomTreeConstruct {
     }
 
     private void DFS(BasicBlock now) {
+        System.err.println("visiting: " + now.label + "_" + now.id);
         vis.add(now);
         for (var succ : now.succ) {
+            System.err.println("checking: " + succ.label + "_" + succ.id);
             if (!vis.contains(succ)) {
                 DFS(succ);
             }
@@ -49,11 +51,7 @@ public class DomTreeConstruct {
     }
 
     private void ReversePostorder(Function func) {
-        for (var block : func.blockList) {
-            if (!vis.contains(block)) {
-                DFS(block);
-            }
-        }
+        DFS(func.enterBlock);
 
         while (stack.size() > 0) {
             ROP.add(stack.peek());
@@ -63,35 +61,53 @@ public class DomTreeConstruct {
 
     private void GetDominance(Function func) {
         ReversePostorder(func);
-        dom.get(0).set(0, true);
+        for (var i : ROP) {
+            System.err.print(indexMap.get(i) + " ");
+        }
+        System.err.println();
+        for (int i = 0; i < func.blockList.size(); ++i) {
+            for (int j = 0; j < func.blockList.size(); ++j) {
+                dom.get(i).set(j, true);
+            }
+        }
         func.blockList.get(0).idom = func.blockList.get(0);
         boolean flag = true;
         while (flag) {
             flag = false;
             for (var block : ROP) {
+                if (block.equals(func.enterBlock)) {
+                    dom.get(0).set(0, true);
+                    for (int i = 1; i < func.blockList.size(); ++i) {
+                        dom.get(0).set(i, false);
+                    }
+                    continue;
+                }
                 int index = indexMap.get(block);
                 BitSet tmp = new BitSet(n);
-                tmp.set(index, true);
+                for (int i = 0; i < n; ++i) {
+                    tmp.set(i, true);
+                }
                 for (var pred : block.pred) {
                     int predIndex = indexMap.get(pred);
                     for (int i = 0; i < n; ++i) {
                         tmp.set(i, tmp.get(i) && dom.get(predIndex).get(i));
                     }
-                    boolean equal = true;
-                    if (tmp.size() != dom.get(index).size()) {
-                        equal = false;
-                    } else {
-                        for (int i = 0; i < tmp.size(); ++i) {
-                            if (tmp.get(i) != dom.get(index).get(i)) {
-                                equal = false;
-                                break;
-                            }
+                }
+                tmp.set(index, true);
+                boolean equal = true;
+                if (tmp.size() != dom.get(index).size()) {
+                    equal = false;
+                } else {
+                    for (int i = 0; i < tmp.size(); ++i) {
+                        if (tmp.get(i) != dom.get(index).get(i)) {
+                            equal = false;
+                            break;
                         }
                     }
-                    if (!equal) {
-                        flag = true;
-                        dom.set(index, tmp);
-                    }
+                }
+                if (!equal) {
+                    flag = true;
+                    dom.set(index, tmp);
                 }
             }
         }
@@ -99,8 +115,12 @@ public class DomTreeConstruct {
             for (int j = 0; j < n; ++j) {
                 if (dom.get(i).get(j)) {
                     Dom.get(i).add(j);
+                    System.err.print("y ");
+                } else {
+                    System.err.print("n ");
                 }
             }
+            System.err.println();
         }
     }
 
@@ -113,7 +133,24 @@ public class DomTreeConstruct {
                 }
                 if (tmp.cardinality() == 1 && tmp.get(u)) {
                     func.blockList.get(u).idom = func.blockList.get(v);
+                    func.blockList.get(v).dom_succ.add(func.blockList.get(u));
                     break;
+                }
+            }
+        }
+    }
+
+    private void GetDominanceFrontier(Function func) {
+        for (var block : func.blockList) {
+            System.err.println("considering: " + indexMap.get(block));
+            if (block.pred.size() >= 2) {
+                for (var pred : block.pred) {
+                    var runner = pred;
+                    while (!Objects.equals(indexMap.get(runner), indexMap.get(block.idom))) {
+                        System.err.println("add: " + indexMap.get(runner));
+                        runner.dominanceFrontier.add(block);
+                        runner = runner.idom;
+                    }
                 }
             }
         }
@@ -124,11 +161,14 @@ public class DomTreeConstruct {
             init(func);
             GetDominance(func);
             BuildDom(func);
+            GetDominanceFrontier(func);
             for (var block : func.blockList) {
                 if (block.idom == null) {
-                    System.out.println(block.label + '.' + block.id + ": null");
+                    System.err.println(block.label + "_" + block.id + ": null");
                 } else {
-                    System.out.println(block.label + '.' + block.id + ": " + block.idom.label + '.' + block.idom.id);
+                    System.err.println(block.label + "_" + block.id + ", IDOM: " + block.idom.label + "_" + block.idom.id);
+                    block.dominanceFrontier.forEach(sd -> System.err.print(sd.label + "_" + sd.id + " "));
+                    System.err.println();
                 }
             }
         }
