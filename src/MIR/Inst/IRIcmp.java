@@ -34,4 +34,10 @@ public class IRIcmp extends IRBaseInst {
     public void accept(IRVisitor visitor) {
         visitor.visit(this);
     }
+
+    @Override
+    public void rename(entity origin, entity obj) {
+        if (op1.equals(origin)) op1 = obj;
+        if (op2.equals(origin)) op2 = obj;
+    }
 }

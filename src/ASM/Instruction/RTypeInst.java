@@ -2,6 +2,9 @@ package ASM.Instruction;
 
 import ASM.ASMVisitor;
 import ASM.Operand.*;
+
+import java.util.ArrayList;
+
 public class RTypeInst extends BaseInst {
     public String op;
     public Reg rd, rs1, rs2;
@@ -21,5 +24,20 @@ public class RTypeInst extends BaseInst {
     @Override
     public void accept(ASMVisitor visitor) {
         visitor.visit(this);
+    }
+
+    @Override
+    public ArrayList<Reg> use() {
+        ArrayList<Reg> ret = new ArrayList<>();
+        ret.add(rs1);
+        ret.add(rs2);
+        return ret;
+    }
+
+    @Override
+    public ArrayList<Reg> def() {
+        ArrayList<Reg> ret = new ArrayList<>();
+        ret.add(rd);
+        return ret;
     }
 }

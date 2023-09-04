@@ -5,12 +5,14 @@ import Backend.InstSelector;
 import MIR.Entity.IRRegister;
 import MIR.Entity.entity;
 import MIR.Inst.IRAlloca;
+import MIR.Inst.IRJump;
 import MIR.Inst.IRRet;
 import MIR.type.IRBaseType;
 import MIR.type.IRPtrType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 
 public class Function {
@@ -19,6 +21,8 @@ public class Function {
     public LinkedList<BasicBlock> blockList = new LinkedList<>();
     public ArrayList<IRRegister> parameterIn = new ArrayList<>();
     public ArrayList<IRAlloca> init = new ArrayList<>(); // put the initializations at the front;
+    public HashSet<IRRegister> allocas = new HashSet<>();
+    public HashSet<IRAlloca> no_alloc = new HashSet<>();
     public BasicBlock exitBlock, enterBlock;
     public IRRegister retReg;
 
@@ -29,6 +33,7 @@ public class Function {
         this.retType = _retType;
         enterBlock = new BasicBlock("enter_" + name);
         exitBlock = new BasicBlock("exit_" + name);
+        enterBlock.terminal = new IRJump(enterBlock, exitBlock);
         blockList.add(enterBlock);
         retReg = new IRRegister("ret_" + name, _retType);
     }
@@ -56,7 +61,11 @@ public class Function {
         for (var block : blockList) {
             ret += block;
         }
-        ret += exitBlock + "\n}";
+        if (exitBlock != null) {
+            ret += exitBlock + "\n}";
+        } else {
+            ret += "}";
+        }
         return ret;
     }
 

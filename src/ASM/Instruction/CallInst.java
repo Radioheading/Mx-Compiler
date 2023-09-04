@@ -6,7 +6,6 @@ import ASM.Operand.*;
 import java.util.ArrayList;
 
 public class CallInst extends BaseInst {
-    public ArrayList<Reg> parameters = new ArrayList<>();
     public String funcName;
 
     public CallInst(String _funcName) {
@@ -24,5 +23,15 @@ public class CallInst extends BaseInst {
     @Override
     public void accept(ASMVisitor visitor) {
         visitor.visit(this);
+    }
+
+    @Override
+    public ArrayList<Reg> use() {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public ArrayList<Reg> def() {
+        return new ArrayList<>();
     }
 }

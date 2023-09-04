@@ -37,4 +37,12 @@ public class IRGetElementPtr extends IRBaseInst {
     public void accept(IRVisitor visitor) {
         visitor.visit(this);
     }
+
+    @Override
+    public void rename(entity origin, entity obj) {
+        if (ptr.equals(origin)) ptr = obj;
+        for (int i = 0; i < indexes.size(); ++i) {
+            if (indexes.get(i).equals(origin)) indexes.set(i, obj);
+        }
+    }
 }

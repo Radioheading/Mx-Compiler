@@ -19,4 +19,9 @@ public class IRCondConst extends IRConst {
     public String toString() {
         return value ? "true" : "false";
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof IRCondConst && ((IRCondConst) obj).value == value;
+    }
 }

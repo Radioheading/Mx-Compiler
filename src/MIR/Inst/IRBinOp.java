@@ -1,7 +1,6 @@
 package MIR.Inst;
 
 // reference: 《编译器指导手册》by @peterzheng98, @LauYeeYu, @YijingGuo, @Undecimber_7th
-// eq, ne, ugt, uge, ult, ule, sgt, sge, slt, sle
 import MIR.BasicBlock;
 import MIR.Entity.IRRegister;
 import MIR.Entity.entity;
@@ -9,6 +8,7 @@ import MIR.IRVisitor;
 import MIR.type.IRBaseType;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class IRBinOp extends IRBaseInst {
     public entity op1, op2;
@@ -33,5 +33,16 @@ public class IRBinOp extends IRBaseInst {
     @Override
     public void accept(IRVisitor visitor) {
         visitor.visit(this);
+    }
+    @Override
+    public void rename(entity origin, entity obj) {
+        if (obj == null) {
+            System.err.println("impossible");
+        }
+        if (op2 == null) {
+            System.err.println(this.toString());
+        }
+        if (op1.equals(origin)) op1 = obj;
+        if (op2.equals(origin)) op2 = obj;
     }
 }

@@ -24,4 +24,7 @@ public class IRJump extends IRBaseInst {
     public void accept(IRVisitor visitor) {
         visitor.visit(this);
     }
+
+    @Override
+    public void rename(entity origin, entity obj) {}
 }

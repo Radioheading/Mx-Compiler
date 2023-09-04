@@ -24,4 +24,12 @@ public class IRRegister extends entity {
     public String toString() {
         return "%" + name + "_" + id;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof IRRegister) {
+            return name.equals(((IRRegister) obj).name) && id == ((IRRegister) obj).id;
+        }
+        return false;
+    }
 }

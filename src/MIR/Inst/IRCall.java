@@ -45,4 +45,11 @@ public class IRCall extends IRBaseInst {
     public void accept(IRVisitor visitor) {
         visitor.visit(this);
     }
+
+    @Override
+    public void rename(entity origin, entity obj) {
+        for (int i = 0; i < arguments.size(); ++i) {
+            if (arguments.get(i).equals(origin)) arguments.set(i, obj);
+        }
+    }
 }

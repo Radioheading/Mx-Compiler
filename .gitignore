@@ -11,5 +11,5 @@ output.ll
 out/
 *.in
 *.out
-*.s
 *.ll
+*.txt

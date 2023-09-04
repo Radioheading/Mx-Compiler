@@ -3,6 +3,10 @@ package IROptimize;
 import MIR.*;
 import MIR.Inst.*;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
+
 public class CFG {
     private Program myProgram;
 
@@ -37,12 +41,24 @@ public class CFG {
             block.terminal = null;
         }
         for (var block : func.blockList) {
-            System.err.print(block.label + '.' + block.id);
+            System.err.print(block.label + '.' + block.id + ": ");
             System.err.print(", succ: ");
             for (var succ : block.succ) {
                 System.err.print(succ.label + '.' + succ.id + ' ');
             }
-            System.err.println("");
+            System.err.println();
         }
+        // test57.mx 's findings
+        LinkedList<BasicBlock> ans = new LinkedList<>();
+        for (var block : func.blockList) {
+            if (block.pred.size() == 0 && block != func.enterBlock) {
+                for (var succ : block.succ) {
+                    succ.pred.remove(block);
+                }
+            } else {
+                ans.add(block);
+            }
+        }
+        func.blockList = ans;
     }
 }

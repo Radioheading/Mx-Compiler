@@ -39,6 +39,7 @@ public class AllocElimination {
             return nullValue;
         }
     }
+
     public void eliminateAlloc() {
         for (var func : myProgram.functions) {
             addPhi(func);
@@ -50,20 +51,6 @@ public class AllocElimination {
         }
         for (var func : myProgram.functions) {
             removePhi(func);
-        }
-    }
-
-    private void phiIter(BasicBlock block, entity value, IRRegister alloca) {
-        for (var edgeBlock : block.dominanceFrontier) {
-            System.err.println("inserting: " + edgeBlock.label + "_" + edgeBlock.id);
-            if (edgeBlock.phiMap.containsKey(alloca)) {
-                edgeBlock.phiMap.get(alloca).addEntry(block, value);
-            } else {
-                IRPhi phi = new IRPhi(edgeBlock, new IRRegister(alloca.name + "_phi", alloca.type.Type()), alloca);
-                phi.addEntry(block, value);
-                edgeBlock.phiMap.put(alloca, phi);
-            }
-            phiIter(edgeBlock, edgeBlock.phiMap.get(alloca).dest, alloca);
         }
     }
 
@@ -98,16 +85,14 @@ public class AllocElimination {
                 for (var Y : X.dominanceFrontier) {
                     if (!F.contains(Y)) {
                         if (Y.phiMap.containsKey(alloca)) {
-                            Y.phiMap.get(alloca).addEntry(X, all.get(alloca).get(X));
+                            // Y.phiMap.get(alloca).addEntry(X, all.get(alloca).get(X));
                         } else {
                             IRPhi phi = new IRPhi(Y, new IRRegister(alloca.name + "_phi", alloca.type.Type()), alloca);
-                            phi.addEntry(X, all.get(alloca).get(X));
+                            // phi.addEntry(X, all.get(alloca).get(X));
                             Y.phiMap.put(alloca, phi);
                         }
                         F.add(Y);
-                        if (!W.contains(Y)) {
-                            W.add(Y);
-                        }
+                        W.add(Y);
                     }
                 }
             }
@@ -125,7 +110,7 @@ public class AllocElimination {
         }
 
         block.phiMap.forEach((key, value) ->
-            last_def.put((IRRegister) key, value.dest));
+                last_def.put((IRRegister) key, value.dest));
 
         for (var inst : block.stmts) {
             for (var element : cur_name.keySet()) {
@@ -143,6 +128,17 @@ public class AllocElimination {
                 }
             }
         }
+        // now consider every successor's phis...
+        for (var edgeBlock : block.succ) {
+            for (var element : edgeBlock.phiMap.keySet()) {
+                System.err.println(element + "::");
+                System.err.println(last_def.get((IRRegister) element));
+                if (last_def.get((IRRegister) element) != null) {
+                    edgeBlock.phiMap.get(element).addEntry(block, last_def.get((IRRegister) element));
+                }
+            }
+        }
+
 
         for (var phi : block.phiMap.values()) {
             System.err.println(block.label + "_" + block.id);
@@ -150,15 +146,6 @@ public class AllocElimination {
                 System.err.println("adding: " + pred.label + "_" + pred.id);
                 if (!phi.blockMap.contains(pred)) {
                     phi.addEntry(pred, defaultValue(phi.dest.type));
-                }
-            }
-        }
-
-        // now consider every successor's phis...
-        for (var edgeBlock : block.dominanceFrontier) {
-            for (var element : edgeBlock.phiMap.keySet()) {
-                if (func.allocas.contains((IRRegister) element)) {
-                    edgeBlock.phiMap.get(element).block_value.put(block, last_def.get(element));
                 }
             }
         }
@@ -172,6 +159,5 @@ public class AllocElimination {
     }
 
     private void removePhi(Function func) {
-
     }
 }

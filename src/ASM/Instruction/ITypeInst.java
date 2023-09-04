@@ -3,6 +3,7 @@ package ASM.Instruction;
 import ASM.ASMVisitor;
 import ASM.Operand.*;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class ITypeInst extends BaseInst {
@@ -28,5 +29,19 @@ public class ITypeInst extends BaseInst {
     @Override
     public void accept(ASMVisitor visitor) {
         visitor.visit(this);
+    }
+
+    @Override
+    public ArrayList<Reg> use() {
+        ArrayList<Reg> ret = new ArrayList<>();
+        ret.add(rs1);
+        return ret;
+    }
+
+    @Override
+    public ArrayList<Reg> def() {
+        ArrayList<Reg> ret = new ArrayList<>();
+        ret.add(rd);
+        return ret;
     }
 }

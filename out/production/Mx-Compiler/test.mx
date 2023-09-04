@@ -1,5 +1,8 @@
 int main() {
-	int a = 0, b = 1;
-	printInt(a + b);
-	return 0;
+	int []a = new int[10];
+	for (int i = 0; i < 10; ++i) {
+	a[i] = i;
+}
+printlnInt(a[0] + a[9]);
+return 0;
 }

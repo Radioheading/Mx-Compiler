@@ -25,4 +25,9 @@ public class IRBranch extends IRBaseInst {
     public void accept(IRVisitor visitor) {
         visitor.visit(this);
     }
+
+    @Override
+    public void rename(entity origin, entity obj) {
+        if (condition.equals(origin)) condition = obj;
+    }
 }

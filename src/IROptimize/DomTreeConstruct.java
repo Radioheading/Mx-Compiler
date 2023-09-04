@@ -16,7 +16,6 @@ public class DomTreeConstruct {
     private ArrayList<BasicBlock> ROP = new ArrayList<>();
     private Stack<BasicBlock> stack = new Stack<>();
     private ArrayList<BitSet> dom = new ArrayList<>();
-    private ArrayList<ArrayList<Integer>> Dom = new ArrayList<>();
     private int n = 0;
     public DomTreeConstruct(Program _myProgram) {
         myProgram = _myProgram;
@@ -34,15 +33,16 @@ public class DomTreeConstruct {
         }
         for (i = 0; i < func.blockList.size(); ++i) {
             dom.add(new BitSet(n));
-            Dom.add(new ArrayList<>(n));
         }
     }
 
     private void DFS(BasicBlock now) {
-        System.err.println("visiting: " + now.label + "_" + now.id);
+        System.err.println("visiting: " + indexMap.get(now));
+        System.err.println("vis: " + now.label + "_" + now.id);
         vis.add(now);
         for (var succ : now.succ) {
-            System.err.println("checking: " + succ.label + "_" + succ.id);
+            System.err.println("checking: " + indexMap.get(succ));
+            System.err.println("check: " + succ.label + "_" + succ.id);
             if (!vis.contains(succ)) {
                 DFS(succ);
             }
@@ -75,11 +75,11 @@ public class DomTreeConstruct {
         while (flag) {
             flag = false;
             for (var block : ROP) {
-                if (block.equals(func.enterBlock)) {
-                    dom.get(0).set(0, true);
-                    for (int i = 1; i < func.blockList.size(); ++i) {
-                        dom.get(0).set(i, false);
+                if (block.equals(func.enterBlock) || (block.pred.size() == 0)) {
+                    for (int i = 0; i < func.blockList.size(); ++i) {
+                        dom.get(indexMap.get(block)).set(i, false);
                     }
+                    dom.get(indexMap.get(block)).set(indexMap.get(block), true);
                     continue;
                 }
                 int index = indexMap.get(block);
@@ -87,6 +87,7 @@ public class DomTreeConstruct {
                 for (int i = 0; i < n; ++i) {
                     tmp.set(i, true);
                 }
+                System.err.println(block.pred.size() + "is empty");
                 for (var pred : block.pred) {
                     int predIndex = indexMap.get(pred);
                     for (int i = 0; i < n; ++i) {
@@ -114,7 +115,6 @@ public class DomTreeConstruct {
         for (int i = 0; i < n; ++i) {
             for (int j = 0; j < n; ++j) {
                 if (dom.get(i).get(j)) {
-                    Dom.get(i).add(j);
                     System.err.print("y ");
                 } else {
                     System.err.print("n ");
@@ -126,16 +126,32 @@ public class DomTreeConstruct {
 
     private void BuildDom(Function func) {
         for (int u = 1; u < n; ++u) {
-            for (int v : Dom.get(u)) {
-                BitSet tmp = new BitSet(n);
-                for (int i = 0; i < n; ++i) {
-                    tmp.set(i, (dom.get(v).get(i) & dom.get(u).get(i)) ^ dom.get(u).get(i));
+            for (int i = 0; i < n; ++i) {
+                if (!dom.get(u).get(i) || i == u) continue;
+                boolean flag = true;
+                for (int j = 0; j < n; ++j) {
+                    if (!dom.get(u).get(j) || i == j || u == j) continue;
+                    if (!dom.get(i).get(j)) {
+                        flag = false;
+                        break;
+                    }
                 }
-                if (tmp.cardinality() == 1 && tmp.get(u)) {
-                    func.blockList.get(u).idom = func.blockList.get(v);
-                    func.blockList.get(v).dom_succ.add(func.blockList.get(u));
+                if (flag) {
+                    func.blockList.get(u).idom = func.blockList.get(i);
+                    func.blockList.get(i).dom_succ.add(func.blockList.get(u));
                     break;
                 }
+            }
+        }
+
+        for (var block : func.blockList) {
+            if (block.idom == null) {
+                System.err.println(block.label + "_" + block.id + ": null");
+            } else {
+                // System.err.println(block.label + "_" + block.id + ", IDOM: " + block.idom.label + "_" + block.idom.id);
+                // block.dominanceFrontier.forEach(sd -> System.err.print(sd.label + "_" + sd.id + " "));
+                System.err.println(indexMap.get(block) + ", idom: " + indexMap.get(block.idom));
+                System.err.println();
             }
         }
     }
@@ -146,7 +162,8 @@ public class DomTreeConstruct {
             if (block.pred.size() >= 2) {
                 for (var pred : block.pred) {
                     var runner = pred;
-                    while (!Objects.equals(indexMap.get(runner), indexMap.get(block.idom))) {
+                    while (runner != null && !Objects.equals(indexMap.get(runner), indexMap.get(block.idom))) {
+                        System.err.println(func.name);
                         System.err.println("add: " + indexMap.get(runner));
                         runner.dominanceFrontier.add(block);
                         runner = runner.idom;
@@ -163,13 +180,11 @@ public class DomTreeConstruct {
             BuildDom(func);
             GetDominanceFrontier(func);
             for (var block : func.blockList) {
-                if (block.idom == null) {
-                    System.err.println(block.label + "_" + block.id + ": null");
-                } else {
-                    System.err.println(block.label + "_" + block.id + ", IDOM: " + block.idom.label + "_" + block.idom.id);
-                    block.dominanceFrontier.forEach(sd -> System.err.print(sd.label + "_" + sd.id + " "));
-                    System.err.println();
+                System.err.println(block.label + "_" + block.id + ", frontier: ");
+                for (var df : block.dominanceFrontier) {
+                    System.err.print(df.label + "_" + df.id + " ");
                 }
+                System.err.println();
             }
         }
     }

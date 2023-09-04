@@ -25,4 +25,11 @@ public class IRRet extends IRBaseInst {
     public void accept(IRVisitor visitor) {
         visitor.visit(this);
     }
+
+    @Override
+    public void rename(entity origin, entity obj) {
+        if (returnValue != null) {
+            if (returnValue.equals(origin)) returnValue = obj;
+        }
+    }
 }

@@ -155,7 +155,7 @@ public class InstSelector implements IRVisitor {
         globalLoad = 0;
         node.blockList.add(node.exitBlock);
         for (var block : node.blockList) {
-            blockMap.put(block, new ASMBlock(".BBL" + block.label + "_" + block.id));
+            blockMap.put(block, new ASMBlock(".LBB" + block.label + "_" + block.id));
             for (var stmt : block.stmts) {
                 if (stmt instanceof IRCall call) {
                     // System.err.println(call.name + " " + call.arguments.size());
@@ -220,6 +220,11 @@ public class InstSelector implements IRVisitor {
 
     @Override
     public void visit(IRBranch inst) {
+        // add: flow graph construction
+        nowBlock.successors.add(blockMap.get(inst.thenBranch));
+        nowBlock.successors.add(blockMap.get(inst.elseBranch));
+        blockMap.get(inst.thenBranch).predecessors.add(nowBlock);
+        blockMap.get(inst.elseBranch).predecessors.add(nowBlock);
         nowBlock.push_back(new BTypeInst("beqz", getReg(inst.condition), blockMap.get(inst.elseBranch)));
         nowBlock.push_back(new JumpInst(blockMap.get(inst.thenBranch)));
     }
@@ -243,9 +248,9 @@ public class InstSelector implements IRVisitor {
 
     @Override
     public void visit(IRJump inst) {
-        if (blockMap.get(inst.destination) == null) {
-            System.out.println("Null Error during IRJump convention");
-        }
+        // add: flow graph construction
+        nowBlock.successors.add(blockMap.get(inst.destination));
+        blockMap.get(inst.destination).predecessors.add(nowBlock);
         nowBlock.push_back(new JumpInst(blockMap.get(inst.destination)));
     }
 

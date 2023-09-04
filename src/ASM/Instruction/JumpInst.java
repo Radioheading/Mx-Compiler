@@ -4,6 +4,8 @@ import ASM.ASMVisitor;
 import ASM.Compound.ASMBlock;
 import ASM.Operand.*;
 
+import java.util.ArrayList;
+
 public class JumpInst extends BaseInst {
     public ASMBlock to;
 
@@ -19,5 +21,15 @@ public class JumpInst extends BaseInst {
     @Override
     public void accept(ASMVisitor visitor) {
         visitor.visit(this);
+    }
+
+    @Override
+    public ArrayList<Reg> use() {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public ArrayList<Reg> def() {
+        return new ArrayList<>();
     }
 }

@@ -20,6 +20,11 @@ public class IRStringConst extends IRConst {
         return "@str." + id;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof IRStringConst && ((IRStringConst) obj).value.equals(value);
+    }
+
     public String toIR() {
         return value.replace("\\", "\\\\").replace("\n", "\\0A").replace("\"", "\\22") + "\\00";
     }

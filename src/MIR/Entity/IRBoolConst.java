@@ -14,4 +14,9 @@ public class IRBoolConst extends IRConst {
     public String toString() {
         return value? "1" : "0";
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof IRBoolConst && ((IRBoolConst) obj).value == value;
+    }
 }

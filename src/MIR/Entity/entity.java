@@ -16,4 +16,7 @@ public abstract class entity {
     }
 
     public abstract String toString();
+
+    @Override
+    public abstract boolean equals(Object obj);
 }

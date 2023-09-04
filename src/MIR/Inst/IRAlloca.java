@@ -2,9 +2,12 @@ package MIR.Inst;
 
 import MIR.BasicBlock;
 import MIR.Entity.IRRegister;
+import MIR.Entity.entity;
 import MIR.IRVisitor;
 import MIR.type.IRBaseType;
 import MIR.type.IRPtrType;
+
+import java.util.HashSet;
 
 public class IRAlloca extends IRBaseInst {
     public IRBaseType type;
@@ -31,4 +34,7 @@ public class IRAlloca extends IRBaseInst {
     public void accept(IRVisitor visitor) {
         visitor.visit(this);
     }
+
+    @Override
+    public void rename(entity origin, entity obj) {}
 }

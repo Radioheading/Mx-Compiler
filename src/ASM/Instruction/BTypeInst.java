@@ -4,6 +4,8 @@ import ASM.ASMVisitor;
 import ASM.Compound.ASMBlock;
 import ASM.Operand.*;
 
+import java.util.ArrayList;
+
 public class BTypeInst extends BaseInst {
     public String op;
     public Reg rs;
@@ -24,4 +26,18 @@ public class BTypeInst extends BaseInst {
     public void accept(ASMVisitor visitor) {
         visitor.visit(this);
     }
+
+    @Override
+    public ArrayList<Reg> use() {
+        ArrayList<Reg> ret = new ArrayList<>();
+        ret.add(rs);
+        return ret;
+    }
+
+    @Override
+    public ArrayList<Reg> def() {
+        return new ArrayList<>();
+    }
+
+
 }

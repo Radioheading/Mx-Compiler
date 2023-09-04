@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Objects;
 
 public class IRBuilder implements ASTVisitor {
-    private boolean hasInit = true;
+    private boolean hasInit = false;
     private final BuiltinElements myBuiltin = new BuiltinElements();
     private Scope nowScope;
     private final globalScope gScope;
@@ -164,6 +164,7 @@ public class IRBuilder implements ASTVisitor {
         if (funcDef.parameterList != null) {
             funcDef.parameterList.parameters.forEach(sd -> IRFunc.parameterIn.add(new IRRegister(sd.varName, TypeToIRType(sd.typeName))));
         }
+
         myProgram.functions.add(IRFunc);
         gScope.IRFunctions.put(funcDef.funcName, IRFunc);
     }
@@ -327,8 +328,8 @@ public class IRBuilder implements ASTVisitor {
         for (var stmt : it.stmts.baseStatements) {
             stmt.accept(this);
         }
-        if (!nowBlock.hasReturned) { // jump to the return block;
-            nowBlock.push_back(new IRJump(nowBlock, nowFunc.exitBlock));
+        if (nowBlock.terminal == null) { // jump to the return block;
+            nowBlock.terminal = new IRJump(nowBlock, nowFunc.exitBlock);
         }
         nowFunc.addAllocate();
     }
@@ -344,8 +345,12 @@ public class IRBuilder implements ASTVisitor {
         for (int i = 0; i < it.parameterList.parameters.size(); ++i) {
             var reg = nowFunc.parameterIn.get(i + offset);
             var ptr = new IRRegister(reg.name, new IRPtrType(reg.type, 0, true));
-            nowFunc.init.add(new IRAlloca(nowBlock, ptr.type, ptr));
+            IRAlloca target = new IRAlloca(nowBlock, ptr.type, ptr);
+            nowFunc.init.add(target);
             nowScope.entities.put(reg.name, ptr);
+            if (i > 7) {
+                nowFunc.no_alloc.add(target);
+            }
         }
         for (int i = 0; i < it.parameterList.parameters.size(); ++i) {
             var reg = nowFunc.parameterIn.get(i + offset);
@@ -362,8 +367,8 @@ public class IRBuilder implements ASTVisitor {
         for (var stmt : it.suite.baseStatements) {
             stmt.accept(this);
         }
-        if (!nowBlock.hasReturned) { // jump to the return block;
-            nowBlock.push_back(new IRJump(nowBlock, nowFunc.exitBlock));
+        if (nowBlock.terminal == null) { // jump to the return block;
+            nowBlock.terminal = new IRJump(nowBlock, nowFunc.exitBlock);
         }
         if (Objects.equals(it.funcName, "main")) { // void init()
             if (hasInit) {
@@ -493,6 +498,7 @@ public class IRBuilder implements ASTVisitor {
         it.inc = new BasicBlock("for.inc");
         it.end = new BasicBlock("for.end");
         it.end.terminal = nowBlock.terminal;
+        System.err.println("for end's terminal: " + it.end.terminal);
         if (it.varInit != null) {
             it.varInit.accept(this);
         } else if (it.exprInit != null) {
@@ -623,7 +629,7 @@ public class IRBuilder implements ASTVisitor {
                 int val = Integer.parseInt(it.str);
                 it.entity = new IRIntConst(val);
             } else if (it.type.type.equals(myBuiltin.BoolType)) {
-                it.entity = Objects.equals(it.str, "true") ? new IRCondConst(true) : new IRCondConst(false);
+                it.entity = Objects.equals(it.str, "true") ? new IRBoolConst(true) : new IRBoolConst(false);
             } else if (it.type.type.equals(myBuiltin.NullType)) {
                 it.entity = new IRNullConst();
             } else if (Objects.equals(it.str, "this")) {
@@ -652,13 +658,12 @@ public class IRBuilder implements ASTVisitor {
 
     private void callStringBuiltin(String op, BinaryExprNode it) {
         IRCall call;
-        var res = new IRRegister("", boolType);
-        it.entity = new IRRegister("", condType);
-        call = new IRCall(res, op, nowBlock, res.type);
+        it.entity = new IRRegister("", boolType);
+        call = new IRCall((IRRegister) it.entity, op, nowBlock, boolType);
         call.arguments.add(getValue(it.lhs, false, nowBlock));
         call.arguments.add(getValue(it.rhs, false, nowBlock));
         nowBlock.push_back(call);
-        nowBlock.push_back(new IRTrunc(nowBlock, res, it.entity.type, (IRRegister) it.entity));
+        // nowBlock.push_back(new IRTrunc(nowBlock, res, it.entity.type, (IRRegister) it.entity));
     }
 
     @Override
@@ -935,7 +940,7 @@ public class IRBuilder implements ASTVisitor {
         nowScope = new Scope(nowScope);
         it.jump_1.accept(this);
         if (!res.baseType.isEqual(voidType)) {
-            nowBlock.push_back(new IRStore(nowBlock, it.jump_1.entity, alloc));
+            nowBlock.push_back(new IRStore(nowBlock, getValue(it.jump_1, false, nowBlock), alloc));
         }
         nowScope = nowScope.parentScope;
         nowBlock.terminal = new IRJump(nowBlock, endStmt);
@@ -946,7 +951,7 @@ public class IRBuilder implements ASTVisitor {
 
         it.jump_2.accept(this);
         if (!res.baseType.isEqual(voidType)) {
-            nowBlock.push_back(new IRStore(nowBlock, it.jump_2.entity, alloc));
+            nowBlock.push_back(new IRStore(nowBlock, getValue(it.jump_2, false, nowBlock), alloc));
         }
         nowScope = nowScope.parentScope;
         nowBlock.terminal = new IRJump(nowBlock, endStmt);
