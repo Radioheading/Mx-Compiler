@@ -34,6 +34,13 @@ public class DomTreeConstruct {
         for (i = 0; i < func.blockList.size(); ++i) {
             dom.add(new BitSet(n));
         }
+        for (var block : func.blockList) {
+            System.err.println(indexMap.get(block) + ", succ: ");
+            for (var succ : block.succ) {
+                System.err.print(indexMap.get(succ) + " ");
+            }
+            System.err.println();
+        }
     }
 
     private void DFS(BasicBlock now) {
@@ -127,16 +134,12 @@ public class DomTreeConstruct {
     private void BuildDom(Function func) {
         for (int u = 1; u < n; ++u) {
             for (int i = 0; i < n; ++i) {
-                if (!dom.get(u).get(i) || i == u) continue;
-                boolean flag = true;
+                if (!dom.get(u).get(i)) continue;
+                BitSet tmp = new BitSet(n);
                 for (int j = 0; j < n; ++j) {
-                    if (!dom.get(u).get(j) || i == j || u == j) continue;
-                    if (!dom.get(i).get(j)) {
-                        flag = false;
-                        break;
-                    }
+                    tmp.set(j, (dom.get(i).get(j) & dom.get(u).get(j)) ^ dom.get(u).get(j));
                 }
-                if (flag) {
+                if (tmp.cardinality() == 1 && tmp.get(u)) {
                     func.blockList.get(u).idom = func.blockList.get(i);
                     func.blockList.get(i).dom_succ.add(func.blockList.get(u));
                     break;

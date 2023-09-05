@@ -19,7 +19,7 @@ public class BasicBlock {
     public BasicBlock idom;
     public HashMap<entity, IRPhi> phiMap = new HashMap<>();
 
-    public LinkedList<BasicBlock> pred = new LinkedList<>(), succ = new LinkedList<>(), dominanceFrontier = new LinkedList<>();
+    public HashSet<BasicBlock> pred = new HashSet<>(), succ = new HashSet<>(), dominanceFrontier = new HashSet<>();
     public HashSet<BasicBlock> visit_pred = new HashSet<>();
 
     public HashSet<BasicBlock> dom_succ = new HashSet<>();

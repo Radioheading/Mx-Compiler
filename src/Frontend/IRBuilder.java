@@ -348,7 +348,7 @@ public class IRBuilder implements ASTVisitor {
             IRAlloca target = new IRAlloca(nowBlock, ptr.type, ptr);
             nowFunc.init.add(target);
             nowScope.entities.put(reg.name, ptr);
-            if (i > 7) {
+            if (i > -1) {
                 nowFunc.no_alloc.add(target);
             }
         }

@@ -1,8 +1,10 @@
-int main() {
-	int []a = new int[10];
-	for (int i = 0; i < 10; ++i) {
-	a[i] = i;
+int foo(int n) {
+	printlnInt(n);
+	if (n == 1) return 1;
+	return foo(n - 1) * n;
 }
-printlnInt(a[0] + a[9]);
-return 0;
+
+int main() {
+	printlnInt(foo(10));
+	return 0;
 }

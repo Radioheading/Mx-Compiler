@@ -153,7 +153,9 @@ public class InstSelector implements IRVisitor {
         tempUsage = 0;
         maxCallParam = 0;
         globalLoad = 0;
-        node.blockList.add(node.exitBlock);
+        if (node.exitBlock != null) {
+            node.blockList.add(node.exitBlock);
+        }
         for (var block : node.blockList) {
             blockMap.put(block, new ASMBlock(".LBB" + block.label + "_" + block.id));
             for (var stmt : block.stmts) {
@@ -189,7 +191,6 @@ public class InstSelector implements IRVisitor {
             cnt++;
         }
         // ask for the space on the stack
-
     }
 
     @Override
@@ -207,7 +208,7 @@ public class InstSelector implements IRVisitor {
 
     @Override
     public void visit(IRBinOp inst) {
-        Reg ans = new VReg(inst.dest.type.size);
+        Reg ans = getReg(inst.dest);
         switch (inst.op) {
             case "add", "sub", "mul", "and", "or", "xor" -> nowBlock.push_back(new RTypeInst(inst.op, ans, getReg(inst.op1), getReg(inst.op2)));
             case "sdiv" -> nowBlock.push_back(new RTypeInst("div", ans, getReg(inst.op1), getReg(inst.op2)));
@@ -240,7 +241,7 @@ public class InstSelector implements IRVisitor {
         }
         nowBlock.push_back(new CallInst(inst.name));
         if (inst.dest != null) {
-            Reg ans = new VReg(inst.dest.type.size);
+            Reg ans = getReg(inst.dest);
             nowBlock.push_back(new MoveInst(ans, myProgram.a0));
             regMap.put(inst.dest, ans);
         }
@@ -256,14 +257,14 @@ public class InstSelector implements IRVisitor {
 
     @Override
     public void visit(IRLoad inst) {
-        var tmp = new VReg(inst.dest.type.size);
+        var tmp = getReg(inst.dest);
         nowBlock.push_back(new LoadInst(tmp, getReg(inst.address), new Imm(0), inst.dest.type.size));
         regMap.put(inst.dest, tmp);
     }
 
     @Override
     public void visit(IRIcmp inst) {
-        Reg ans = new VReg(inst.dest.type.size), tmp = new VReg(inst.op1.type.size);
+        Reg ans = getReg(inst.dest), tmp = new VReg(inst.op1.type.size);
         switch (inst.op) {
             case "eq" -> {
                 nowBlock.push_back(new RTypeInst("sub", tmp, getReg(inst.op1), getReg(inst.op2)));
@@ -293,7 +294,7 @@ public class InstSelector implements IRVisitor {
 
     @Override
     public void visit(IRGetElementPtr inst) {
-        Reg res = new VReg(inst.indexes.get(0).type.size);
+        Reg res = getReg(inst.dest);
         if (inst.indexes.size() > 1) { // gep as class
             Reg offset = getReg(inst.indexes.get(1));
             Reg immAdd = new VReg(inst.indexes.get(1).type.size);
@@ -344,5 +345,51 @@ public class InstSelector implements IRVisitor {
         Reg ans = getReg(inst.dest);
         nowBlock.push_back(new MoveInst(ans, getReg(inst.value)));
         regMap.put(inst.dest, ans);
+    }
+
+    @Override
+    public void visit(IRMove inst) {
+        if (inst.src instanceof IRConst) {
+            int value;
+            Reg ans = getReg((IRRegister) inst.dest);
+            if (inst.src instanceof IRGlobalVar) {
+                Reg reg = new VReg(4);
+                nowBlock.push_back(new LaInst(reg, inst.src.name));
+                nowBlock.push_back(new MoveInst(ans, reg));
+                regMap.put((IRRegister) inst.dest, ans);
+                globalLoad += inst.src.type.size;
+            } else if (inst.src instanceof IRStringConst) {
+                Reg reg = new VReg(4);
+                nowBlock.push_back(new LaInst(reg, ".str." + ((IRStringConst) inst.src).id));
+                nowBlock.push_back(new MoveInst(ans, reg));
+                regMap.put((IRRegister) inst.dest, ans);
+                globalLoad += inst.src.type.size;
+            } else {
+                if (inst.src instanceof IRIntConst) {
+                    value = ((IRIntConst) inst.src).value;
+                } else if (inst.src instanceof IRBoolConst) {
+                    value = ((IRBoolConst) inst.src).value ? 1 : 0;
+                } else if (inst.src instanceof IRCondConst) {
+                    value = ((IRCondConst) inst.src).value ? 1 : 0;
+                } else {
+                    value = 0;
+                }
+                nowBlock.push_back(new LiInst(ans, new Imm(value)));
+                tempUsage += 4;
+                regMap.put((IRRegister) inst.dest, ans);
+            }
+        } else {
+            Reg ans = getReg(inst.dest), source = getReg(inst.src);
+            if (!regMap.containsKey(inst.dest)) {
+                System.err.println("fool: " + inst.dest);
+            }
+            nowBlock.push_back(new MoveInst(ans, source));
+            regMap.put((IRRegister) inst.dest, ans);
+            regMap.put((IRRegister) inst.src, source);
+            System.err.println(getReg(inst.src) + " - " + inst.src);
+        }
+//        var ans = getReg(inst.dest);
+//        nowBlock.push_back(new MoveInst(ans, getReg(inst.src)));
+//        regMap.put((IRRegister) inst.dest, ans);
     }
 }

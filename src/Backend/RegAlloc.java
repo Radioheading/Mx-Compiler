@@ -61,9 +61,9 @@ public class RegAlloc implements ASMVisitor {
 
     @Override
     public void visit(ASMBlock node) {
-//        for (var i = node.headInst; i != null && i.next != null; i = i.next) {
-//            // System.err.println(i);
-//        }
+        for (var i = node.headInst; i != null && i.next != null; i = i.next) {
+            System.err.println(i);
+        }
         for (var i = node.headInst; i != null && i.next != null; i = i.next) {
             i.accept(this);
         }

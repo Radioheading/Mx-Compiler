@@ -6,6 +6,7 @@ import MIR.*;
 import MIR.Entity.*;
 import MIR.Inst.*;
 import MIR.type.*;
+import Util.error.internalError;
 
 import java.util.HashMap;
 
@@ -49,6 +50,12 @@ public class AllocElimination {
             last_def.clear();
             rename(func);
         }
+        for (var func : myProgram.functions) {
+            addEdge(func);
+        }
+    }
+
+    public void eliminatePhi() {
         for (var func : myProgram.functions) {
             removePhi(func);
         }
@@ -128,6 +135,11 @@ public class AllocElimination {
                 }
             }
         }
+        if (block.terminal != null) {
+            for (var element : cur_name.keySet()) {
+                block.terminal.rename(element, cur_name.get(element));
+            }
+        }
         // now consider every successor's phis...
         for (var edgeBlock : block.succ) {
             for (var element : edgeBlock.phiMap.keySet()) {
@@ -158,6 +170,71 @@ public class AllocElimination {
         visitBlock(func.enterBlock, func);
     }
 
+    private void addEdge(Function func) {
+        // add edge (critical)
+        HashSet<BasicBlock> toAdd = new HashSet<>();
+        for (var block : func.blockList) {
+            HashSet<BasicBlock> original = new HashSet<>(block.succ);
+            for (var succ : original) {
+                if (succ.pred.size() > 1 && original.size() > 1) {
+                    System.err.println("adding edge: " + block.label + "_" + block.id + " -> " + succ.label + "_" + succ.id);
+                    // add a new block
+                    BasicBlock newBlock = new BasicBlock("phi_" + block.label + "_" + block.id);
+                    toAdd.add(newBlock);
+                    newBlock.terminal = new IRJump(newBlock, succ);
+                    newBlock.pred.add(block);
+                    block.succ.remove(succ);
+                    block.succ.add(newBlock);
+                    succ.pred.remove(block);
+                    succ.pred.add(newBlock);
+                    for (var phi : succ.phiMap.values()) {
+                        if (phi.blockMap.contains(block)) {
+                            phi.blockMap.remove(block);
+                            phi.blockMap.add(newBlock);
+                            phi.block_value.put(newBlock, phi.block_value.get(block));
+                            phi.block_value.remove(block);
+                        }
+                    }
+                    newBlock.succ.add(succ);
+                    var branch = (IRBranch) block.terminal;
+                    if (branch.thenBranch == succ) {
+                        branch.thenBranch = newBlock;
+                    } else {
+                        branch.elseBranch = newBlock;
+                    }
+                }
+            }
+        }
+        func.blockList.addAll(toAdd);
+    }
+
     private void removePhi(Function func) {
+        for (var block : func.blockList) {
+            for (var phi : block.phiMap.values()) {
+                // step 1: check for phi simplification
+                var tmp = new IRRegister(phi.dest.name + "_tmp", phi.dest.type);
+                for (var pred : block.pred) {
+                    pred.stmts.add(new IRMove(pred, tmp, phi.block_value.get(pred)));
+                    // pred.stmts.add(new IRMove(pred, phi.dest, phi.block_value.get(pred)));
+                }
+                block.stmts.addFirst(new IRMove(block, phi.dest, tmp));
+            }
+            block.phiMap.clear();
+        }
+    }
+
+
+    private boolean canSimplify(IRPhi phi) {
+        if (phi.blockMap.size() == 1) {
+            return true;
+        } else {
+            entity toCmp = phi.block_value.values().iterator().next();
+            for (var cmp : phi.block_value.values()) {
+                if (!cmp.equals(toCmp)) {
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 }

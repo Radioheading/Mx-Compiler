@@ -21,4 +21,6 @@ public interface IRVisitor {
     void visit(IRTrunc inst);
 
     void visit(IRZext inst);
+
+    void visit(IRMove inst);
 }
