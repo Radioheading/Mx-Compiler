@@ -13,3 +13,4 @@ out/
 *.out
 *.ll
 *.txt
+*.s

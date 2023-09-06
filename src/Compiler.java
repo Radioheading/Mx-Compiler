@@ -4,8 +4,8 @@ import Backend.*;
 import Frontend.*;
 import IROptimize.AllocElimination;
 import IROptimize.CFG;
-import IROptimize.DCE;
 import IROptimize.DomTreeConstruct;
+import IROptimize.GlobalToLocal;
 import Parser.*;
 import Util.MxErrorListener;
 import Util.error.error;
@@ -34,9 +34,9 @@ public class Compiler {
             new SymbolCollector(gScope).visit(ASTRoot);
             new SemanticChecker(gScope).visit(ASTRoot);
             IRBuilder irBuilder = new IRBuilder(gScope);
-            new DCE(irBuilder.myProgram).ErrorElimination();
             irBuilder.visit(ASTRoot);
             new CFG(irBuilder.myProgram).buildCFG();
+            new GlobalToLocal(irBuilder.myProgram).globalTransition();
             new DomTreeConstruct(irBuilder.myProgram).work();
             var Mem2Reg = new AllocElimination(irBuilder.myProgram);
             Mem2Reg.eliminateAlloc();
@@ -47,7 +47,6 @@ public class Compiler {
             System.out.println(asmProgram);
         } catch (error er) {
             System.err.println(er.toString());
-            throw new RuntimeException();
         }
     }
 }

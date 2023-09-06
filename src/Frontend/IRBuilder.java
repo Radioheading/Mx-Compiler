@@ -152,6 +152,7 @@ public class IRBuilder implements ASTVisitor {
                 } else {
                     gVar.initValue = defaultValue(gVar.type.Type());
                     pushStore(gVar, assign.initValue);
+                    gVar.init_use = true;
                 }
             } else {
                 gVar.initValue = defaultValue(gVar.type.Type());
