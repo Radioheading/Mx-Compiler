@@ -64,7 +64,9 @@ public class InstSelector implements IRVisitor {
                 nowBlock.push_back(new LiInst(reg, new Imm(value)));
                 return reg;
             } else {
-                return new VReg(obj.type.size);
+                VReg reg = new VReg(obj.type.size);
+                regMap.put((IRRegister) obj, reg);
+                return reg;
             }
         }
     }
@@ -140,7 +142,11 @@ public class InstSelector implements IRVisitor {
 
     @Override
     public void visit(BasicBlock node) {
-        node.stmts.forEach(sd -> sd.accept(this));
+        for (var inst : node.stmts) {
+            if (!inst.shouldRemove) {
+                inst.accept(this);
+            }
+        }
         if (node.terminal != null) {
             node.terminal.accept(this);
         }
@@ -171,9 +177,11 @@ public class InstSelector implements IRVisitor {
         nowFunc.paramUsage = maxCallParam;
         // System.err.println("maxCallParam = " + maxCallParam);
         // find the maximum parameter usage first!
+        nowBlock = blockMap.get(node.enterBlock);
         for (int i = 0; i < Math.min(node.parameterIn.size(), 8); ++i) {
             var parameter = node.parameterIn.get(i);
-            regMap.put(parameter, ASMProgram.registerMap.get("a" + i));
+            VReg target = (VReg) getReg(parameter);
+            nowBlock.push_back(new MoveInst(target, ASMProgram.registerMap.get("a" + i)));
         }
         for (int i = 8; i < node.parameterIn.size(); ++i) {
             var parameter = node.parameterIn.get(i);
@@ -216,7 +224,6 @@ public class InstSelector implements IRVisitor {
             case "shl" -> nowBlock.push_back(new RTypeInst("sll", ans, getReg(inst.op1), getReg(inst.op2)));
             case "ashr" -> nowBlock.push_back(new RTypeInst("sra", ans, getReg(inst.op1), getReg(inst.op2)));
         }
-        regMap.put(inst.dest, ans);
     }
 
     @Override
@@ -243,7 +250,6 @@ public class InstSelector implements IRVisitor {
         if (inst.dest != null) {
             Reg ans = getReg(inst.dest);
             nowBlock.push_back(new MoveInst(ans, myProgram.a0));
-            regMap.put(inst.dest, ans);
         }
     }
 
@@ -259,7 +265,6 @@ public class InstSelector implements IRVisitor {
     public void visit(IRLoad inst) {
         var tmp = getReg(inst.dest);
         nowBlock.push_back(new LoadInst(tmp, getReg(inst.address), new Imm(0), inst.dest.type.size));
-        regMap.put(inst.dest, tmp);
     }
 
     @Override
@@ -289,12 +294,11 @@ public class InstSelector implements IRVisitor {
                 tempUsage += 4;
             }
         }
-        regMap.put(inst.dest, ans);
     }
 
     @Override
     public void visit(IRGetElementPtr inst) {
-        Reg res = getReg(inst.dest);
+        Reg res = new VReg(inst.indexes.get(0).type.size);
         if (inst.indexes.size() > 1) { // gep as class
             Reg offset = getReg(inst.indexes.get(1));
             Reg immAdd = new VReg(inst.indexes.get(1).type.size);
@@ -337,14 +341,12 @@ public class InstSelector implements IRVisitor {
     public void visit(IRTrunc inst) {
         Reg ans = getReg(inst.dest);
         nowBlock.push_back(new MoveInst(ans, getReg(inst.value)));
-        regMap.put(inst.dest, ans);
     }
 
     @Override
     public void visit(IRZext inst) {
         Reg ans = getReg(inst.dest);
         nowBlock.push_back(new MoveInst(ans, getReg(inst.value)));
-        regMap.put(inst.dest, ans);
     }
 
     @Override
@@ -356,13 +358,11 @@ public class InstSelector implements IRVisitor {
                 Reg reg = new VReg(4);
                 nowBlock.push_back(new LaInst(reg, inst.src.name));
                 nowBlock.push_back(new MoveInst(ans, reg));
-                regMap.put((IRRegister) inst.dest, ans);
                 globalLoad += inst.src.type.size;
             } else if (inst.src instanceof IRStringConst) {
                 Reg reg = new VReg(4);
                 nowBlock.push_back(new LaInst(reg, ".str." + ((IRStringConst) inst.src).id));
                 nowBlock.push_back(new MoveInst(ans, reg));
-                regMap.put((IRRegister) inst.dest, ans);
                 globalLoad += inst.src.type.size;
             } else {
                 if (inst.src instanceof IRIntConst) {
@@ -376,7 +376,6 @@ public class InstSelector implements IRVisitor {
                 }
                 nowBlock.push_back(new LiInst(ans, new Imm(value)));
                 tempUsage += 4;
-                regMap.put((IRRegister) inst.dest, ans);
             }
         } else {
             Reg ans = getReg(inst.dest), source = getReg(inst.src);
@@ -384,12 +383,7 @@ public class InstSelector implements IRVisitor {
                 System.err.println("fool: " + inst.dest);
             }
             nowBlock.push_back(new MoveInst(ans, source));
-            regMap.put((IRRegister) inst.dest, ans);
-            regMap.put((IRRegister) inst.src, source);
             System.err.println(getReg(inst.src) + " - " + inst.src);
         }
-//        var ans = getReg(inst.dest);
-//        nowBlock.push_back(new MoveInst(ans, getReg(inst.src)));
-//        regMap.put((IRRegister) inst.dest, ans);
     }
 }

@@ -176,7 +176,7 @@ public class AllocElimination {
         for (var block : func.blockList) {
             HashSet<BasicBlock> original = new HashSet<>(block.succ);
             for (var succ : original) {
-                if (succ.pred.size() > 1 && original.size() > 1) {
+                if (succ.pred.size() > 1 && original.size() > 1 && succ.phiMap.size() > 0) {
                     System.err.println("adding edge: " + block.label + "_" + block.id + " -> " + succ.label + "_" + succ.id);
                     // add a new block
                     BasicBlock newBlock = new BasicBlock("phi_" + block.label + "_" + block.id);
@@ -212,6 +212,10 @@ public class AllocElimination {
         for (var block : func.blockList) {
             for (var phi : block.phiMap.values()) {
                 // step 1: check for phi simplification
+                if (canSimplify(phi)) {
+                    block.stmts.addFirst(new IRMove(block, phi.dest, phi.block_value.values().iterator().next()));
+                    continue;
+                }
                 var tmp = new IRRegister(phi.dest.name + "_tmp", phi.dest.type);
                 for (var pred : block.pred) {
                     pred.stmts.add(new IRMove(pred, tmp, phi.block_value.get(pred)));

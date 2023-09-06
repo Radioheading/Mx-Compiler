@@ -185,9 +185,11 @@ public class IRBuilder implements ASTVisitor {
             IRRegister thisAddr = new IRRegister("this.addr", new IRPtrType(classType, 0, true));
             IRRegister thisIn = new IRRegister("this", classType);
             nowFunc = IRFunc;
+            var target = new IRAlloca(nowBlock, thisAddr.type, thisAddr);
+            // nowFunc.no_alloc.add(target);
             nowBlock = IRFunc.enterBlock;
             nowFunc.parameterIn.add(thisIn);
-            nowFunc.init.add(new IRAlloca(nowBlock, thisAddr.type, thisAddr));
+            nowFunc.init.add(target);
             nowBlock.push_back(new IRStore(nowBlock, thisIn, thisAddr));
             nowFunc.thisPtr = thisAddr;
             if (func.parameterList != null) {
@@ -348,7 +350,7 @@ public class IRBuilder implements ASTVisitor {
             IRAlloca target = new IRAlloca(nowBlock, ptr.type, ptr);
             nowFunc.init.add(target);
             nowScope.entities.put(reg.name, ptr);
-            if (i > -1) {
+            if (i > 7) {
                 nowFunc.no_alloc.add(target);
             }
         }
