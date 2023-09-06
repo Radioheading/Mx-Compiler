@@ -20,4 +20,8 @@ public abstract class IRBaseInst {
     public abstract void accept(IRVisitor visitor);
 
     public abstract void rename(entity origin, entity obj);
+
+    public abstract HashSet<IRRegister> defs();
+
+    public abstract HashSet<entity> uses();
 }

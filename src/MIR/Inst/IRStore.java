@@ -8,6 +8,8 @@ import MIR.IRVisitor;
 import MIR.type.IRNullType;
 import MIR.type.IRPtrType;
 
+import java.util.HashSet;
+
 public class IRStore extends IRBaseInst {
     public entity value;
     public IRRegister dest;
@@ -35,5 +37,20 @@ public class IRStore extends IRBaseInst {
     public void rename(entity origin, entity obj) {
         if (value.equals(origin)) value = obj;
         if (dest.equals(origin)) dest = (IRRegister) obj;
+    }
+
+    @Override
+    public HashSet<IRRegister> defs() {
+        return new HashSet<>();
+    }
+
+    @Override
+    public HashSet<entity> uses() {
+        HashSet<entity> ret = new HashSet<>();
+        if (!(value.type instanceof IRNullType)) {
+            ret.add(value);
+        }
+        ret.add(dest);
+        return ret;
     }
 }

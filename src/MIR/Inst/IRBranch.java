@@ -1,8 +1,11 @@
 package MIR.Inst;
 
 import MIR.BasicBlock;
+import MIR.Entity.IRRegister;
 import MIR.Entity.entity;
 import MIR.IRVisitor;
+
+import java.util.HashSet;
 
 public class IRBranch extends IRBaseInst {
     public entity condition;
@@ -29,5 +32,15 @@ public class IRBranch extends IRBaseInst {
     @Override
     public void rename(entity origin, entity obj) {
         if (condition.equals(origin)) condition = obj;
+    }
+
+    @Override
+    public HashSet<IRRegister> defs() {
+        return new HashSet<>();
+    }
+
+    @Override
+    public HashSet<entity> uses() {
+        return new HashSet<>(){{add(condition);}};
     }
 }

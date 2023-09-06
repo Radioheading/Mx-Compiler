@@ -9,6 +9,7 @@ import MIR.IRVisitor;
 import MIR.type.IRBaseType;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class IRGetElementPtr extends IRBaseInst {
     public IRBaseType type;
@@ -44,5 +45,20 @@ public class IRGetElementPtr extends IRBaseInst {
         for (int i = 0; i < indexes.size(); ++i) {
             if (indexes.get(i).equals(origin)) indexes.set(i, obj);
         }
+    }
+
+    @Override
+    public HashSet<IRRegister> defs() {
+        HashSet<IRRegister> ret = new HashSet<>();
+        ret.add(dest);
+        return ret;
+    }
+
+    @Override
+    public HashSet<entity> uses() {
+        HashSet<entity> ret = new HashSet<>();
+        ret.add(ptr);
+        ret.addAll(indexes);
+        return ret;
     }
 }

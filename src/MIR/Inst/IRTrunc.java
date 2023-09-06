@@ -7,6 +7,8 @@ import MIR.IRVisitor;
 import MIR.Inst.IRBaseInst;
 import MIR.type.IRBaseType;
 
+import java.util.HashSet;
+
 public class IRTrunc extends IRBaseInst {
     public entity value;
     public IRBaseType destType;
@@ -32,5 +34,15 @@ public class IRTrunc extends IRBaseInst {
     @Override
     public void rename(entity origin, entity obj) {
         if (value.equals(origin)) value = obj;
+    }
+
+    @Override
+    public HashSet<IRRegister> defs() {
+        return new HashSet<>(){{add(dest);}};
+    }
+
+    @Override
+    public HashSet<entity> uses() {
+        return new HashSet<>(){{add(value);}};
     }
 }

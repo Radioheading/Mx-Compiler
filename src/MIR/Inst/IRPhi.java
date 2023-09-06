@@ -48,7 +48,26 @@ public class IRPhi extends IRBaseInst {
             }
         }
     }
-        public void addEntry (BasicBlock from, entity value){
+
+    @Override
+    public HashSet<IRRegister> defs() {
+        HashSet<IRRegister> ret = new HashSet<>();
+        ret.add(dest);
+        return ret;
+    }
+
+    @Override
+    public HashSet<entity> uses() {
+        HashSet<entity> ret = new HashSet<>();
+        for (var block : blockMap) {
+            if (block_value.get(block) instanceof IRRegister) {
+                ret.add((IRRegister) block_value.get(block));
+            }
+        }
+        return ret;
+    }
+
+    public void addEntry (BasicBlock from, entity value){
             blockMap.add(from);
             block_value.put(from, value);
         }

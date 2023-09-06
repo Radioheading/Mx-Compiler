@@ -37,4 +37,16 @@ public class IRAlloca extends IRBaseInst {
 
     @Override
     public void rename(entity origin, entity obj) {}
+
+    @Override
+    public HashSet<IRRegister> defs() {
+        HashSet<IRRegister> ret = new HashSet<>();
+        if (regDest != null) ret.add(regDest);
+        return ret;
+    }
+
+    @Override
+    public HashSet<entity> uses() {
+        return new HashSet<>();
+    }
 }

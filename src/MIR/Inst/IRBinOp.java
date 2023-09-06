@@ -45,4 +45,19 @@ public class IRBinOp extends IRBaseInst {
         if (op1.equals(origin)) op1 = obj;
         if (op2.equals(origin)) op2 = obj;
     }
+
+    @Override
+    public HashSet<IRRegister> defs() {
+        HashSet<IRRegister> ret = new HashSet<>();
+        ret.add(dest);
+        return ret;
+    }
+
+    @Override
+    public HashSet<entity> uses() {
+        HashSet<entity> ret = new HashSet<>();
+        ret.add(op1);
+        ret.add(op2);
+        return ret;
+    }
 }

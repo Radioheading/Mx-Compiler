@@ -5,6 +5,8 @@ import MIR.Entity.*;
 import MIR.IRVisitor;
 import MIR.type.IRIntType;
 
+import java.util.HashSet;
+
 public class IRMove extends IRBaseInst {
     public entity src, dest;
 
@@ -26,4 +28,14 @@ public class IRMove extends IRBaseInst {
 
     @Override
     public void rename(entity origin, entity obj) {}
+    // no need to do anything
+    @Override
+    public HashSet<IRRegister> defs() {
+        return null;
+    }
+
+    @Override
+    public HashSet<entity> uses() {
+        return null;
+    }
 }

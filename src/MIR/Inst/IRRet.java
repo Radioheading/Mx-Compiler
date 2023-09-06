@@ -1,8 +1,11 @@
 package MIR.Inst;
 
 import MIR.BasicBlock;
+import MIR.Entity.IRRegister;
 import MIR.Entity.entity;
 import MIR.IRVisitor;
+
+import java.util.HashSet;
 
 public class IRRet extends IRBaseInst {
     public entity returnValue;
@@ -31,5 +34,15 @@ public class IRRet extends IRBaseInst {
         if (returnValue != null) {
             if (returnValue.equals(origin)) returnValue = obj;
         }
+    }
+
+    @Override
+    public HashSet<IRRegister> defs() {
+        return new HashSet<>();
+    }
+
+    @Override
+    public HashSet<entity> uses() {
+        return new HashSet<>(){{if (returnValue != null) add(returnValue);}};
     }
 }

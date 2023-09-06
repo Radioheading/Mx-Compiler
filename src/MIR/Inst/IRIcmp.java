@@ -9,6 +9,7 @@ import MIR.IRVisitor;
 import MIR.type.IRBaseType;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class IRIcmp extends IRBaseInst {
     public entity op1, op2;
@@ -39,5 +40,20 @@ public class IRIcmp extends IRBaseInst {
     public void rename(entity origin, entity obj) {
         if (op1.equals(origin)) op1 = obj;
         if (op2.equals(origin)) op2 = obj;
+    }
+
+    @Override
+    public HashSet<IRRegister> defs() {
+        HashSet<IRRegister> ret = new HashSet<>();
+        ret.add(dest);
+        return ret;
+    }
+
+    @Override
+    public HashSet<entity> uses() {
+        HashSet<entity> ret = new HashSet<>();
+        ret.add(op1);
+        ret.add(op2);
+        return ret;
     }
 }
