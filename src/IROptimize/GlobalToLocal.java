@@ -53,7 +53,7 @@ public class GlobalToLocal {
                 for (var func : myProgram.functions) {
                     for (var block : func.blockList) {
                         for (var inst : block.stmts) {
-                            if (inst instanceof IRLoad load && load.address.equals(global)) {
+                            if (inst instanceof IRLoad load && load.address.equals(global) || inst instanceof IRStore store && store.dest.equals(global)) {
                                 System.err.println("appear in : " + func.name);
                                 if (onlyDest != null && !onlyDest.name.equals(func.name)) {
                                     flag = false;
