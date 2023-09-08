@@ -95,6 +95,7 @@ public class ConstPropagation {
                 changePhi(workList, nowBlock, otherBlock);
                 // delete block if there's no predecessor, change CFG, change uses, change phis
                 if (otherBlock.pred.size() == 0) {
+                    System.err.println("erase block: " + otherBlock.label + "_" + otherBlock.id);
                     eraseBlock(otherBlock, func);
                 }
             }
@@ -102,6 +103,36 @@ public class ConstPropagation {
         for (var block : func.blockList) {
             block.stmts.removeIf(inst -> inst.shouldRemove);
         }
+        HashSet<BasicBlock> toCheck = new HashSet<>();
+        for (var block : func.blockList) {
+            if (block.stmts.size() + block.phiMap.size() == 0 && block.succ.size() == 1) {
+                toCheck.add(block);
+            }
+        }
+        for (var block : toCheck) {
+            removeEmptyBlock(block, func);
+        }
+    }
+
+    private void removeEmptyBlock(BasicBlock block, Function func) {
+        System.err.println(block.succ.size());
+        assert block.succ.size() == 1;
+        BasicBlock succ = block.succ.iterator().next();
+        for (var pred : block.pred) {
+            if (pred.terminal instanceof IRBranch branch) {
+                if (branch.thenBranch == block) {
+                    branch.thenBranch = succ;
+                } else {
+                    branch.elseBranch = succ;
+                }
+            } else if (pred.terminal instanceof IRJump jump) {
+                jump.destination = succ;
+            }
+            pred.succ.remove(block);
+            pred.succ.add(succ);
+        }
+        succ.pred.remove(block);
+        func.blockList.remove(block);
     }
 
     private void changePhi(HashSet<IRBaseInst> workList, BasicBlock nowBlock, BasicBlock otherBlock) {

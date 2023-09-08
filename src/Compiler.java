@@ -1,24 +1,28 @@
 import ASM.Compound.ASMProgram;
 import AST.RootNode;
-import Backend.*;
+import Backend.InstSelector;
+import Backend.RegAlloc;
 import Frontend.*;
-import IROptimize.*;
 import Parser.*;
-import Util.MxErrorListener;
+import Util.*;
 import Util.error.error;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
-import Util.globalScope;
+
+import java.io.*;
+
+import IROptimize.*;
 
 public class Compiler {
     public static void main(String[] args) throws Exception {
-        CharStream input = CharStreams.fromStream(System.in);
+        String name = "testcases/optim/humble.mx";
+        InputStream input = new FileInputStream(name);
         try {
             RootNode ASTRoot;
             globalScope gScope = new globalScope(null);
-            MxLexer lexer = new MxLexer(input);
+            MxLexer lexer = new MxLexer(CharStreams.fromStream(input));
             lexer.removeErrorListeners();
             lexer.addErrorListener(new MxErrorListener());
             MxParser parser = new MxParser(new CommonTokenStream(lexer));
@@ -32,20 +36,30 @@ public class Compiler {
             new SemanticChecker(gScope).visit(ASTRoot);
             IRBuilder irBuilder = new IRBuilder(gScope);
             irBuilder.visit(ASTRoot);
+            PrintStream output = new PrintStream("output.ll");
+            System.setOut(output);
             new CFG(irBuilder.myProgram).buildCFG();
-            new GlobalToLocal(irBuilder.myProgram).globalTransition();
             new DomTreeConstruct(irBuilder.myProgram).work();
-            var Mem2Reg = new AllocElimination(irBuilder.myProgram);
-            Mem2Reg.eliminateAlloc();
-            // new DCE(irBuilder.myProgram).ErrorElimination();
+            new AllocElimination(irBuilder.myProgram).eliminateAlloc();
+            new DCE(irBuilder.myProgram).ErrorElimination();
+            System.out.println(irBuilder.myProgram);
+            PrintStream output_1 = new PrintStream("opt.ll");
+            System.setOut(output_1);
             new ConstPropagation(irBuilder.myProgram).propagateConst();
-            Mem2Reg.eliminatePhi();
-            ASMProgram asmProgram = new ASMProgram();
+            System.out.println(irBuilder.myProgram);
+            PrintStream output_2 = new PrintStream("DCE.ll");
+            System.setOut(output_2);
+            System.out.println(irBuilder.myProgram);
+            PrintStream output_3 = new PrintStream("output.s");
+            System.setOut(output_3);
+            new AllocElimination(irBuilder.myProgram).eliminatePhi();
+            var asmProgram = new ASMProgram();
             new InstSelector(asmProgram).visit(irBuilder.myProgram);
             new RegAlloc().visit(asmProgram);
             System.out.println(asmProgram);
         } catch (error er) {
             System.err.println(er.toString());
+            throw new RuntimeException();
         }
     }
 }

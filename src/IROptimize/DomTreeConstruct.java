@@ -44,13 +44,13 @@ public class DomTreeConstruct {
     }
 
     private void DFS(BasicBlock now) {
-        System.err.println("visiting: " + indexMap.get(now));
-        System.err.println("vis: " + now.label + "_" + now.id);
+        // System.err.println("visiting: " + indexMap.get(now));
+        // System.err.println("vis: " + now.label + "_" + now.id);
         vis.add(now);
         for (var succ : now.succ) {
-            System.err.println("checking: " + indexMap.get(succ));
-            System.err.println("check: " + succ.label + "_" + succ.id);
-            if (!vis.contains(succ)) {
+            // System.err.println("checking: " + indexMap.get(succ));
+            // System.err.println("check: " + succ.label + "_" + succ.id);
+            if (!vis.contains(succ) && !Objects.equals(succ, now)) {
                 DFS(succ);
             }
         }
