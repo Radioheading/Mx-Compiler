@@ -28,7 +28,8 @@ public class DCE {
         HashMap<IRRegister, HashSet<IRBaseInst>> back_up = new HashMap<>();
         HashMap<IRRegister, IRBaseInst> defInst = new HashMap<>();
         LinkedList<IRRegister> workList = new LinkedList<>();
-
+        HashSet<IRRegister> paramSet = new HashSet<>();
+        paramSet.addAll(func.parameterIn);
         for (var block : func.blockList) {
             if (block.terminal != null) {
                 block.stmts.add(block.terminal);
@@ -62,19 +63,7 @@ public class DCE {
                     }
                 }
             }
-            for (var inst : block.stmts) {
-                if (inst.shouldRemove) continue;
-                for (var entity : inst.uses()) {
-                    if (entity instanceof IRRegister) {
-                        if (variables.containsKey(entity)) {
-                            variables.get(entity).add(inst);
-                        }
-                    }
-                }
-            }
-            if (block.terminal != null) {
-                block.stmts.removeLast();
-            }
+            ConstPropagation.getUse(variables, block);
         }
 
         for (var reg : variables.keySet()) {
@@ -98,6 +87,7 @@ public class DCE {
                     inst.parentBlock.phiMap.remove(phi.origin);
                 }
                 for (var entity : inst.uses()) {
+                    if (paramSet.contains(entity)) continue;
                     if (entity instanceof IRRegister) {
                         System.err.println("reduce use: " + entity);
                         for (var use : back_up.get(entity)) {
@@ -109,8 +99,10 @@ public class DCE {
                             back_up.get(entity).remove(inst);
                         } else {
                             back_up.get(entity).remove(inst);
-                            variables.put((IRRegister) entity, back_up.get(entity));
-                            workList.add((IRRegister) entity);
+                            if (!back_up.get(entity).isEmpty()) {
+                                variables.put((IRRegister) entity, back_up.get(entity));
+                                workList.add((IRRegister) entity);
+                            }
                         }
                         for (var use : back_up.get(entity)) {
                             System.err.print("use: " + use + " ");
@@ -119,6 +111,9 @@ public class DCE {
                     }
                 }
             }
+        }
+        for (var block : func.blockList) {
+            block.stmts.removeIf(inst -> inst.shouldRemove);
         }
     }
 }

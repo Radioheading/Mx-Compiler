@@ -11,6 +11,7 @@ import Util.error.internalError;
 import java.util.HashMap;
 
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Stack;
 
 public class AllocElimination {
@@ -164,6 +165,13 @@ public class AllocElimination {
         block.dom_succ.forEach(sd -> visitBlock(sd, func));
         cur_name = cur;
         last_def = cur_last_def;
+        LinkedList<IRBaseInst> newStmts = new LinkedList<>();
+        for (var inst : block.stmts) {
+            if (!inst.shouldRemove) {
+                newStmts.add(inst);
+            }
+        }
+        block.stmts = newStmts;
     }
 
     private void rename(Function func) {
@@ -219,7 +227,7 @@ public class AllocElimination {
                 var tmp = new IRRegister(phi.dest.name + "_tmp", phi.dest.type);
                 for (var pred : block.pred) {
                     pred.stmts.add(new IRMove(pred, tmp, phi.block_value.get(pred)));
-                    // pred.stmts.add(new IRMove(pred, phi.dest, phi.block_value.get(pred)));
+                    // pred.stmts.add(new IRMove(pred, dest, phi.block_value.get(pred)));
                 }
                 block.stmts.addFirst(new IRMove(block, phi.dest, tmp));
             }

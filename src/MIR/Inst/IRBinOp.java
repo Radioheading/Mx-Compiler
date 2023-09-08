@@ -2,8 +2,7 @@ package MIR.Inst;
 
 // reference: 《编译器指导手册》by @peterzheng98, @LauYeeYu, @YijingGuo, @Undecimber_7th
 import MIR.BasicBlock;
-import MIR.Entity.IRRegister;
-import MIR.Entity.entity;
+import MIR.Entity.*;
 import MIR.IRVisitor;
 import MIR.type.IRBaseType;
 
@@ -59,5 +58,24 @@ public class IRBinOp extends IRBaseInst {
         ret.add(op1);
         ret.add(op2);
         return ret;
+    }
+
+    public entity getVal() {
+        if (!(op1 instanceof IRIntConst) || !(op2 instanceof IRIntConst)) {
+            return null;
+        }
+        switch (op) {
+            case "add" -> {return new IRIntConst(((IRIntConst) op1).value + ((IRIntConst) op2).value);}
+            case "sub" -> {return new IRIntConst(((IRIntConst) op1).value - ((IRIntConst) op2).value);}
+            case "mul" -> {return new IRIntConst(((IRIntConst) op1).value * ((IRIntConst) op2).value);}
+            case "sdiv" -> {return new IRIntConst(((IRIntConst) op1).value / ((IRIntConst) op2).value);}
+            case "srem" -> {return new IRIntConst(((IRIntConst) op1).value % ((IRIntConst) op2).value);}
+            case "and" -> {return new IRIntConst(((IRIntConst) op1).value & ((IRIntConst) op2).value);}
+            case "or" -> {return new IRIntConst(((IRIntConst) op1).value | ((IRIntConst) op2).value);}
+            case "xor" -> {return new IRIntConst(((IRIntConst) op1).value ^ ((IRIntConst) op2).value);}
+            case "shl" -> {return new IRIntConst(((IRIntConst) op1).value << ((IRIntConst) op2).value);}
+            case "ashr" -> {return new IRIntConst(((IRIntConst) op1).value >> ((IRIntConst) op2).value);}
+        }
+        return null;
     }
 }

@@ -3,8 +3,7 @@ package MIR.Inst;
 // reference: 《编译器指导手册》by @peterzheng98, @LauYeeYu, @YijingGuo, @Undecimber_7th
 // eq, ne, ugt, uge, ult, ule, sgt, sge, slt, sle
 import MIR.BasicBlock;
-import MIR.Entity.IRRegister;
-import MIR.Entity.entity;
+import MIR.Entity.*;
 import MIR.IRVisitor;
 import MIR.type.IRBaseType;
 
@@ -55,5 +54,40 @@ public class IRIcmp extends IRBaseInst {
         ret.add(op1);
         ret.add(op2);
         return ret;
+    }
+
+    public entity getVal() {
+        if (!(op1 instanceof IRConst) || !(op2 instanceof IRConst)) {
+            return null;
+        }
+        if (op1 instanceof IRCondConst && op2 instanceof IRCondConst) {
+            boolean val1 = ((IRCondConst) op1).value, val2 = ((IRCondConst) op2).value;
+            switch (op) {
+                case "eq":
+                    return new IRCondConst(val1 == val2);
+                case "ne":
+                    return new IRCondConst(val1 != val2);
+                default:
+                    return null;
+            }
+        } else if (op1 instanceof IRIntConst && op2 instanceof IRIntConst) {
+            switch (op) {
+                case "eq":
+                    return new IRCondConst(((IRIntConst) op1).value == ((IRIntConst) op2).value);
+                case "ne":
+                    return new IRCondConst(((IRIntConst) op1).value != ((IRIntConst) op2).value);
+                case "sgt":
+                    return new IRCondConst(((IRIntConst) op1).value > ((IRIntConst) op2).value);
+                case "sge":
+                    return new IRCondConst(((IRIntConst) op1).value >= ((IRIntConst) op2).value);
+                case "slt":
+                    return new IRCondConst(((IRIntConst) op1).value < ((IRIntConst) op2).value);
+                case "sle":
+                    return new IRCondConst(((IRIntConst) op1).value <= ((IRIntConst) op2).value);
+                default:
+                    return null;
+            }
+        }
+        return null;
     }
 }
