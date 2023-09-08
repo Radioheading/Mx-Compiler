@@ -68,8 +68,12 @@ public class IRBinOp extends IRBaseInst {
             case "add" -> {return new IRIntConst(((IRIntConst) op1).value + ((IRIntConst) op2).value);}
             case "sub" -> {return new IRIntConst(((IRIntConst) op1).value - ((IRIntConst) op2).value);}
             case "mul" -> {return new IRIntConst(((IRIntConst) op1).value * ((IRIntConst) op2).value);}
-            case "sdiv" -> {return new IRIntConst(((IRIntConst) op1).value / ((IRIntConst) op2).value);}
-            case "srem" -> {return new IRIntConst(((IRIntConst) op1).value % ((IRIntConst) op2).value);}
+            case "sdiv" -> {
+                if (((IRIntConst) op2).value == 0) return null;
+                return new IRIntConst(((IRIntConst) op1).value / ((IRIntConst) op2).value);}
+            case "srem" -> {
+                if (((IRIntConst) op2).value == 0) return null;
+                return new IRIntConst(((IRIntConst) op1).value % ((IRIntConst) op2).value);}
             case "and" -> {return new IRIntConst(((IRIntConst) op1).value & ((IRIntConst) op2).value);}
             case "or" -> {return new IRIntConst(((IRIntConst) op1).value | ((IRIntConst) op2).value);}
             case "xor" -> {return new IRIntConst(((IRIntConst) op1).value ^ ((IRIntConst) op2).value);}

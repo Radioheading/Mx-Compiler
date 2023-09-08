@@ -37,7 +37,7 @@ public class Compiler {
             new DomTreeConstruct(irBuilder.myProgram).work();
             var Mem2Reg = new AllocElimination(irBuilder.myProgram);
             Mem2Reg.eliminateAlloc();
-            new DCE(irBuilder.myProgram).ErrorElimination();
+            // new DCE(irBuilder.myProgram).ErrorElimination();
             new ConstPropagation(irBuilder.myProgram).propagateConst();
             Mem2Reg.eliminatePhi();
             ASMProgram asmProgram = new ASMProgram();
