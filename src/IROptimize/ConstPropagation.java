@@ -1,3 +1,5 @@
+// reference: 现代编译原理-C语言描述 chapter 19.3.2（基础的常数传播，四个步骤）
+
 package IROptimize;
 
 import MIR.*;
@@ -10,6 +12,8 @@ import java.util.LinkedList;
 
 public class ConstPropagation {
     Program myProgram;
+    HashSet<IRBaseInst> workList = new HashSet<>();
+    HashMap<IRRegister, HashSet<IRBaseInst>> variables = new HashMap<>();
 
     public ConstPropagation(Program _myProgram) {
         myProgram = _myProgram;
@@ -20,8 +24,8 @@ public class ConstPropagation {
     }
 
     private void propagateConst_function(Function func) {
-
-        HashMap<IRRegister, HashSet<IRBaseInst>> variables = new HashMap<>();
+        variables.clear();
+        workList.clear();
         for (var block : func.blockList) {
             if (block.terminal != null) {
                 block.stmts.add(block.terminal);
@@ -49,7 +53,6 @@ public class ConstPropagation {
             }
             getUse(variables, block);
         }
-        HashSet<IRBaseInst> workList = new HashSet<>();
         for (var block : func.blockList) {
             workList.addAll(block.phiMap.values());
             workList.addAll(block.stmts);
@@ -57,21 +60,57 @@ public class ConstPropagation {
                 workList.add(block.terminal);
             }
         }
-        while (workList.isEmpty()) {
+        while (!workList.isEmpty()) {
             var inst = workList.iterator().next();
+            System.err.println(inst);
             workList.remove(inst);
-            if (getConst(inst) == null) continue;
-            entity val = getConst(inst);
-            for (var def : inst.defs()) {
-                for (var use : variables.get(def)) {
-                    if (use instanceof IRPhi phi) {
-                        phi.addEntry(inst.parentBlock, val);
-                        workList.add(phi);
-                    } else {
-                        use.rename(def, val);
-                        workList.add(use);
+            if (inst.shouldRemove) continue;
+            if (getConst(inst) != null) {
+                entity val = getConst(inst);
+                inst.shouldRemove = true;
+                for (var def : inst.defs()) {
+                    for (var use : variables.get(def)) {
+                        if (use instanceof IRPhi phi) {
+                            phi.addEntry(inst.parentBlock, val);
+                            workList.add(phi);
+                        } else {
+                            use.rename(def, val);
+                            if (val instanceof IRRegister) {
+                                if (variables.containsKey(val)) {
+                                    variables.get(val).add(use);
+                                }
+                            }
+                            workList.add(use);
+                        }
                     }
                 }
+            } else if (inst instanceof IRBranch branch && branch.condition instanceof IRCondConst cond) {
+                var nowBlock = inst.parentBlock;
+                var toBlock = cond.value ? branch.thenBranch : branch.elseBranch;
+                var otherBlock = cond.value ? branch.elseBranch : branch.thenBranch;
+                inst.parentBlock.terminal = new IRJump(nowBlock, toBlock);
+                inst.shouldRemove = true;
+                // change the control flow graph and the phis
+                nowBlock.succ.remove(otherBlock);
+                changePhi(workList, nowBlock, otherBlock);
+                // delete block if there's no predecessor, change CFG, change uses, change phis
+                if (otherBlock.pred.size() == 0) {
+                    eraseBlock(otherBlock, func);
+                }
+            }
+        }
+        for (var block : func.blockList) {
+            block.stmts.removeIf(inst -> inst.shouldRemove);
+        }
+    }
+
+    private void changePhi(HashSet<IRBaseInst> workList, BasicBlock nowBlock, BasicBlock otherBlock) {
+        otherBlock.pred.remove(nowBlock);
+        for (var phi : otherBlock.phiMap.values()) {
+            phi.blockMap.remove(nowBlock);
+            phi.block_value.remove(nowBlock);
+            if (phi.blockMap.contains(nowBlock)) {
+                workList.add(phi);
             }
         }
     }
@@ -120,7 +159,7 @@ public class ConstPropagation {
     }
 
     private entity getConstPhi(IRPhi phi) {
-        if (phi.blockMap.size() == 1 && phi.block_value.values().iterator().next() instanceof IRConst) {
+        if (phi.blockMap.size() == 1) {
             return phi.block_value.values().iterator().next();
         } else {
             entity toCmp = phi.block_value.values().iterator().next();
@@ -133,6 +172,41 @@ public class ConstPropagation {
                 return toCmp;
             } else {
                 return null;
+            }
+        }
+    }
+
+    private void eraseBlock(BasicBlock otherBlock, Function func) {
+        func.blockList.remove(otherBlock);
+        if (otherBlock.terminal != null) {
+            otherBlock.stmts.add(otherBlock.terminal);
+        }
+        for (var phi : otherBlock.phiMap.values()) {
+            for (var entity : phi.uses()) {
+                if (entity instanceof IRRegister) {
+                    if (variables.containsKey(entity)) {
+                        variables.get(entity).remove(phi);
+                    }
+                }
+            }
+        }
+        for (var inside : otherBlock.stmts) {
+            inside.shouldRemove = true;
+            for (var entity : inside.uses()) {
+                if (entity instanceof IRRegister) {
+                    if (variables.containsKey(entity)) {
+                        variables.get(entity).remove(inside);
+                    }
+                }
+            }
+        }
+        if (otherBlock.terminal != null) {
+            otherBlock.stmts.removeLast();
+        }
+        for (var succ : otherBlock.succ) {
+            changePhi(workList, otherBlock, succ);
+            if (succ.pred.size() == 0) {
+                eraseBlock(succ, func);
             }
         }
     }

@@ -1,10 +1,4 @@
-int foo(int n) {
-	printlnInt(n);
-	if (n == 1) return 1;
-	return foo(n - 1) * n;
-}
-
 int main() {
-	printlnInt(foo(10));
-	return 0;
+	int a = 1, b = 2;
+	return (a + b) * (a - b);
 }
