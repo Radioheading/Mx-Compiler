@@ -53,5 +53,18 @@ public class LivenessAnalyzer {
                 workList.addAll(block.predecessors);
             }
         }
+
+        for (var block : myFunction.blocks) {
+            System.err.println(block.name + ", liveIn");
+            for (var in : block.liveIn) {
+                System.err.print(in + " ");
+            }
+            System.err.println();
+            System.err.println(block.name + ", liveOut");
+            for (var out : block.liveOut) {
+                System.err.println(out + " ");
+            }
+            System.err.println();
+        }
     }
 }

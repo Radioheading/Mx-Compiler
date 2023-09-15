@@ -42,7 +42,7 @@ public class GraphColoring {
         @Override
         public boolean equals(Object obj) {
             if (obj instanceof Edge o) {
-                return u == o.u && v == o.v || u == o.v && v == o.u;
+                return u == o.u && v == o.v;
             }
             return false;
         }
@@ -154,12 +154,14 @@ public class GraphColoring {
             for (var inst = block.headInst; inst != null; inst = inst.next) {
                 for (var reg : inst.realUse()) {
                     if (color.containsKey(reg) && color.get(reg) != null && reg instanceof VReg) {
+                        System.err.println("do on def: " + reg);
                         System.err.println("color: " + color.get(reg));
                         inst.replaceUse(reg, ASMProgram.pRegArrayList.get(color.get(reg)));
                     }
                 }
                 for (var reg : inst.def()) {
                     if (color.containsKey(reg) && color.get(reg) != null && reg instanceof VReg) {
+                        System.err.println("do on use: " + reg);
                         System.err.println("color: " + color.get(reg));
                         inst.replaceDef(reg, ASMProgram.pRegArrayList.get(color.get(reg)));
                     }
@@ -195,6 +197,7 @@ public class GraphColoring {
                 for (var d : inst.def()) {
                     for (var l : live) {
                         AddEdge(l, d);
+                        System.err.println("edge: " + l + ' ' + d);
                     }
                 }
                 live.removeAll(inst.def());
@@ -478,7 +481,9 @@ public class GraphColoring {
                         System.err.println("rewrite def");
                         VReg vSrc = new VReg(((VReg) def).size);
                         readSpill.add(vSrc);
+                        System.err.println("before:" + inst);
                         inst.replaceDef(def, vSrc);
+                        System.err.println("after: " + inst);
                         int place = func.placeMap.get(def);
                         if (place < 2048 && place >= -2048) {
                             block.insert_after(new StoreInst(vSrc, ASMProgram.registerMap.get("sp"), new Imm(place), ((VReg) def).size), inst);

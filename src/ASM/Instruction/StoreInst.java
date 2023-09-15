@@ -33,14 +33,13 @@ public class StoreInst extends BaseInst {
     public HashSet<Reg> use() {
         HashSet<Reg> ret = new HashSet<>();
         ret.add(src);
+        ret.add(dest);
         return ret;
     }
 
     @Override
     public HashSet<Reg> def() {
-        HashSet<Reg> ret = new HashSet<>();
-        ret.add(dest);
-        return ret;
+        return new HashSet<>();
     }
 
     @Override
@@ -51,10 +50,11 @@ public class StoreInst extends BaseInst {
     @Override
     public void replaceUse(Reg origin, Reg replaced) {
         if (src == origin) src = replaced;
+        if (dest == origin) dest = replaced;
     }
 
     @Override
     public void replaceDef(Reg origin, Reg replaced) {
-        if (dest == origin) dest = replaced;
+
     }
 }
