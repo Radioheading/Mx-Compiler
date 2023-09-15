@@ -179,13 +179,13 @@ public class GraphColoring {
             for (var inst = block.tailInst; inst != null; inst = inst.prev) {
                 if (inst instanceof MoveInst move) {
                     move.use().forEach(live::remove);
-                    for (var n : move.use()) {
+                    for (var n : move.def()) {
                         if (!moveList.containsKey(n)) {
                             moveList.put(n, new HashSet<>());
                         }
                         moveList.get(n).add(move);
                     }
-                    for (var n : move.def()) {
+                    for (var n : move.use()) {
                         if (!moveList.containsKey(n)) {
                             moveList.put(n, new HashSet<>());
                         }

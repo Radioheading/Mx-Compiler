@@ -128,7 +128,7 @@ public class InstSelector implements IRVisitor {
             nowFunc.pushVeryFront(new ITypeInst("addi", myProgram.sp, myProgram.sp, new Imm(-nowFunc.stackSize)));
             nowFunc.pushVeryBack(new ITypeInst("addi", myProgram.sp, myProgram.sp, new Imm(nowFunc.stackSize)));
         } else {
-            PReg tmp_1 = ASMProgram.registerMap.get("t1"), tmp_2 = ASMProgram.registerMap.get("t2");
+            PReg tmp_1 = ASMProgram.registerMap.get("t0"), tmp_2 = ASMProgram.registerMap.get("t0");
             nowFunc.pushVeryFront(new RTypeInst("add", myProgram.sp, myProgram.sp, tmp_1));
             nowFunc.pushVeryFront(new LiInst(tmp_1, new Imm(-nowFunc.stackSize)));
             nowFunc.pushVeryBack(new LiInst(tmp_2, new Imm(nowFunc.stackSize)));
@@ -195,6 +195,9 @@ public class InstSelector implements IRVisitor {
         nowFunc.entryBlock = nowBlock;
         for (var block : node.blockList) {
             nowBlock = blockMap.get(block);
+            if (block.label.matches(".*exit.*")) {
+                nowFunc.exitBlock = nowBlock;
+            }
             nowFunc.blocks.add(nowBlock);
             if (cnt == 0) { // allocation for the return value
                 addStore(myProgram.ra, myProgram.sp, new Imm(maxCallParam), 4);
