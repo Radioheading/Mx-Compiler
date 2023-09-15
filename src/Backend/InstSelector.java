@@ -12,6 +12,7 @@ import MIR.*;
 import MIR.Entity.*;
 import MIR.Inst.*;
 import MIR.type.IRIntType;
+import MIR.type.IRVoidType;
 import Util.error.internalError;
 
 import java.util.HashMap;
@@ -114,6 +115,13 @@ public class InstSelector implements IRVisitor {
     }
 
     private void finish() {
+        for (var save_reg : ASMProgram.calleeSave) {
+            var VReg = new VReg(4);
+            System.err.println("finish: " + VReg + ", size: " + VReg.size) ;
+            tempUsage += 4;
+            nowFunc.pushVeryFront(new MoveInst(VReg, save_reg));
+            nowFunc.pushVeryBack(new MoveInst(save_reg, VReg));
+        }
         // use the space on stack, built ret instruction
         nowFunc.stackSize = tempUsage + regMap.size() * 4 + nowFunc.paramUsage + nowFunc.allocaUsage + globalLoad;
         if (nowFunc.stackSize < 2048 && nowFunc.stackSize >= -2048) {
@@ -154,7 +162,6 @@ public class InstSelector implements IRVisitor {
 
     @Override
     public void visit(Function node) {
-        // System.err.println("curFunc: " + node.name);
         regMap.clear();
         tempUsage = 0;
         maxCallParam = 0;
@@ -166,16 +173,12 @@ public class InstSelector implements IRVisitor {
             blockMap.put(block, new ASMBlock(".LBB" + block.label + "_" + block.id));
             for (var stmt : block.stmts) {
                 if (stmt instanceof IRCall call) {
-                    // System.err.println(call.name + " " + call.arguments.size());
                     maxCallParam = Integer.max(maxCallParam, call.arguments.size());
-                    // System.err.println("cur: " + maxCallParam);
                 }
             }
         }
-        // System.err.println("maxCallParam = " + maxCallParam);
         maxCallParam = (maxCallParam > 8 ? maxCallParam - 8 : 0) * 4;
         nowFunc.paramUsage = maxCallParam;
-        // System.err.println("maxCallParam = " + maxCallParam);
         // find the maximum parameter usage first!
         nowBlock = blockMap.get(node.enterBlock);
         for (int i = 0; i < Math.min(node.parameterIn.size(), 8); ++i) {
@@ -189,6 +192,7 @@ public class InstSelector implements IRVisitor {
             regMap.put(parameter, reg);
         }
         int cnt = 0;
+        nowFunc.entryBlock = nowBlock;
         for (var block : node.blockList) {
             nowBlock = blockMap.get(block);
             nowFunc.blocks.add(nowBlock);
@@ -198,7 +202,6 @@ public class InstSelector implements IRVisitor {
             block.accept(this);
             cnt++;
         }
-        // ask for the space on the stack
     }
 
     @Override
@@ -207,7 +210,6 @@ public class InstSelector implements IRVisitor {
         Reg tmp = new VReg(4);
         VReg dest = new VReg(4);
         tempUsage += 4;
-        // System.err.println("alloca place: " + nowFunc.allocaUsage + " " + nowFunc.paramUsage);
         nowBlock.push_back(new LiInst(tmp, new Imm(nowFunc.allocaUsage + nowFunc.paramUsage)));
         nowBlock.push_back(new RTypeInst("add", dest, myProgram.sp, tmp));
         regMap.put(inst.regDest, dest);
@@ -247,7 +249,8 @@ public class InstSelector implements IRVisitor {
             }
         }
         nowBlock.push_back(new CallInst(inst.name));
-        if (inst.dest != null) {
+        if (inst.resultType != null && !(inst.resultType instanceof IRVoidType)) {
+            System.err.println("call dest: " + inst.dest);
             Reg ans = getReg(inst.dest);
             nowBlock.push_back(new MoveInst(ans, myProgram.a0));
         }
@@ -379,11 +382,7 @@ public class InstSelector implements IRVisitor {
             }
         } else {
             Reg ans = getReg(inst.dest), source = getReg(inst.src);
-            if (!regMap.containsKey(inst.dest)) {
-                System.err.println("fool: " + inst.dest);
-            }
             nowBlock.push_back(new MoveInst(ans, source));
-            System.err.println(getReg(inst.src) + " - " + inst.src);
         }
     }
 }

@@ -2,15 +2,21 @@ package ASM.Compound;
 
 import ASM.ASMVisitor;
 import ASM.Instruction.BaseInst;
+import ASM.Operand.Reg;
 import Backend.InstSelector;
 import Backend.RegAlloc;
 import MIR.IRVisitor;
 
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.TreeSet;
 
 public class ASMBlock {
+    public boolean visited = false;
+
     public BaseInst headInst = null, tailInst = null;
-    public HashSet<ASMBlock> successors = new HashSet<>(), predecessors = new HashSet<>();
+    public LinkedList<ASMBlock> successors = new LinkedList<>(), predecessors = new LinkedList<>();
+    public HashSet<Reg> liveIn = new HashSet<>(), liveOut = new HashSet<>(), use = new HashSet<>(), def = new HashSet<>();
     public String name;
 
     public ASMBlock(String _name) {
@@ -52,6 +58,19 @@ public class ASMBlock {
             in.next = i.next;
             i.next.prev = in;
             i.next = in;
+        }
+    }
+
+    public void remove(BaseInst inst) {
+        if (inst == headInst) {
+            headInst = inst.next;
+        } else {
+            inst.prev.next = inst.next;
+        }
+        if (inst == tailInst) {
+            tailInst = inst.prev;
+        } else {
+            inst.next.prev = inst.prev;
         }
     }
 

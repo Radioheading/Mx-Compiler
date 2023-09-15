@@ -5,6 +5,7 @@ import ASM.Compound.ASMBlock;
 import ASM.Operand.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class JumpInst extends BaseInst {
     public ASMBlock to;
@@ -24,12 +25,25 @@ public class JumpInst extends BaseInst {
     }
 
     @Override
-    public ArrayList<Reg> use() {
-        return new ArrayList<>();
+    public HashSet<Reg> use() {
+        return new HashSet<>();
     }
 
     @Override
-    public ArrayList<Reg> def() {
-        return new ArrayList<>();
+    public HashSet<Reg> def() {
+        return new HashSet<>();
+    }
+
+    @Override
+    public HashSet<Reg> realUse() {
+        return new HashSet<>();
+    }
+
+    @Override
+    public void replaceUse(Reg origin, Reg replaced) {
+    }
+
+    @Override
+    public void replaceDef(Reg origin, Reg replaced) {
     }
 }

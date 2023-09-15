@@ -5,6 +5,7 @@ import ASM.Compound.ASMBlock;
 import ASM.Operand.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class BTypeInst extends BaseInst {
     public String op;
@@ -28,16 +29,28 @@ public class BTypeInst extends BaseInst {
     }
 
     @Override
-    public ArrayList<Reg> use() {
-        ArrayList<Reg> ret = new ArrayList<>();
+    public HashSet<Reg> use() {
+        HashSet<Reg> ret = new HashSet<>();
         ret.add(rs);
         return ret;
     }
 
     @Override
-    public ArrayList<Reg> def() {
-        return new ArrayList<>();
+    public HashSet<Reg> def() {
+        return new HashSet<>();
     }
 
+    @Override
+    public HashSet<Reg> realUse() {
+        return use();
+    }
 
+    @Override
+    public void replaceUse(Reg origin, Reg replaced) {
+        if (rs == origin) rs = replaced;
+    }
+
+    @Override
+    public void replaceDef(Reg origin, Reg replaced) {
+    }
 }

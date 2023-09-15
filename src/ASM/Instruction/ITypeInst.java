@@ -4,6 +4,7 @@ import ASM.ASMVisitor;
 import ASM.Operand.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Objects;
 
 public class ITypeInst extends BaseInst {
@@ -32,16 +33,31 @@ public class ITypeInst extends BaseInst {
     }
 
     @Override
-    public ArrayList<Reg> use() {
-        ArrayList<Reg> ret = new ArrayList<>();
+    public HashSet<Reg> use() {
+        HashSet<Reg> ret = new HashSet<>();
         ret.add(rs1);
         return ret;
     }
 
     @Override
-    public ArrayList<Reg> def() {
-        ArrayList<Reg> ret = new ArrayList<>();
+    public HashSet<Reg> def() {
+        HashSet<Reg> ret = new HashSet<>();
         ret.add(rd);
         return ret;
+    }
+
+    @Override
+    public HashSet<Reg> realUse() {
+        return use();
+    }
+
+    @Override
+    public void replaceUse(Reg origin, Reg replaced) {
+        if (rs1 == origin) rs1 = replaced;
+    }
+
+    @Override
+    public void replaceDef(Reg origin, Reg replaced) {
+        if (rd == origin) rd = replaced;
     }
 }

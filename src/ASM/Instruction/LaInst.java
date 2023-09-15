@@ -4,6 +4,7 @@ import ASM.ASMVisitor;
 import ASM.Operand.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class LaInst extends BaseInst {
     public Reg rd;
@@ -25,14 +26,28 @@ public class LaInst extends BaseInst {
     }
 
     @Override
-    public ArrayList<Reg> use() {
-        return new ArrayList<>();
+    public HashSet<Reg> use() {
+        return new HashSet<>();
     }
 
     @Override
-    public ArrayList<Reg> def() {
-        ArrayList<Reg> ret = new ArrayList<>();
+    public HashSet<Reg> def() {
+        HashSet<Reg> ret = new HashSet<>();
         ret.add(rd);
         return ret;
+    }
+
+    @Override
+    public HashSet<Reg> realUse() {
+        return new HashSet<>();
+    }
+
+    @Override
+    public void replaceUse(Reg origin, Reg replaced) {
+    }
+
+    @Override
+    public void replaceDef(Reg origin, Reg replaced) {
+        if (rd == origin) rd = replaced;
     }
 }

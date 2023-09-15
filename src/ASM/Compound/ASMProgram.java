@@ -50,10 +50,50 @@ public class ASMProgram {
         }
     };
 
-    public static ArrayList<String> physicalRegName = new ArrayList<>(Arrays.asList(
-            "zero", "ra", "sp", "gp", "tp", "t0", "t1", "t2", "s0", "s1",
-            "a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7",
-            "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"));
+    public static ArrayList<PReg> pRegArrayList = new ArrayList<>() {{
+        add(registerMap.get("zero"));
+        add(registerMap.get("ra"));
+        add(registerMap.get("sp"));
+        add(registerMap.get("gp"));
+        add(registerMap.get("tp"));
+        for (int i = 0; i < 3; i++) add(registerMap.get("t" + i));
+        for (int i = 0; i < 2; i++) add(registerMap.get("s" + i));
+        for (int i = 0; i < 8; i++) add(registerMap.get("a" + i));
+        for (int i = 2; i < 12; i++) add(registerMap.get("s" + i));
+        for (int i = 3; i < 7; i++) add(registerMap.get("t" + i));
+    }};
+    public static ArrayList<PReg> callerSave = new ArrayList<>(Arrays.asList(
+            registerMap.get("ra"),
+            registerMap.get("t0"),
+            registerMap.get("t1"),
+            registerMap.get("t2"),
+            registerMap.get("t3"),
+            registerMap.get("t4"),
+            registerMap.get("t5"),
+            registerMap.get("t6"),
+            registerMap.get("a0"),
+            registerMap.get("a1"),
+            registerMap.get("a2"),
+            registerMap.get("a3"),
+            registerMap.get("a4"),
+            registerMap.get("a5"),
+            registerMap.get("a6"),
+            registerMap.get("a7")
+    ));
+    public static ArrayList<PReg> calleeSave = new ArrayList<>(Arrays.asList(
+            registerMap.get("s0"),
+            registerMap.get("s1"),
+            registerMap.get("s2"),
+            registerMap.get("s3"),
+            registerMap.get("s4"),
+            registerMap.get("s5"),
+            registerMap.get("s6"),
+            registerMap.get("s7"),
+            registerMap.get("s8"),
+            registerMap.get("s9"),
+            registerMap.get("s10"),
+            registerMap.get("s11")
+    ));
     public PReg zero = registerMap.get("zero");
     public PReg ra = registerMap.get("ra");
     public PReg sp = registerMap.get("sp");

@@ -1,7 +1,7 @@
 package ASM.Operand;
 
 public class PReg extends Reg {
-    int id;
+    public int id;
 
     public PReg(String name, int _id) {
         super(name);

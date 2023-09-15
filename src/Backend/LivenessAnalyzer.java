@@ -6,25 +6,46 @@ import ASM.Compound.ASMBlock;
 import ASM.Compound.ASMFunction;
 import ASM.Compound.ASMProgram;
 
-import java.util.LinkedList;
+import java.util.HashSet;
 
 public class LivenessAnalyzer {
-    private LinkedList<ASMBlock> workList = new LinkedList<>();
-    public ASMProgram myProgram;
+    private HashSet<ASMBlock> workList = new HashSet<>();
+    public ASMFunction myFunction;
 
-    public LivenessAnalyzer(ASMProgram _myProgram) {
-        myProgram = _myProgram;
+    public LivenessAnalyzer(ASMFunction func) {
+        myFunction = func;
     }
 
     public void LivenessAnalysis() {
-        for (var func : myProgram.functions) {
-            analyze_function(func);
+        // step 1: gen[pn] = gen[n] \cup (gen[p] - kill[n])
+        for (var block : myFunction.blocks) {
+            block.liveIn.clear();
+            block.liveOut.clear();
+            block.def.clear();
+            block.use.clear();
+            for (var inst = block.tailInst; inst != null; inst = inst.prev) {
+                for (var def : inst.def()) {
+                    if (!block.use.contains(def)) {
+                        block.def.add(def);
+                    }
+                }
+                block.use.addAll(inst.use());
+            }
+            workList.add(block);
         }
-    }
 
-    private void analyze_function(ASMFunction func) {
-        for (var block : func.blocks) {
-
+        while (!workList.isEmpty()) {
+            var block = workList.iterator().next();
+            workList.remove(block);
+            var old = new HashSet<>(block.liveOut);
+            block.liveIn.clear();
+            block.predecessors.forEach(pre -> block.liveIn.addAll(pre.liveOut));
+            block.liveOut = new HashSet<>(block.liveIn);
+            block.liveOut.removeAll(block.use);
+            block.liveOut.addAll(block.def);
+            if (!block.liveOut.equals(old)) {
+                workList.addAll(block.successors);
+            }
         }
     }
 }
