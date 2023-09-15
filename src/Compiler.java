@@ -40,7 +40,7 @@ public class Compiler {
             Mem2Reg.eliminatePhi();
             ASMProgram asmProgram = new ASMProgram();
             new InstSelector(asmProgram).visit(irBuilder.myProgram);
-            new RegAlloc().visit(asmProgram);
+            new GraphColoring(asmProgram).allocateReg();
             new BlockMerger(asmProgram).MergeBlock();
             System.out.println(asmProgram);
         } catch (error er) {
