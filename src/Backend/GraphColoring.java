@@ -120,24 +120,26 @@ public class GraphColoring {
     }
 
     public void allocate_func(ASMFunction func) {
-        readSpill.clear();
-        while (true) {
-            new LivenessAnalyzer(func).LivenessAnalysis();
-            init(func);
-            Build(func);
-            MakeWorkList(func);
-            do {
-                if (!simplifyWorkList.isEmpty()) Simplify(func);
-                else if (!workListMoves.isEmpty()) Coalesce();
-                else if (!freezeWorkList.isEmpty()) Freeze();
-                else if (!spillWorkList.isEmpty()) SelectSpill();
-            } while (!simplifyWorkList.isEmpty() || !workListMoves.isEmpty() || !freezeWorkList.isEmpty() || !spillWorkList.isEmpty());
-            AssignColors();
-            if (spilledNodes.isEmpty()) {
-                break;
+        new LivenessAnalyzer(func).LivenessAnalysis();
+        init(func);
+        Build(func);
+        MakeWorkList(func);
+        do {
+            if (!simplifyWorkList.isEmpty()) {
+                Simplify(func);
+            } else if (!workListMoves.isEmpty()) {
+                Coalesce();
+            } else if (!freezeWorkList.isEmpty()) {
+                Freeze();
+            } else if (!spillWorkList.isEmpty()) {
+                SelectSpill();
             }
+        } while (!simplifyWorkList.isEmpty() || !workListMoves.isEmpty() || !freezeWorkList.isEmpty() || !spillWorkList.isEmpty());
+        AssignColors();
+        if (!spilledNodes.isEmpty()) {
             RewriteProgram(func);
-            cnt++;
+            allocate_func(func);
+            return;
         }
 
         for (var block : func.blocks) {

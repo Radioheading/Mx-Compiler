@@ -501,7 +501,6 @@ public class IRBuilder implements ASTVisitor {
         it.inc = new BasicBlock("for.inc");
         it.end = new BasicBlock("for.end");
         it.end.terminal = nowBlock.terminal;
-        System.err.println("for end's terminal: " + it.end.terminal);
         if (it.varInit != null) {
             it.varInit.accept(this);
         } else if (it.exprInit != null) {
