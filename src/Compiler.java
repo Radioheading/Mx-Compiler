@@ -26,8 +26,8 @@ public class Compiler {
 
             ASTBuilder astBuilder = new ASTBuilder(gScope);
             ASTRoot = (RootNode) astBuilder.visit(parseTreeRoot);
-            new SymbolCollector(gScope).visit(ASTRoot);
-            new SemanticChecker(gScope).visit(ASTRoot);
+//            new SymbolCollector(gScope).visit(ASTRoot);
+//            new SemanticChecker(gScope).visit(ASTRoot);
             IRBuilder irBuilder = new IRBuilder(gScope);
             irBuilder.visit(ASTRoot);
             new CFG(irBuilder.myProgram).buildCFG();

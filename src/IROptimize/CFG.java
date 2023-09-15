@@ -25,10 +25,6 @@ public class CFG {
         func.exitBlock = null;
         // essential
         for (var block : func.blockList) {
-//            if (block.terminal == null) {
-//                continue;
-//            }
-//            block.stmts.add(block.terminal); // we have terminal now!
             if (block.terminal instanceof IRBranch branch) {
                 block.succ.add(branch.elseBranch);
                 branch.elseBranch.pred.add(block);
@@ -38,15 +34,6 @@ public class CFG {
                 block.succ.add(jump.destination);
                 jump.destination.pred.add(block);
             }
-//            block.terminal = null;
-        }
-        for (var block : func.blockList) {
-            System.err.print(block.label + '.' + block.id + ": ");
-            System.err.print(", succ: ");
-            for (var succ : block.succ) {
-                System.err.print(succ.label + '.' + succ.id + ' ');
-            }
-            System.err.println();
         }
         // test57.mx 's findings
         LinkedList<BasicBlock> ans = new LinkedList<>();

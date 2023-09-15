@@ -144,8 +144,6 @@ public class AllocElimination {
         // now consider every successor's phis...
         for (var edgeBlock : block.succ) {
             for (var element : edgeBlock.phiMap.keySet()) {
-                System.err.println(element + "::");
-                System.err.println(last_def.get((IRRegister) element));
                 if (last_def.get((IRRegister) element) != null) {
                     edgeBlock.phiMap.get(element).addEntry(block, last_def.get((IRRegister) element));
                 }
@@ -154,9 +152,7 @@ public class AllocElimination {
 
 
         for (var phi : block.phiMap.values()) {
-            System.err.println(block.label + "_" + block.id);
             for (var pred : block.pred) {
-                System.err.println("adding: " + pred.label + "_" + pred.id);
                 if (!phi.blockMap.contains(pred)) {
                     phi.addEntry(pred, defaultValue(phi.dest.type));
                 }
@@ -185,7 +181,7 @@ public class AllocElimination {
             HashSet<BasicBlock> original = new HashSet<>(block.succ);
             for (var succ : original) {
                 if (succ.pred.size() > 1 && original.size() > 1 && succ.phiMap.size() > 0) {
-                    System.err.println("adding edge: " + block.label + "_" + block.id + " -> " + succ.label + "_" + succ.id);
+                    // System.err.println("adding edge: " + block.label + "_" + block.id + " -> " + succ.label + "_" + succ.id);
                     // add a new block
                     BasicBlock newBlock = new BasicBlock("phi_" + block.label + "_" + block.id);
                     toAdd.add(newBlock);

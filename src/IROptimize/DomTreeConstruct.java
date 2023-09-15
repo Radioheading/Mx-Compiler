@@ -34,13 +34,6 @@ public class DomTreeConstruct {
         for (i = 0; i < func.blockList.size(); ++i) {
             dom.add(new BitSet(n));
         }
-        for (var block : func.blockList) {
-            System.err.println(indexMap.get(block) + ", succ: ");
-            for (var succ : block.succ) {
-                System.err.print(indexMap.get(succ) + " ");
-            }
-            System.err.println();
-        }
     }
 
     private void DFS(BasicBlock now) {
@@ -68,10 +61,6 @@ public class DomTreeConstruct {
 
     private void GetDominance(Function func) {
         ReversePostorder(func);
-        for (var i : ROP) {
-            System.err.print(indexMap.get(i) + " ");
-        }
-        System.err.println();
         for (int i = 0; i < func.blockList.size(); ++i) {
             for (int j = 0; j < func.blockList.size(); ++j) {
                 dom.get(i).set(j, true);
@@ -94,7 +83,6 @@ public class DomTreeConstruct {
                 for (int i = 0; i < n; ++i) {
                     tmp.set(i, true);
                 }
-                System.err.println(block.pred.size() + "is empty");
                 for (var pred : block.pred) {
                     int predIndex = indexMap.get(pred);
                     for (int i = 0; i < n; ++i) {
@@ -119,16 +107,6 @@ public class DomTreeConstruct {
                 }
             }
         }
-        for (int i = 0; i < n; ++i) {
-            for (int j = 0; j < n; ++j) {
-                if (dom.get(i).get(j)) {
-                    System.err.print("y ");
-                } else {
-                    System.err.print("n ");
-                }
-            }
-            System.err.println();
-        }
     }
 
     private void BuildDom(Function func) {
@@ -146,28 +124,14 @@ public class DomTreeConstruct {
                 }
             }
         }
-
-        for (var block : func.blockList) {
-            if (block.idom == null) {
-                System.err.println(block.label + "_" + block.id + ": null");
-            } else {
-                // System.err.println(block.label + "_" + block.id + ", IDOM: " + block.idom.label + "_" + block.idom.id);
-                // block.dominanceFrontier.forEach(sd -> System.err.print(sd.label + "_" + sd.id + " "));
-                System.err.println(indexMap.get(block) + ", idom: " + indexMap.get(block.idom));
-                System.err.println();
-            }
-        }
     }
 
     private void GetDominanceFrontier(Function func) {
         for (var block : func.blockList) {
-            System.err.println("considering: " + indexMap.get(block));
             if (block.pred.size() >= 2) {
                 for (var pred : block.pred) {
                     var runner = pred;
                     while (runner != null && !Objects.equals(indexMap.get(runner), indexMap.get(block.idom))) {
-                        System.err.println(func.name);
-                        System.err.println("add: " + indexMap.get(runner));
                         runner.dominanceFrontier.add(block);
                         runner = runner.idom;
                     }
@@ -182,13 +146,6 @@ public class DomTreeConstruct {
             GetDominance(func);
             BuildDom(func);
             GetDominanceFrontier(func);
-            for (var block : func.blockList) {
-                System.err.println(block.label + "_" + block.id + ", frontier: ");
-                for (var df : block.dominanceFrontier) {
-                    System.err.print(df.label + "_" + df.id + " ");
-                }
-                System.err.println();
-            }
         }
     }
 }

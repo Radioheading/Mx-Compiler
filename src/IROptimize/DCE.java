@@ -65,23 +65,13 @@ public class DCE {
             }
             ConstPropagation.getUse(variables, block);
         }
-
-        for (var reg : variables.keySet()) {
-            System.err.println("reg: " + reg);
-            for (var use : variables.get(reg)) {
-                System.err.print("use: " + use + " ");
-            }
-            System.err.println();
-        }
         while (!variables.isEmpty()) {
             var iter = workList.getFirst();
-            System.err.println("iter: " + iter);
             var uses = variables.get(iter);
             variables.remove(iter);
             workList.removeFirst();
             var inst = defInst.get(iter);
             if (uses.isEmpty() && !(inst instanceof IRCall)) {
-                System.err.println("remove: " + inst);
                 inst.shouldRemove = true;
                 if (inst instanceof IRPhi phi) {
                     inst.parentBlock.phiMap.remove(phi.origin);
@@ -89,11 +79,6 @@ public class DCE {
                 for (var entity : inst.uses()) {
                     if (paramSet.contains(entity)) continue;
                     if (entity instanceof IRRegister) {
-                        System.err.println("reduce use: " + entity);
-                        for (var use : back_up.get(entity)) {
-                            System.err.print("original use: " + use + " ");
-                        }
-                        System.err.println();
                         if (variables.containsKey(entity)) {
                             variables.get(entity).remove(inst);
                             back_up.get(entity).remove(inst);
@@ -104,10 +89,6 @@ public class DCE {
                                 workList.add((IRRegister) entity);
                             }
                         }
-                        for (var use : back_up.get(entity)) {
-                            System.err.print("use: " + use + " ");
-                        }
-                        System.err.println();
                     }
                 }
             }

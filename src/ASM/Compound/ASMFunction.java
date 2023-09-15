@@ -48,7 +48,6 @@ public class ASMFunction {
     }
 
     public void addAlloc(VReg reg) {
-//         placeMap.put(reg, paramUsage + allocaUsage);
         allocaUsage += reg.size;
     }
 }

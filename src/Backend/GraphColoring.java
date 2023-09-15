@@ -127,13 +127,6 @@ public class GraphColoring {
             Build(func);
             MakeWorkList(func);
             do {
-                System.err.println("simplifyWorkList.size() = " + simplifyWorkList.size());
-                System.err.println("workListMoves.size() = " + workListMoves.size());
-                System.err.println("freezeWorkList.size() = " + freezeWorkList.size());
-                System.err.println("spillWorkList.size() = " + spillWorkList.size());
-                for (var spill : spillWorkList) {
-                    System.err.println("spill: " + spill);
-                }
                 if (!simplifyWorkList.isEmpty()) Simplify(func);
                 else if (!workListMoves.isEmpty()) Coalesce();
                 else if (!freezeWorkList.isEmpty()) Freeze();
@@ -143,9 +136,6 @@ public class GraphColoring {
             if (spilledNodes.isEmpty()) {
                 break;
             }
-            for (var spill : spilledNodes) {
-                System.err.println("really spill: " + spill);
-            }
             RewriteProgram(func);
             cnt++;
         }
@@ -154,15 +144,11 @@ public class GraphColoring {
             for (var inst = block.headInst; inst != null; inst = inst.next) {
                 for (var reg : inst.realUse()) {
                     if (color.containsKey(reg) && color.get(reg) != null && reg instanceof VReg) {
-                        System.err.println("do on def: " + reg);
-                        System.err.println("color: " + color.get(reg));
                         inst.replaceUse(reg, ASMProgram.pRegArrayList.get(color.get(reg)));
                     }
                 }
                 for (var reg : inst.def()) {
                     if (color.containsKey(reg) && color.get(reg) != null && reg instanceof VReg) {
-                        System.err.println("do on use: " + reg);
-                        System.err.println("color: " + color.get(reg));
                         inst.replaceDef(reg, ASMProgram.pRegArrayList.get(color.get(reg)));
                     }
                 }
@@ -197,7 +183,7 @@ public class GraphColoring {
                 for (var d : inst.def()) {
                     for (var l : live) {
                         AddEdge(l, d);
-                        System.err.println("edge: " + l + ' ' + d);
+                        // System.err.println("edge: " + l + ' ' + d);
                     }
                 }
                 live.removeAll(inst.def());
@@ -438,7 +424,6 @@ public class GraphColoring {
                 }
             }
             if (okColors.isEmpty()) {
-                System.err.println("NoColor: " + n);
                 spilledNodes.add(n);
             } else {
                 coloredNodes.add(n);
@@ -450,7 +435,6 @@ public class GraphColoring {
 
     private void RewriteProgram(ASMFunction func) {
         for (var reg : spilledNodes) {
-            System.err.println("aminoac" + reg);
             if (reg instanceof VReg v_reg) {
                 int place = RegAlloc.getPlace(v_reg, func);
                 func.placeMap.put(v_reg, place);
@@ -460,7 +444,6 @@ public class GraphColoring {
             for (var inst = block.headInst; inst != null; inst = inst.next) {
                 for (var use : inst.realUse()) {
                     if (spilledNodes.contains(use)) {
-                        System.err.println("rewrite use");
                         VReg vDest = new VReg(((VReg) use).size);
                         inst.replaceUse(use, vDest);
                         readSpill.add(vDest);
@@ -478,12 +461,9 @@ public class GraphColoring {
                 }
                 for (var def : inst.def()) {
                     if (spilledNodes.contains(def)) {
-                        System.err.println("rewrite def");
                         VReg vSrc = new VReg(((VReg) def).size);
                         readSpill.add(vSrc);
-                        System.err.println("before:" + inst);
                         inst.replaceDef(def, vSrc);
-                        System.err.println("after: " + inst);
                         int place = func.placeMap.get(def);
                         if (place < 2048 && place >= -2048) {
                             block.insert_after(new StoreInst(vSrc, ASMProgram.registerMap.get("sp"), new Imm(place), ((VReg) def).size), inst);
@@ -496,11 +476,6 @@ public class GraphColoring {
                         }
                     }
                 }
-            }
-        }
-        for (var block : func.blocks) {
-            for (var inst = block.headInst; inst != null; inst = inst.next) {
-                System.err.println("try + " + inst);
             }
         }
     }

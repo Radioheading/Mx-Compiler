@@ -117,7 +117,6 @@ public class InstSelector implements IRVisitor {
     private void finish() {
         for (var save_reg : ASMProgram.calleeSave) {
             var VReg = new VReg(4);
-            System.err.println("finish: " + VReg + ", size: " + VReg.size) ;
             tempUsage += 4;
             nowFunc.pushVeryFront(new MoveInst(VReg, save_reg));
             nowFunc.pushVeryBack(new MoveInst(save_reg, VReg));
@@ -253,7 +252,6 @@ public class InstSelector implements IRVisitor {
         }
         nowBlock.push_back(new CallInst(inst.name));
         if (inst.resultType != null && !(inst.resultType instanceof IRVoidType)) {
-            System.err.println("call dest: " + inst.dest);
             Reg ans = getReg(inst.dest);
             nowBlock.push_back(new MoveInst(ans, myProgram.a0));
         }
