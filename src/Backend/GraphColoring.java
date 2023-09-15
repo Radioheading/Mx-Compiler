@@ -4,10 +4,12 @@ import ASM.Compound.*;
 import ASM.Operand.*;
 import ASM.Instruction.*;
 
+import java.io.PrintStream;
 import java.util.*;
 
 public class GraphColoring {
     public static int colorNum = 27;
+    int cnt = 0;
     private ASMProgram asmProgram;
 
     public GraphColoring(ASMProgram _asmProgram) {
@@ -145,6 +147,7 @@ public class GraphColoring {
                 System.err.println("really spill: " + spill);
             }
             RewriteProgram(func);
+            cnt++;
         }
 
         for (var block : func.blocks) {
@@ -443,7 +446,6 @@ public class GraphColoring {
     }
 
     private void RewriteProgram(ASMFunction func) {
-        HashSet<Reg> newTemps = new HashSet<>();
         for (var reg : spilledNodes) {
             System.err.println("aminoac" + reg);
             if (reg instanceof VReg v_reg) {
@@ -459,18 +461,16 @@ public class GraphColoring {
                         VReg vDest = new VReg(((VReg) use).size);
                         inst.replaceUse(use, vDest);
                         readSpill.add(vDest);
-                        newTemps.add(vDest);
-//                        int place = func.placeMap.get(use);
-//                        if (place < 2048 && place >= -2048) {
-//                            block.insert_before(new LoadInst(vDest, ASMProgram.registerMap.get("sp"), new Imm(place), ((VReg) use).size), inst);
-//                        } else {
-//                            VReg addDest = new VReg(((VReg) use).size);
-//                            readSpill.add(addDest);
-//                            newTemps.add(addDest);
-//                            block.insert_before(new LiInst(addDest, new Imm(place)), inst);
-//                            block.insert_before(new RTypeInst("add", addDest, ASMProgram.registerMap.get("sp"), addDest), inst);
-//                            block.insert_before(new LoadInst(vDest, addDest, new Imm(0), ((VReg) use).size), inst);
-//                        }
+                        int place = func.placeMap.get(use);
+                        if (place < 2048 && place >= -2048) {
+                            block.insert_before(new LoadInst(vDest, ASMProgram.registerMap.get("sp"), new Imm(place), ((VReg) use).size), inst);
+                        } else {
+                            VReg addDest = new VReg(((VReg) use).size);
+                            readSpill.add(addDest);
+                            block.insert_before(new LiInst(addDest, new Imm(place)), inst);
+                            block.insert_before(new RTypeInst("add", addDest, ASMProgram.registerMap.get("sp"), addDest), inst);
+                            block.insert_before(new LoadInst(vDest, addDest, new Imm(0), ((VReg) use).size), inst);
+                        }
                     }
                 }
                 for (var def : inst.def()) {
@@ -478,19 +478,17 @@ public class GraphColoring {
                         System.err.println("rewrite def");
                         VReg vSrc = new VReg(((VReg) def).size);
                         readSpill.add(vSrc);
-                        newTemps.add(vSrc);
                         inst.replaceDef(def, vSrc);
-//                        int place = func.placeMap.get(def);
-//                        if (place < 2048 && place >= -2048) {
-//                            block.insert_after(new StoreInst(vSrc, ASMProgram.registerMap.get("sp"), new Imm(place), ((VReg) def).size), inst);
-//                        } else {
-//                            VReg addDest = new VReg(((VReg) def).size);
-//                            readSpill.add(addDest);
-//                            newTemps.add(addDest);
-//                            block.insert_after(new LiInst(addDest, new Imm(place)), inst);
-//                            block.insert_after(new RTypeInst("add", addDest, ASMProgram.registerMap.get("sp"), addDest), inst);
-//                            block.insert_after(new StoreInst(vSrc, addDest, new Imm(0), ((VReg) def).size), inst);
-//                        }
+                        int place = func.placeMap.get(def);
+                        if (place < 2048 && place >= -2048) {
+                            block.insert_after(new StoreInst(vSrc, ASMProgram.registerMap.get("sp"), new Imm(place), ((VReg) def).size), inst);
+                        } else {
+                            VReg addDest = new VReg(((VReg) def).size);
+                            readSpill.add(addDest);
+                            block.insert_after(new LiInst(addDest, new Imm(place)), inst);
+                            block.insert_after(new RTypeInst("add", addDest, ASMProgram.registerMap.get("sp"), addDest), inst);
+                            block.insert_after(new StoreInst(vSrc, addDest, new Imm(0), ((VReg) def).size), inst);
+                        }
                     }
                 }
             }
@@ -500,12 +498,5 @@ public class GraphColoring {
                 System.err.println("try + " + inst);
             }
         }
-        spilledNodes.clear();
-        initial.clear();
-        initial.addAll(coloredNodes);
-        initial.addAll(coalescedNodes);
-        initial.addAll(newTemps);
-        coloredNodes.clear();
-        coalescedNodes.clear();
     }
 }

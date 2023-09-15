@@ -5,6 +5,7 @@ package Backend;
 import ASM.Compound.ASMBlock;
 import ASM.Compound.ASMFunction;
 import ASM.Compound.ASMProgram;
+import ASM.Operand.Reg;
 
 import java.util.HashSet;
 
@@ -23,28 +24,33 @@ public class LivenessAnalyzer {
             block.liveOut.clear();
             block.def.clear();
             block.use.clear();
-            for (var inst = block.tailInst; inst != null; inst = inst.prev) {
-                for (var def : inst.def()) {
-                    if (!block.use.contains(def)) {
-                        block.def.add(def);
+            for (var inst = block.headInst; inst != null; inst = inst.next) {
+                for (var use : inst.use()) {
+                    if (!block.def.contains(use)) {
+                        block.use.add(use);
                     }
                 }
-                block.use.addAll(inst.use());
+                block.def.addAll(inst.def());
             }
-            workList.add(block);
         }
+        System.err.println(myFunction.blocks.size());
+        System.err.println("try first: " + myFunction.blocks.get(myFunction.blocks.size() - 1).name);
+        workList.add(myFunction.blocks.get(myFunction.blocks.size() - 1));
 
         while (!workList.isEmpty()) {
             var block = workList.iterator().next();
             workList.remove(block);
-            var old = new HashSet<>(block.liveOut);
-            block.liveIn.clear();
-            block.predecessors.forEach(pre -> block.liveIn.addAll(pre.liveOut));
-            block.liveOut = new HashSet<>(block.liveIn);
-            block.liveOut.removeAll(block.use);
-            block.liveOut.addAll(block.def);
-            if (!block.liveOut.equals(old)) {
-                workList.addAll(block.successors);
+            HashSet<Reg> live_out_new = new HashSet<>();
+            for (var succ : block.successors) {
+                live_out_new.addAll(succ.liveIn);
+            }
+            HashSet<Reg> live_in_new = new HashSet<>(live_out_new);
+            live_in_new.addAll(block.use);
+            live_in_new.removeAll(block.def);
+            if (!live_in_new.equals(block.liveIn) || !live_out_new.equals(block.liveOut)) {
+                block.liveOut = live_out_new;
+                block.liveIn = live_in_new;
+                workList.addAll(block.predecessors);
             }
         }
     }
