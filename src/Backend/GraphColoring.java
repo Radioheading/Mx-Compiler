@@ -437,13 +437,17 @@ public class GraphColoring {
         double min = Integer.MAX_VALUE;
         Reg target = null;
         for (var m : spillWorkList) {
-            if ((double)spillCost.get(m) / degree.get(m)< min) {
+            if ((double)spillCost.get(m) / degree.get(m)< min && !readSpill.contains(m)) {
                 min = spillCost.get(m);
                 target = m;
             }
         }
+        if (target == null) {
+            target = spillWorkList.get(0);
+        }
         spillWorkList.remove(target);
         simplifyWorkList.add(target);
+        FreezeMoves(target);
     }
 
     private void AssignColors() {
