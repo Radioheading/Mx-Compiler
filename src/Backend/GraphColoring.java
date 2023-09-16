@@ -434,20 +434,23 @@ public class GraphColoring {
     }
 
     private void SelectSpill() {
-        double min = Integer.MAX_VALUE;
-        Reg target = null;
+        boolean find = false;
         for (var m : spillWorkList) {
-            if ((double)spillCost.get(m) / degree.get(m)< min && !readSpill.contains(m)) {
-                min = spillCost.get(m);
-                target = m;
+            if (!readSpill.contains(m)) {
+                find = true;
+                spillWorkList.remove(m);
+                System.err.println("really removing");
+                simplifyWorkList.add(m);
+                FreezeMoves(m);
+                break;
             }
         }
-        if (target == null) {
-            target = spillWorkList.get(0);
+        if (!find && !spillWorkList.isEmpty()) {
+            var m = spillWorkList.get(0);
+            spillWorkList.remove(0);
+            simplifyWorkList.add(m);
+            FreezeMoves(m);
         }
-        spillWorkList.remove(target);
-        simplifyWorkList.add(target);
-        FreezeMoves(target);
     }
 
     private void AssignColors() {
