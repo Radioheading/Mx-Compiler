@@ -32,9 +32,6 @@ public class Compiler {
             irBuilder.visit(ASTRoot);
             new CFG(irBuilder.myProgram).buildCFG();
             new GlobalToLocal(irBuilder.myProgram).globalTransition();
-
-            new DCE(irBuilder.myProgram).ErrorElimination();
-            new ConstPropagation(irBuilder.myProgram).propagateConst();
             new DomTreeConstruct(irBuilder.myProgram).work();
             var Mem2Reg = new AllocElimination(irBuilder.myProgram);
             Mem2Reg.eliminateAlloc();
