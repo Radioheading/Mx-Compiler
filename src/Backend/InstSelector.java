@@ -322,6 +322,7 @@ public class InstSelector implements IRVisitor {
 
     @Override
     public void visit(IRRet inst) {
+        nowBlock.isLast = true;
         if (inst.returnValue != null)
             nowBlock.push_back(new MoveInst(myProgram.a0, getReg(inst.returnValue)));
         addLoad(myProgram.ra, myProgram.sp, new Imm(maxCallParam), 4);

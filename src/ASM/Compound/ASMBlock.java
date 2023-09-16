@@ -19,6 +19,7 @@ public class ASMBlock {
     public HashSet<Reg> liveIn = new HashSet<>(), liveOut = new HashSet<>(), use = new HashSet<>(), def = new HashSet<>();
     public String name;
     public int loopDepth = 0;
+    public boolean isLast = false;
 
     public ASMBlock(String _name, int _loopDepth) {
         name = _name;

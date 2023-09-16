@@ -1,9 +1,7 @@
 package Backend;
 
-import ASM.Compound.ASMBlock;
-import ASM.Compound.ASMFunction;
-import ASM.Compound.ASMProgram;
-import ASM.Instruction.JumpInst;
+import ASM.Compound.*;
+import ASM.Instruction.*;
 
 import java.util.ArrayList;
 
@@ -43,6 +41,7 @@ public class BlockMerger {
                     target.headInst = block.headInst;
                 }
                 target.tailInst = block.tailInst;
+                target.isLast = block.isLast;
                 target.successors.remove(block);
                 target.successors.addAll(block.successors);
                 block.successors.forEach(suc -> {
@@ -54,6 +53,23 @@ public class BlockMerger {
             }
         }
         func.blocks = res;
+        for (var block : func.blocks) {
+            block.successors.clear();
+            block.predecessors.clear();
+        }
+        for (var block : func.blocks) {
+            // rewrite control flow graph
+            for (var inst = block.headInst; inst != null; inst = inst.next) {
+                if (inst instanceof JumpInst jump) {
+                    jump.to.predecessors.add(block);
+                    block.successors.add(jump.to);
+                }
+                if (inst instanceof BTypeInst bTypeInst) {
+                    bTypeInst.to.predecessors.add(block);
+                    block.successors.add(bTypeInst.to);
+                }
+            }
+        }
     }
 
     private void dfs(ASMBlock block, ArrayList<ASMBlock> order) {
