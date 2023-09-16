@@ -18,9 +18,11 @@ public class ASMBlock {
     public LinkedList<ASMBlock> successors = new LinkedList<>(), predecessors = new LinkedList<>();
     public HashSet<Reg> liveIn = new HashSet<>(), liveOut = new HashSet<>(), use = new HashSet<>(), def = new HashSet<>();
     public String name;
+    public int loopDepth = 0;
 
-    public ASMBlock(String _name) {
+    public ASMBlock(String _name, int _loopDepth) {
         name = _name;
+        loopDepth = _loopDepth;
     }
 
     public void push_back(BaseInst inst) {

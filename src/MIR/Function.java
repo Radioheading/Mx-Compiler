@@ -31,8 +31,8 @@ public class Function {
     public Function(String _name, IRBaseType _retType) {
         this.name = _name;
         this.retType = _retType;
-        enterBlock = new BasicBlock("enter_" + name);
-        exitBlock = new BasicBlock("exit_" + name);
+        enterBlock = new BasicBlock("enter_" + name, 0);
+        exitBlock = new BasicBlock("exit_" + name, 0);
         enterBlock.terminal = new IRJump(enterBlock, exitBlock);
         blockList.add(enterBlock);
         retReg = new IRRegister("ret_" + name, _retType);

@@ -32,6 +32,7 @@ public class Compiler {
             irBuilder.visit(ASTRoot);
             new CFG(irBuilder.myProgram).buildCFG();
             new GlobalToLocal(irBuilder.myProgram).globalTransition();
+
             new DCE(irBuilder.myProgram).ErrorElimination();
             new ConstPropagation(irBuilder.myProgram).propagateConst();
             new DomTreeConstruct(irBuilder.myProgram).work();
@@ -42,7 +43,6 @@ public class Compiler {
             Mem2Reg.eliminatePhi();
             ASMProgram asmProgram = new ASMProgram();
             new InstSelector(asmProgram).visit(irBuilder.myProgram);
-            new BlockMerger(asmProgram).MergeBlock();
             new GraphColoring(asmProgram).allocateReg();
             new BlockMerger(asmProgram).MergeBlock();
             System.out.println(asmProgram);

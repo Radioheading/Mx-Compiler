@@ -15,7 +15,7 @@ public class BasicBlock {
     public LinkedList<IRBaseInst> stmts = new LinkedList<>();
     public IRBaseInst terminal;
     static public HashMap<String, Integer> appearance = new HashMap<String, Integer>();
-    public int id;
+    public int id, loopDepth;
     public BasicBlock idom;
     public HashMap<entity, IRPhi> phiMap = new HashMap<>();
 
@@ -24,7 +24,7 @@ public class BasicBlock {
 
     public HashSet<BasicBlock> dom_succ = new HashSet<>();
 
-    public BasicBlock(String _label) {
+    public BasicBlock(String _label, int _loopDepth) {
         label = _label;
         if (appearance.containsKey(_label)) {
             id = appearance.get(_label);
@@ -33,6 +33,7 @@ public class BasicBlock {
             id = 0;
             appearance.put(_label, 1);
         }
+        loopDepth = _loopDepth;
     }
 
     public void push_back(IRBaseInst stmt) {

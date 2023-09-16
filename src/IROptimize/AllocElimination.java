@@ -181,7 +181,7 @@ public class AllocElimination {
                 if (succ.pred.size() > 1 && original.size() > 1 && succ.phiMap.size() > 0) {
                     // System.err.println("adding edge: " + block.label + "_" + block.id + " -> " + succ.label + "_" + succ.id);
                     // add a new block
-                    BasicBlock newBlock = new BasicBlock("phi_" + block.label + "_" + block.id);
+                    BasicBlock newBlock = new BasicBlock("phi_" + block.label + "_" + block.id, block.loopDepth);
                     toAdd.add(newBlock);
                     newBlock.terminal = new IRJump(newBlock, succ);
                     newBlock.pred.add(block);

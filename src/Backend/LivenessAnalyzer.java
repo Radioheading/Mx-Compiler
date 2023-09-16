@@ -51,7 +51,7 @@ public class LivenessAnalyzer {
                 block.liveIn = live_in_new;
                 workList.addAll(block.predecessors);
                 for (var pred : block.predecessors) {
-                    System.err.println("add to worklist: " + pred.name);
+                    System.err.println("add to worklist: " + pred.name + " " + pred.loopDepth);
                 }
             }
         }

@@ -169,7 +169,7 @@ public class InstSelector implements IRVisitor {
             node.blockList.add(node.exitBlock);
         }
         for (var block : node.blockList) {
-            blockMap.put(block, new ASMBlock(".LBB" + block.label + "_" + block.id));
+            blockMap.put(block, new ASMBlock(".LBB" + block.label + "_" + block.id, block.loopDepth));
             for (var stmt : block.stmts) {
                 if (stmt instanceof IRCall call) {
                     maxCallParam = Integer.max(maxCallParam, call.arguments.size());

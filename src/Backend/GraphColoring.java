@@ -3,12 +3,14 @@ package Backend;
 import ASM.Compound.*;
 import ASM.Operand.*;
 import ASM.Instruction.*;
+
 import java.util.*;
 
 public class GraphColoring {
     public static int colorNum = 27;
     static int defWeight = 1;
     static int useWeight = 1;
+    static int moveWeight = 1;
     private ASMProgram asmProgram;
 
     public GraphColoring(ASMProgram _asmProgram) {
@@ -59,6 +61,19 @@ public class GraphColoring {
     private HashMap<Reg, Reg> alias = new HashMap<>();
     private HashMap<Reg, Integer> color = new HashMap<>();
     private HashSet<VReg> readSpill = new HashSet<>();
+    private HashMap<Reg, Integer> spillCost = new HashMap<>();
+    private static HashMap<Integer, Integer> pow_10 = new HashMap<>() {{
+        put(0, 1);
+        put(1, 10);
+        put(2, 100);
+        put(3, 1000);
+        put(4, 10000);
+        put(5, 100000);
+        put(6, 1000000);
+        put(7, 10000000);
+        put(8, 100000000);
+        put(9, 1000000000);
+    }};
 
     public void allocateReg() {
         asmProgram.functions.forEach(this::allocate_func);
@@ -66,6 +81,7 @@ public class GraphColoring {
 
     private void init(ASMFunction func) {
         // clear everything
+        spillCost.clear();
         precolored.clear();
         initial.clear();
         simplifyWorkList.clear();
@@ -118,9 +134,35 @@ public class GraphColoring {
         }
     }
 
-    public void allocate_func(ASMFunction func) {
+    private void CalculateSpillCost(ASMFunction func) {
+        for (var block : func.blocks) {
+            for (var inst = block.headInst; inst != null; inst = inst.next) {
+                for (var reg : inst.use()) {
+                    if (reg instanceof VReg) {
+                        spillCost.put(reg, spillCost.getOrDefault(reg, 0) + useWeight * pow_10.get(block.loopDepth));
+                    }
+                }
+                for (var reg : inst.def()) {
+                    if (reg instanceof VReg) {
+                        spillCost.put(reg, spillCost.getOrDefault(reg, 0) + defWeight * pow_10.get(block.loopDepth));
+                    }
+                }
+                if (inst instanceof MoveInst moveInst) {
+                    if (moveInst.src instanceof VReg) {
+                        spillCost.put(moveInst.src, spillCost.getOrDefault(moveInst.src, 0) - moveWeight * pow_10.get(block.loopDepth));
+                    }
+                    if (moveInst.dest instanceof VReg) {
+                        spillCost.put(moveInst.dest, spillCost.getOrDefault(moveInst.dest, 0) - moveWeight * pow_10.get(block.loopDepth));
+                    }
+                }
+            }
+        }
+    }
+
+    private void allocate_func(ASMFunction func) {
         new LivenessAnalyzer(func).LivenessAnalysis();
         init(func);
+        CalculateSpillCost(func);
         Build(func);
         MakeWorkList(func);
         do {
@@ -392,23 +434,16 @@ public class GraphColoring {
     }
 
     private void SelectSpill() {
-        boolean find = false;
+        double min = Integer.MAX_VALUE;
+        Reg target = null;
         for (var m : spillWorkList) {
-            if (!readSpill.contains(m)) {
-                find = true;
-                spillWorkList.remove(m);
-                System.err.println("really removing");
-                simplifyWorkList.add(m);
-                FreezeMoves(m);
-                break;
+            if ((double)spillCost.get(m) / degree.get(m)< min) {
+                min = spillCost.get(m);
+                target = m;
             }
         }
-        if (!find && !spillWorkList.isEmpty()) {
-            var m = spillWorkList.get(0);
-            spillWorkList.remove(0);
-            simplifyWorkList.add(m);
-            FreezeMoves(m);
-        }
+        spillWorkList.remove(target);
+        simplifyWorkList.add(target);
     }
 
     private void AssignColors() {
