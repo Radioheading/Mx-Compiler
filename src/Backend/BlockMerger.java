@@ -22,6 +22,9 @@ public class BlockMerger {
         ArrayList<ASMBlock> order = new ArrayList<>();
         ArrayList<ASMBlock> res = new ArrayList<>();
         res.add(func.entryBlock);
+        for (var block : func.blocks) {
+            block.visited = false;
+        }
         // get dfs order
         dfs(func.entryBlock, order);
         // merge from back

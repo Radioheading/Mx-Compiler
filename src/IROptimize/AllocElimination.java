@@ -1,7 +1,5 @@
 package IROptimize;
 
-// todo: consider whether an alloca instruction can be eliminated
-
 import MIR.*;
 import MIR.Entity.*;
 import MIR.Inst.*;
@@ -223,7 +221,6 @@ public class AllocElimination {
                 var tmp = new IRRegister(phi.dest.name + "_tmp", phi.dest.type);
                 for (var pred : block.pred) {
                     pred.stmts.add(new IRMove(pred, tmp, phi.block_value.get(pred)));
-                    // pred.stmts.add(new IRMove(pred, dest, phi.block_value.get(pred)));
                 }
                 block.stmts.addFirst(new IRMove(block, phi.dest, tmp));
             }

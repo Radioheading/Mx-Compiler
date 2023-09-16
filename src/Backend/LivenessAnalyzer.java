@@ -32,9 +32,10 @@ public class LivenessAnalyzer {
                 }
                 block.def.addAll(inst.def());
             }
+            if (block.successors.size() == 0) {
+                workList.add(block);
+            }
         }
-        workList.add(myFunction.exitBlock);
-
         while (!workList.isEmpty()) {
             var block = workList.iterator().next();
             workList.remove(block);
@@ -49,6 +50,9 @@ public class LivenessAnalyzer {
                 block.liveOut = live_out_new;
                 block.liveIn = live_in_new;
                 workList.addAll(block.predecessors);
+                for (var pred : block.predecessors) {
+                    System.err.println("add to worklist: " + pred.name);
+                }
             }
         }
     }

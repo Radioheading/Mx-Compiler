@@ -194,9 +194,6 @@ public class InstSelector implements IRVisitor {
         nowFunc.entryBlock = nowBlock;
         for (var block : node.blockList) {
             nowBlock = blockMap.get(block);
-            if (block.label.matches(".*exit.*")) {
-                nowFunc.exitBlock = nowBlock;
-            }
             nowFunc.blocks.add(nowBlock);
             if (cnt == 0) { // allocation for the return value
                 addStore(myProgram.ra, myProgram.sp, new Imm(maxCallParam), 4);

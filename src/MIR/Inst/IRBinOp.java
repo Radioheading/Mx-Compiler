@@ -69,15 +69,19 @@ public class IRBinOp extends IRBaseInst {
             case "sub" -> {return new IRIntConst(((IRIntConst) op1).value - ((IRIntConst) op2).value);}
             case "mul" -> {return new IRIntConst(((IRIntConst) op1).value * ((IRIntConst) op2).value);}
             case "sdiv" -> {
-                if (((IRIntConst) op2).value == 0) return null;
+                if (((IRIntConst) op2).value == 0) return new IRIntConst(0);
                 return new IRIntConst(((IRIntConst) op1).value / ((IRIntConst) op2).value);}
             case "srem" -> {
-                if (((IRIntConst) op2).value == 0) return null;
+                if (((IRIntConst) op2).value == 0) return new IRIntConst(0);
                 return new IRIntConst(((IRIntConst) op1).value % ((IRIntConst) op2).value);}
             case "and" -> {return new IRIntConst(((IRIntConst) op1).value & ((IRIntConst) op2).value);}
             case "or" -> {return new IRIntConst(((IRIntConst) op1).value | ((IRIntConst) op2).value);}
             case "xor" -> {return new IRIntConst(((IRIntConst) op1).value ^ ((IRIntConst) op2).value);}
-            case "shl" -> {return new IRIntConst(((IRIntConst) op1).value << ((IRIntConst) op2).value);}
+            case "shl" -> {
+                if (((long)((IRIntConst) op1).value << ((IRIntConst) op2).value) > Integer.MAX_VALUE) {
+                    return null;
+                }
+                return new IRIntConst(((IRIntConst) op1).value << ((IRIntConst) op2).value);}
             case "ashr" -> {return new IRIntConst(((IRIntConst) op1).value >> ((IRIntConst) op2).value);}
         }
         return null;

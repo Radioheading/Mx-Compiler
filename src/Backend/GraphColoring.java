@@ -3,13 +3,12 @@ package Backend;
 import ASM.Compound.*;
 import ASM.Operand.*;
 import ASM.Instruction.*;
-
-import java.io.PrintStream;
 import java.util.*;
 
 public class GraphColoring {
     public static int colorNum = 27;
-    int cnt = 0;
+    static int defWeight = 1;
+    static int useWeight = 1;
     private ASMProgram asmProgram;
 
     public GraphColoring(ASMProgram _asmProgram) {
