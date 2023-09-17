@@ -32,7 +32,7 @@ public class LivenessAnalyzer {
                 }
                 block.def.addAll(inst.def());
             }
-            if (block.successors.size() == 0) {
+            if (block.isLast) {
                 workList.add(block);
             }
         }
