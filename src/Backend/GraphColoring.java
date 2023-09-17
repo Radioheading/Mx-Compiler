@@ -75,6 +75,8 @@ public class GraphColoring {
         put(9, 1000000000);
     }};
 
+    // reference: 鲸书, advice from @zhongyichao
+
     public void allocateReg() {
         asmProgram.functions.forEach(this::allocate_func);
     }
@@ -126,7 +128,7 @@ public class GraphColoring {
             adjList.put(reg, new HashSet<>());
         }
         for (var reg : precolored) {
-            degree.put(reg, 114514);
+            degree.put(reg, 1919810);
             moveList.put(reg, new HashSet<>());
             alias.put(reg, null);
             color.put(reg, reg.id);
@@ -435,22 +437,21 @@ public class GraphColoring {
 
     private void SelectSpill() {
         boolean find = false;
+        double max_cost = 1919810;
+        Reg target = null;
         for (var m : spillWorkList) {
-            if (!readSpill.contains(m)) {
+            if (!readSpill.contains(m) && (double)spillCost.getOrDefault(m, 0) / (double)degree.get(m) < max_cost) {
                 find = true;
-                spillWorkList.remove(m);
-                System.err.println("really removing");
-                simplifyWorkList.add(m);
-                FreezeMoves(m);
-                break;
+                target = m;
+                max_cost = (double)spillCost.getOrDefault(m, 0) / (double)degree.get(m);
             }
         }
         if (!find && !spillWorkList.isEmpty()) {
-            var m = spillWorkList.get(0);
-            spillWorkList.remove(0);
-            simplifyWorkList.add(m);
-            FreezeMoves(m);
+            target = spillWorkList.get(0);
         }
+        spillWorkList.remove(target);
+        simplifyWorkList.add(target);
+        FreezeMoves(target);
     }
 
     private void AssignColors() {
