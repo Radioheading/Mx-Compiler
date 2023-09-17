@@ -49,12 +49,12 @@ public class AllocElimination {
             last_def.clear();
             rename(func);
         }
-        for (var func : myProgram.functions) {
-            addEdge(func);
-        }
     }
 
     public void eliminatePhi() {
+        for (var func : myProgram.functions) {
+            addEdge(func);
+        }
         for (var func : myProgram.functions) {
             removePhi(func);
         }
@@ -219,7 +219,7 @@ public class AllocElimination {
                     continue;
                 }
                 var tmp = new IRRegister(phi.dest.name + "_tmp", phi.dest.type);
-                for (var pred : block.pred) {
+                for (var pred : phi.blockMap) {
                     pred.stmts.add(new IRMove(pred, tmp, phi.block_value.get(pred)));
                 }
                 block.stmts.addFirst(new IRMove(block, phi.dest, tmp));

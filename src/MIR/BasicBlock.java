@@ -17,12 +17,16 @@ public class BasicBlock {
     static public HashMap<String, Integer> appearance = new HashMap<String, Integer>();
     public int id, loopDepth;
     public BasicBlock idom;
+    public BasicBlock anti_idom;
     public HashMap<entity, IRPhi> phiMap = new HashMap<>();
 
     public HashSet<BasicBlock> pred = new HashSet<>(), succ = new HashSet<>(), dominanceFrontier = new HashSet<>();
-    public HashSet<BasicBlock> visit_pred = new HashSet<>();
+    public HashSet<BasicBlock> anti_pred = new HashSet<>(), anti_succ = new HashSet<>(), anti_dominanceFrontier = new HashSet<>();
 
     public HashSet<BasicBlock> dom_succ = new HashSet<>();
+    public HashSet<BasicBlock> anti_dom_succ = new HashSet<>();
+    public HashSet<BasicBlock> cdg_succ = new HashSet<>();
+    public HashSet<BasicBlock> cdg_pred = new HashSet<>();
 
     public BasicBlock(String _label, int _loopDepth) {
         label = _label;

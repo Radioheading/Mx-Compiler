@@ -41,9 +41,12 @@ public class CFG {
             if (block.pred.size() == 0 && block != func.enterBlock) {
                 for (var succ : block.succ) {
                     succ.pred.remove(block);
+                    succ.anti_succ.remove(block);
                 }
             } else {
                 ans.add(block);
+                block.anti_pred.addAll(block.succ);
+                block.anti_succ.addAll(block.pred);
             }
         }
         func.blockList = ans;
