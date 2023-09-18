@@ -2,6 +2,7 @@ package Backend;
 
 // reference: 《现代编译原理：C语言描述》，chapter 17.4.5
 // note: 这应该属于向后数据流分析，所以实际上代码与17.4.5不同
+// new reference: 《编译器指导手册》4.3.2
 
 import ASM.Compound.ASMBlock;
 import ASM.Compound.ASMFunction;
@@ -44,8 +45,8 @@ public class LivenessAnalyzer {
                 live_out_new.addAll(succ.liveIn);
             }
             HashSet<Reg> live_in_new = new HashSet<>(live_out_new);
-            live_in_new.addAll(block.use);
             live_in_new.removeAll(block.def);
+            live_in_new.addAll(block.use);
             if (!live_in_new.equals(block.liveIn) || !live_out_new.equals(block.liveOut)) {
                 block.liveOut = live_out_new;
                 block.liveIn = live_in_new;

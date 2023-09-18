@@ -151,6 +151,7 @@ public class IRBuilder implements ASTVisitor {
                 if (assign.initValue.entity instanceof IRConst && !(assign.initValue.entity instanceof IRStringConst)) {
                     gVar.initValue = assign.initValue.entity;
                 } else {
+                    hasInit = true;
                     gVar.initValue = defaultValue(gVar.type.Type());
                     pushStore(gVar, assign.initValue);
                     gVar.init_use = true;

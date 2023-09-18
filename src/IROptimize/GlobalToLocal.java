@@ -43,7 +43,7 @@ public class GlobalToLocal {
         }
         for (var global : myProgram.gVariables) {
             System.err.println("&gValue" + global.name);
-            if (!global.initValue.equals(defaultValue(global.type.Type())) || global.init_use) {
+            if (global.init_use) {
                 System.err.println("old value:" + global.initValue);
                 System.err.println("new value" + defaultValue(global.type.Type()));
                 newGVariables.add(global);

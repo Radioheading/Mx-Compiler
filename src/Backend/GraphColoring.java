@@ -437,7 +437,7 @@ public class GraphColoring {
 
     private void SelectSpill() {
         boolean find = false;
-        double max_cost = 1919810;
+        double max_cost = 1919810000;
         Reg target = null;
         for (var m : spillWorkList) {
             if (!readSpill.contains(m) && (double)spillCost.getOrDefault(m, 0) / (double)degree.get(m) < max_cost) {
