@@ -44,7 +44,7 @@ public class ADCE {
 
         while (!workList.isEmpty()) {
             IRBaseInst inst = workList.iterator().next();
-            System.err.println("iterator = " + inst);
+            // System.err.println("iterator = " + inst);
             workList.remove(inst);
             live.add(inst);
             liveBlock.add(inst.parentBlock);
@@ -65,7 +65,7 @@ public class ADCE {
             // branch inst of the control dependent blocks
             for (var use : inst.uses()) {
                 if (!(use instanceof IRRegister) || use instanceof IRGlobalVar) continue;
-                System.err.println("use = " + use);
+                // System.err.println("use = " + use);
                 IRBaseInst def = defMap.get(use);
                 if (def != null && !live.contains(def)) {
                     workList.add(def);

@@ -25,6 +25,7 @@ public class Function {
     public HashSet<IRAlloca> no_alloc = new HashSet<>();
     public BasicBlock exitBlock, enterBlock;
     public IRRegister retReg;
+    public Loop LoopRoot;
 
     public IRRegister thisPtr;
 

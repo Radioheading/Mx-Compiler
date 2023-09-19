@@ -27,6 +27,8 @@ public class BasicBlock {
     public HashSet<BasicBlock> anti_dom_succ = new HashSet<>();
     public HashSet<BasicBlock> cdg_succ = new HashSet<>();
     public HashSet<BasicBlock> cdg_pred = new HashSet<>();
+    public HashSet<BasicBlock> dom_sub = new HashSet<>();
+    public HashSet<BasicBlock> dom_father = new HashSet<>();
 
     public BasicBlock(String _label, int _loopDepth) {
         label = _label;

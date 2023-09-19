@@ -39,6 +39,9 @@ public class Compiler {
             new CDGConstruct(irBuilder.myProgram).work();
             new ADCE(irBuilder.myProgram).work();
             new ConstPropagation(irBuilder.myProgram).propagateConst();
+            new LoopInvariant(irBuilder.myProgram).simplifyLoopInvariant();
+            new ADCE(irBuilder.myProgram).work();
+            new ConstPropagation(irBuilder.myProgram).propagateConst();
             Mem2Reg.eliminatePhi();
             ASMProgram asmProgram = new ASMProgram();
             new InstSelector(asmProgram).visit(irBuilder.myProgram);
