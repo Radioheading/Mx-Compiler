@@ -26,6 +26,7 @@ public class Function {
     public BasicBlock exitBlock, enterBlock;
     public IRRegister retReg;
     public Loop LoopRoot;
+    public boolean hasCall = false;
 
     public IRRegister thisPtr;
 

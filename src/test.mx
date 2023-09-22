@@ -1,4 +1,7 @@
 int main() {
-	int a = getInt(), b = getInt();
-	return a + b;
+	int x = 1;
+	for (int i = 0; i < 10; ++i) {
+		x = x + 1;
+	}
+	return x;
 }

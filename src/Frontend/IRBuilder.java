@@ -870,6 +870,7 @@ public class IRBuilder implements ASTVisitor {
         FuncDefNode func = it.funcName.funcDefGuess;
         func.returnType.IRType = TypeToIRType(func.returnType);
         IRCall call = new IRCall(new IRRegister("", func.returnType.IRType), func.funcName, nowBlock, func.returnType.IRType);
+        nowFunc.hasCall = true;
         if (func.className != null) {
             // add this pointer as the first parameter
             // case 1: calling a member function like a.foo()

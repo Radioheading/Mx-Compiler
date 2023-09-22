@@ -440,10 +440,10 @@ public class GraphColoring {
         double max_cost = 1919810000;
         Reg target = null;
         for (var m : spillWorkList) {
-            if (!readSpill.contains(m) && (double)(1) / (double)degree.get(m) < max_cost) {
+            if (!readSpill.contains(m) && (double)spillCost.getOrDefault(m, 0) / (double)degree.get(m) < max_cost) {
                 find = true;
                 target = m;
-                max_cost = (double)(1) / (double)degree.get(m);
+                max_cost = (double)spillCost.getOrDefault(m, 0) / (double)degree.get(m);
             }
         }
         if (!find && !spillWorkList.isEmpty()) {
@@ -458,7 +458,7 @@ public class GraphColoring {
         while (!selectStack.isEmpty()) {
             var n = selectStack.pop();
             HashSet<Integer> okColors = new HashSet<>();
-            for (int i = 5; i < colorNum + 5; ++i) {
+            for (int i = 5; i < 32; ++i) {
                 okColors.add(i);
             }
             for (var w : adjList.getOrDefault(n, new HashSet<>())) {

@@ -11,8 +11,6 @@ import java.util.LinkedList;
 
 public class LoopInvariant {
     static HashMap<IRRegister, IRBaseInst> defMap = new HashMap<>();
-
-    HashSet<BasicBlock> vis = new HashSet<>();
     private Program myProgram;
     public LoopInvariant(Program _myProgram) {
         myProgram = _myProgram;
@@ -60,6 +58,7 @@ public class LoopInvariant {
         }
         for (var block : now.loopBlocks) {
             LinkedList<IRBaseInst> newStmts = new LinkedList<>();
+            HashMap<entity, IRPhi> newPhiMap = new HashMap<>();
             for (var inst : block.stmts) {
                 boolean isInvariant = true;
                 for (var use : inst.uses()) {

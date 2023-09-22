@@ -52,9 +52,9 @@ public class AllocElimination {
     }
 
     public void eliminatePhi() {
-        for (var func : myProgram.functions) {
-            addEdge(func);
-        }
+//        for (var func : myProgram.functions) {
+//            addEdge(func);
+//        }
         for (var func : myProgram.functions) {
             removePhi(func);
         }
