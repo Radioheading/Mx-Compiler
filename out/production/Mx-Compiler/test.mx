@@ -1,7 +1,17 @@
+int a = 0;
+
+
+int foo() {
+	a++;
+	println("shit");
+	return 0;
+}
+
 int main() {
-	int x = 1;
-	for (int i = 0; i < 10; ++i) {
-		x = x + 1;
-	}
-	return x;
+	int b = a + 1;
+	int c = a + 1;
+	int d = a + 1;
+	int e = a + 1;
+	println("shit");
+	return b;
 }

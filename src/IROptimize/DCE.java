@@ -42,6 +42,7 @@ public class DCE {
             }
             for (var inst : block.stmts) {
                 if (inst.shouldRemove) continue;
+
                 for (var entity : inst.defs()) {
                     variables.put(entity, new HashSet<>());
                     defInst.put((IRRegister) entity, inst);
@@ -71,6 +72,7 @@ public class DCE {
             variables.remove(iter);
             workList.removeFirst();
             var inst = defInst.get(iter);
+            System.err.println("iter = " + iter);
             if (uses.isEmpty() && !(inst instanceof IRCall)) {
                 inst.shouldRemove = true;
                 if (inst instanceof IRPhi phi) {

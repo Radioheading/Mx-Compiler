@@ -2,12 +2,12 @@ package IROptimize;
 
 import MIR.*;
 import MIR.Entity.*;
-import MIR.Inst.IRAlloca;
-import MIR.Inst.IRLoad;
-import MIR.Inst.IRStore;
+import MIR.Inst.*;
 import MIR.type.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
 
 
 public class GlobalToLocal {
@@ -36,12 +36,77 @@ public class GlobalToLocal {
         myProgram = _myProgram;
     }
 
+    public void ReadOnlyOptimize(Function func, IRGlobalVar gVar) {
+        if (func.hasCall) return;
+        boolean exist = false;
+        for (var block : func.blockList) {
+            for (var inst : block.stmts) {
+                if (inst instanceof IRStore store && store.dest.equals(gVar)) {
+                    return;
+                } else if (inst instanceof IRLoad load && load.address.equals(gVar)) {
+                    exist = true;
+                }
+            }
+        }
+        if (!exist) return;
+        IRRegister newReg = new IRRegister(gVar.name, gVar.type.Type());
+        if (func.name.equals("main")) {
+            boolean flag = false;
+            LinkedList<IRBaseInst> newStmts = new LinkedList<>();
+            for (var inst : func.enterBlock.stmts) {
+                newStmts.add(inst);
+                if (inst instanceof IRCall call && call.name.equals("__mx_global_var_init")) { // only initializer
+                    flag = true;
+                    newStmts.add(new IRLoad(func.enterBlock, gVar.type, newReg, gVar));
+                }
+            }
+            if (!flag) {
+                newStmts.addFirst(new IRLoad(func.enterBlock, gVar.type, newReg, gVar));
+            }
+            func.enterBlock.stmts = newStmts;
+        } else {
+            func.enterBlock.stmts.addFirst(new IRLoad(func.enterBlock, gVar.type, newReg, gVar));
+        }
+        HashSet<IRRegister> toChange = new HashSet<>();
+        for (var block : func.blockList) {
+            LinkedList<IRBaseInst> newStmts = new LinkedList<>();
+            for (var inst : block.stmts) {
+                if (inst instanceof IRLoad load && load.address.equals(gVar) && !((IRLoad) inst).dest.equals(newReg)) {
+                    toChange.add(((IRLoad) inst).dest);
+                } else {
+                    newStmts.add(inst);
+                }
+            }
+            block.stmts = newStmts;
+        }
+        for (var block : func.blockList) {
+            for (var phi : block.phiMap.values()) {
+                if (phi.dest.equals(gVar)) {
+                    toChange.add(phi.dest);
+                }
+            }
+            for (var inst : block.stmts) {
+                for (var reg : toChange) {
+                    inst.rename(reg, newReg);
+                }
+            }
+            if (block.terminal instanceof IRBranch branch) {
+                if (branch.condition instanceof IRRegister reg && toChange.contains(reg)) {
+                    branch.condition = newReg;
+                }
+            }
+        }
+    }
+
     public void globalTransition() {
         ArrayList<IRGlobalVar> newGVariables = new ArrayList<>();
         for (var func : myProgram.functions) {
             func.init.clear();
         }
         for (var global : myProgram.gVariables) {
+            for (var func : myProgram.functions) {
+                ReadOnlyOptimize(func, global);
+            }
             System.err.println("&gValue" + global.name);
             if (global.init_use) {
                 System.err.println("old value:" + global.initValue);

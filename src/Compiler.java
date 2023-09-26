@@ -10,9 +10,12 @@ import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import Util.globalScope;
 
+import java.io.PrintStream;
+
 public class Compiler {
     public static void main(String[] args) throws Exception {
-        CharStream input = CharStreams.fromStream(System.in);
+        // input from file
+        CharStream input = CharStreams.fromFileName("testcases/codegen/e6.mx");
         try {
             RootNode ASTRoot;
             globalScope gScope = new globalScope(null);
@@ -31,7 +34,11 @@ public class Compiler {
             IRBuilder irBuilder = new IRBuilder(gScope);
             irBuilder.visit(ASTRoot);
             new CFG(irBuilder.myProgram).buildCFG();
+            PrintStream out = new PrintStream("output.ll");
+            out.println(irBuilder.myProgram);
             new GlobalToLocal(irBuilder.myProgram).globalTransition();
+            PrintStream err = new PrintStream("opt.ll");
+            err.println(irBuilder.myProgram);
             new DomTreeConstruct(irBuilder.myProgram).work();
             var Mem2Reg = new AllocElimination(irBuilder.myProgram);
             Mem2Reg.eliminateAlloc();
@@ -45,12 +52,14 @@ public class Compiler {
             Mem2Reg.eliminatePhi();
             ASMProgram asmProgram = new ASMProgram();
             new InstSelector(asmProgram).visit(irBuilder.myProgram);
-            new BlockMerger(asmProgram).MergeBlock();
+            // new BlockMerger(asmProgram).MergeBlock();
+            // no idea why merging blocks beforehand would have lower efficiency
             new GraphColoring(asmProgram).allocateReg();
             new BlockMerger(asmProgram).MergeBlock();
-            System.out.println(asmProgram);
+            PrintStream asm = new PrintStream("output.s");
+            asm.println(asmProgram);
         } catch (error er) {
-            System.err.println(er.toString());
+            System.err.println(er);
         }
     }
 }

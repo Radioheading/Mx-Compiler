@@ -17,6 +17,7 @@ import Util.globalScope;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Objects;
 
 public class IRBuilder implements ASTVisitor {
@@ -37,6 +38,7 @@ public class IRBuilder implements ASTVisitor {
             voidType = new IRVoidType(), nullType = new IRNullType(), stringType = new IRPtrType(boolType, 0, false);
     private static final IRConst
             intOne = new IRIntConst(1), intZero = new IRIntConst(0), minusOne = new IRIntConst(-1), nullValue = new IRNullConst();
+
     public IRBuilder(globalScope _gScope) {
         this.gScope = _gScope;
         this.nowScope = _gScope;
@@ -62,6 +64,29 @@ public class IRBuilder implements ASTVisitor {
         myProgram.builtinFunc.add(new IRFuncDeclare("__str_parseInt", intType, charStar));
         myProgram.builtinFunc.add(new IRFuncDeclare("__str_ord", intType, charStar, intType));
     }
+
+    static HashSet<String> builtinFuncName = new HashSet<>() {{
+        add("print");
+        add("println");
+        add("printInt");
+        add("printlnInt");
+        add("getString");
+        add("getInt");
+        add("toString");
+        add("__malloc");
+        add("__array_size");
+        add("__str_add");
+        add("__str_eq");
+        add("__str_ne");
+        add("__str_lt");
+        add("__str_le");
+        add("__str_gt");
+        add("__str_ge");
+        add("__str_length");
+        add("__str_substring");
+        add("__str_parseInt");
+        add("__str_ord");
+    }};
 
     private String noEscape(String obj) {
         String inner = obj.substring(1, obj.length() - 1);
@@ -114,11 +139,22 @@ public class IRBuilder implements ASTVisitor {
     private IRBaseType TypeToIRType(TypeNameNode type) {
         IRBaseType baseType;
         switch (type.type.name) {
-            case "int": baseType = intType; break;
-            case "bool": baseType = boolType; break;
-            case "string": baseType = stringType; break;
-            case "void": case "null": baseType = voidType; break;
-            default: baseType = new IRPtrType(StructInfoMap.get(type.type.name), 0, false); break;
+            case "int":
+                baseType = intType;
+                break;
+            case "bool":
+                baseType = boolType;
+                break;
+            case "string":
+                baseType = stringType;
+                break;
+            case "void":
+            case "null":
+                baseType = voidType;
+                break;
+            default:
+                baseType = new IRPtrType(StructInfoMap.get(type.type.name), 0, false);
+                break;
         }
         if (type.type.dim > 0) {
             return new IRPtrType(baseType, type.type.dim - 1, false);
@@ -333,7 +369,7 @@ public class IRBuilder implements ASTVisitor {
         curLoop = new Loop(nowBlock, null);
         nowFunc.LoopRoot = curLoop;
 
-                IRPtrType classType = new IRPtrType(nowClass, 0, false);
+        IRPtrType classType = new IRPtrType(nowClass, 0, false);
         IRRegister thisAddr = new IRRegister("this.addr", new IRPtrType(classType, 0, true));
         IRRegister thisIn = new IRRegister("this", classType);
         nowFunc.parameterIn.add(thisIn);
@@ -403,7 +439,8 @@ public class IRBuilder implements ASTVisitor {
     }
 
     @Override
-    public void visit(ParameterListNode it) {}
+    public void visit(ParameterListNode it) {
+    }
 
     @Override
     public void visit(RootNode it) {
@@ -466,7 +503,8 @@ public class IRBuilder implements ASTVisitor {
     }
 
     @Override
-    public void visit(TypeNameNode it) {}
+    public void visit(TypeNameNode it) {
+    }
 
     @Override
     public void visit(VarDefAssignNode it) {
@@ -870,7 +908,10 @@ public class IRBuilder implements ASTVisitor {
         FuncDefNode func = it.funcName.funcDefGuess;
         func.returnType.IRType = TypeToIRType(func.returnType);
         IRCall call = new IRCall(new IRRegister("", func.returnType.IRType), func.funcName, nowBlock, func.returnType.IRType);
-        nowFunc.hasCall = true;
+        if (!builtinFuncName.contains(func.funcName)) {
+            System.err.println("not builtin name: " + func.funcName);
+            nowFunc.hasCall = true;
+        }
         if (func.className != null) {
             // add this pointer as the first parameter
             // case 1: calling a member function like a.foo()
@@ -1019,6 +1060,7 @@ public class IRBuilder implements ASTVisitor {
             nowBlock.push_back(new IRLoad(nowBlock, res, (IRRegister) it.entity, alloc));
         }
     }
+
     @Override
     public void visit(UnaryExprNode it) {
         it.object.accept(this);
