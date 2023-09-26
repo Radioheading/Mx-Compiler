@@ -402,8 +402,11 @@ public class GraphColoring {
             add(v);
         }});
         for (var t : Adjacent(v)) {
-            AddEdge(t, u);
-            DecrementDegree(t);
+            if (!adjSet.contains(new Edge(t, u))) {
+                AddEdge(t, u);
+            } else {
+                DecrementDegree(t);
+            }
         }
         if (degree.get(u) >= colorNum && freezeWorkList.contains(u)) {
             freezeWorkList.remove(u);
