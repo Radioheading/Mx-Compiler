@@ -10,7 +10,7 @@ import MIR.Inst.*;
 
 public class BasicBlock {
     public String label;
-
+    public boolean hasCall = false;
     public boolean hasReturned = false;
     public LinkedList<IRBaseInst> stmts = new LinkedList<>();
     public IRBaseInst terminal;

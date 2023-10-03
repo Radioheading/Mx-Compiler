@@ -98,6 +98,7 @@ public class GlobalToLocal {
         }
     }
 
+
     public void globalTransition() {
         ArrayList<IRGlobalVar> newGVariables = new ArrayList<>();
         for (var func : myProgram.functions) {

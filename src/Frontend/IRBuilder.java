@@ -430,6 +430,7 @@ public class IRBuilder implements ASTVisitor {
         if (Objects.equals(it.funcName, "main")) { // void init()
             if (hasInit) {
                 it.IRFunc.enterBlock.stmts.addFirst(new IRCall(null, "__mx_global_var_init", nowBlock, null));
+                it.IRFunc.enterBlock.hasCall = true;
             }
             it.IRFunc.enterBlock.stmts.addFirst(new IRStore(nowBlock, intZero, it.IRFunc.retReg));
         }
@@ -908,6 +909,7 @@ public class IRBuilder implements ASTVisitor {
         FuncDefNode func = it.funcName.funcDefGuess;
         func.returnType.IRType = TypeToIRType(func.returnType);
         IRCall call = new IRCall(new IRRegister("", func.returnType.IRType), func.funcName, nowBlock, func.returnType.IRType);
+        nowBlock.hasCall = true;
         if (!builtinFuncName.contains(func.funcName)) {
             System.err.println("not builtin name: " + func.funcName);
             nowFunc.hasCall = true;
@@ -988,6 +990,7 @@ public class IRBuilder implements ASTVisitor {
             callInst.arguments.add(new IRIntConst(classType.all_size));
             nowBlock.push_back(callInst);
             if (classType.hasConstruct) {
+                nowBlock.hasCall = true;
                 var callConstruct = new IRCall(null, classType.name + "." + classType.name, nowBlock, voidType);
                 callConstruct.arguments.add(it.entity);
                 nowBlock.push_back(callConstruct);
