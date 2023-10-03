@@ -73,12 +73,12 @@ public class ASMProgram {
             registerMap.get("t6"),
             registerMap.get("a0"),
             registerMap.get("a1"),
-            registerMap.get("a2")
-//            registerMap.get("a3"),
-//            registerMap.get("a4"),
-//            registerMap.get("a5"),
-//            registerMap.get("a6"),
-//            registerMap.get("a7")
+            registerMap.get("a2"),
+            registerMap.get("a3"),
+            registerMap.get("a4"),
+            registerMap.get("a5"),
+            registerMap.get("a6"),
+            registerMap.get("a7")
     ));
     public static ArrayList<PReg> calleeSave = new ArrayList<>(Arrays.asList(
             registerMap.get("s0"),
