@@ -7,7 +7,7 @@ import ASM.Instruction.*;
 import java.util.*;
 
 public class GraphColoring {
-    public static int colorNum = 27;
+    public static int colorNum = 29;
     static int defWeight = 1;
     static int useWeight = 1;
     static int moveWeight = 1;
@@ -461,7 +461,7 @@ public class GraphColoring {
         while (!selectStack.isEmpty()) {
             var n = selectStack.pop();
             HashSet<Integer> okColors = new HashSet<>();
-            for (int i = 5; i < 32; ++i) {
+            for (int i = 3; i < 32; ++i) {
                 okColors.add(i);
             }
             for (var w : adjList.getOrDefault(n, new HashSet<>())) {
