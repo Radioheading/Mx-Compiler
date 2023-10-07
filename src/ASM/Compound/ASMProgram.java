@@ -95,7 +95,7 @@ public class ASMProgram {
             registerMap.get("s8"),
             registerMap.get("s9"),
             registerMap.get("s10"),
-            registerMap.get("s11"),
+            registerMap.get("s11")
     ));
     public PReg zero = registerMap.get("zero");
     public PReg ra = registerMap.get("ra");
