@@ -78,7 +78,10 @@ public class ASMProgram {
             registerMap.get("a4"),
             registerMap.get("a5"),
             registerMap.get("a6"),
-            registerMap.get("a7")
+            registerMap.get("a7"),
+            // unsafe try: add gp tp
+            registerMap.get("gp"),
+            registerMap.get("tp")
     ));
     public static ArrayList<PReg> calleeSave = new ArrayList<>(Arrays.asList(
             registerMap.get("s0"),
@@ -93,9 +96,6 @@ public class ASMProgram {
             registerMap.get("s9"),
             registerMap.get("s10"),
             registerMap.get("s11"),
-            // unsafe try: add gp tp
-            registerMap.get("gp"),
-            registerMap.get("tp")
     ));
     public PReg zero = registerMap.get("zero");
     public PReg ra = registerMap.get("ra");
