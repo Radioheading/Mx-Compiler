@@ -61,4 +61,12 @@ public class IRGetElementPtr extends IRBaseInst {
         ret.addAll(indexes);
         return ret;
     }
+
+    @Override
+    public void replaceUse(entity origin, entity replaced) {
+        if (ptr.equals(origin)) ptr = replaced;
+        for (int i = 0; i < indexes.size(); ++i) {
+            if (indexes.get(i).equals(origin)) indexes.set(i, replaced);
+        }
+    }
 }

@@ -45,4 +45,11 @@ public class IRRet extends IRBaseInst {
     public HashSet<entity> uses() {
         return new HashSet<>(){{if (returnValue != null) add(returnValue);}};
     }
+
+    @Override
+    public void replaceUse(entity origin, entity replaced) {
+        if (returnValue != null) {
+            if (returnValue.equals(origin)) returnValue = replaced;
+        }
+    }
 }

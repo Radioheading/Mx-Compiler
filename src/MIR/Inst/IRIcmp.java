@@ -90,4 +90,10 @@ public class IRIcmp extends IRBaseInst {
         }
         return null;
     }
+
+    @Override
+    public void replaceUse(entity origin, entity replaced) {
+        if (op1.equals(origin)) op1 = replaced;
+        if (op2.equals(origin)) op2 = replaced;
+    }
 }

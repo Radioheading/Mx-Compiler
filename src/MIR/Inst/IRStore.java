@@ -53,4 +53,10 @@ public class IRStore extends IRBaseInst {
         ret.add(dest);
         return ret;
     }
+
+    @Override
+    public void replaceUse(entity origin, entity replaced) {
+        if (value.equals(origin)) value = replaced;
+        if (dest.equals(origin)) dest = (IRRegister) replaced;
+    }
 }

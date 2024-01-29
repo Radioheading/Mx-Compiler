@@ -31,11 +31,11 @@ public class CDGConstruct {
     }
 
     private void DFS(BasicBlock now) {
-        System.err.println("visiting: " + indexMap.get(now));
+//        System.err.println("visiting: " + indexMap.get(now));
         // System.err.println("vis: " + now.label + "_" + now.id);
         vis.add(now);
         for (var succ : now.anti_succ) {
-            System.err.println("checking: " + indexMap.get(succ) + " " + indexMap.get(now));
+//            System.err.println("checking: " + indexMap.get(succ) + " " + indexMap.get(now));
             // System.err.println("succ: " + succ.label + "_" + succ.id);
             if (!vis.contains(succ) && !Objects.equals(succ, now)) {
                 DFS(succ);
@@ -107,7 +107,7 @@ public class CDGConstruct {
 
     private void BuildDom(Function func) {
         for (int u = n - 2; u >= 0; --u) {
-            System.err.println("son: " + u);
+//            System.err.println("son: " + u);
             for (int i = n - 1; i >= 0; --i) {
                 if (!dom.get(u).get(i)) continue;
                 BitSet tmp = new BitSet(n);
@@ -116,8 +116,8 @@ public class CDGConstruct {
                 }
                 if (tmp.cardinality() == 1 && tmp.get(u)) {
                     func.blockList.get(u).anti_idom = func.blockList.get(i);
-                    System.err.println("father: " + i);
-                    System.err.println();
+//                    System.err.println("father: " + i);
+//                    System.err.println();
                     func.blockList.get(i).anti_dom_succ.add(func.blockList.get(u));
                     break;
                 }

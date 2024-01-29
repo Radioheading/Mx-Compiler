@@ -65,4 +65,11 @@ public class IRCall extends IRBaseInst {
     public HashSet<entity> uses() {
         return new HashSet<>(arguments);
     }
+
+    @Override
+    public void replaceUse(entity origin, entity replaced) {
+        for (int i = 0; i < arguments.size(); ++i) {
+            if (arguments.get(i).equals(origin)) arguments.set(i, replaced);
+        }
+    }
 }

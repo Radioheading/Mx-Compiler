@@ -24,4 +24,6 @@ public abstract class IRBaseInst {
     public abstract HashSet<IRRegister> defs();
 
     public abstract HashSet<entity> uses();
+
+    public abstract void replaceUse(entity origin, entity replaced);
 }

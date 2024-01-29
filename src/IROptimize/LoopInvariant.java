@@ -58,15 +58,16 @@ public class LoopInvariant {
         }
         for (var block : now.loopBlocks) {
             LinkedList<IRBaseInst> newStmts = new LinkedList<>();
-            HashMap<entity, IRPhi> newPhiMap = new HashMap<>();
             for (var inst : block.stmts) {
                 boolean isInvariant = true;
                 for (var use : inst.uses()) {
-                    System.err.println("use = " + use);
                     if (!(use instanceof IRConst) && !(Invariant.contains(use)) && (!defMap.containsKey(use) || now.loopBlocks.contains(defMap.get(use).parentBlock))) {
                         isInvariant = false;
                         break;
                     }
+                }
+                if (isInvariant) {
+                    System.err.println("invariant: " + inst);
                 }
                 if (isInvariant && canBeMoved(inst)) {
                     System.err.println("invariant: " + inst);

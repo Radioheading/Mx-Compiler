@@ -72,7 +72,7 @@ public class DCE {
             variables.remove(iter);
             workList.removeFirst();
             var inst = defInst.get(iter);
-            System.err.println("iter = " + iter);
+            // System.err.println("iter = " + iter);
             if (uses.isEmpty() && !(inst instanceof IRCall)) {
                 inst.shouldRemove = true;
                 if (inst instanceof IRPhi phi) {

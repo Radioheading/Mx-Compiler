@@ -1,6 +1,15 @@
-int []a = new int[8];
-
 int main() {
-	int b = a[0];
-	return b;
+    int a = getInt(), b = getInt(), c = getInt(), d = getInt();
+
+    int sum = 0;
+
+    for (int i = 0; i < 10; ++i) {
+        int e = a + b + c + d + 1;
+        int f = a + b + c + d + 1;
+        int g = a + b + c + d + 1;
+        int h = a + b + c + d + 1;
+        sum = sum + e + f + g + h + 1;
+    }
+
+    printlnInt(sum);
 }

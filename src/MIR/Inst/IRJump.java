@@ -40,4 +40,7 @@ public class IRJump extends IRBaseInst {
     public HashSet<entity> uses() {
         return new HashSet<>();
     }
+
+    @Override
+    public void replaceUse(entity origin, entity replaced) {}
 }

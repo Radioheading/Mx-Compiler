@@ -67,8 +67,17 @@ public class IRPhi extends IRBaseInst {
         return ret;
     }
 
-    public void addEntry (BasicBlock from, entity value){
-            blockMap.add(from);
-            block_value.put(from, value);
+    @Override
+    public void replaceUse(entity origin, entity replaced) {
+        for (var block : blockMap) {
+            if (block_value.get(block).equals(origin)) {
+                block_value.put(block, replaced);
+            }
         }
     }
+
+    public void addEntry (BasicBlock from, entity value){
+        blockMap.add(from);
+        block_value.put(from, value);
+    }
+}

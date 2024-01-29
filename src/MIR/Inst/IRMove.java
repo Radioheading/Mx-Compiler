@@ -27,6 +27,11 @@ public class IRMove extends IRBaseInst {
     }
 
     @Override
+    public void replaceUse(entity origin, entity replaced) {
+        if (src.equals(origin)) src = replaced;
+    }
+
+    @Override
     public void rename(entity origin, entity obj) {}
     // no need to do anything
     @Override

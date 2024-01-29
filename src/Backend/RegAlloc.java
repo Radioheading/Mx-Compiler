@@ -17,7 +17,7 @@ public class RegAlloc implements ASMVisitor {
 
     private PReg getPhysical(PReg use, VReg def, BaseInst inst, boolean srcOrDest) {
         int place; // place on stack
-        System.err.println("def size: " + def + ' ' + def.size);
+//        System.err.println("def size: " + def + ' ' + def.size);
         place = getPlace(def, nowFunc);
         if (place < 2048 && place >= -2048) {
             if (srcOrDest) {
@@ -46,15 +46,15 @@ public class RegAlloc implements ASMVisitor {
                 place = nowFunc.placeMap.get(def);
             } else {
                 place = nowFunc.allocaUsage;
-                System.err.println("1: " + place);
+//                System.err.println("1: " + place);
                 place += nowFunc.paramUsage;
-                System.err.println("2: " + place);
+//                System.err.println("2: " + place);
                 nowFunc.placeMap.put(def, place);
-                System.err.println("?: " + def.size);
+//                System.err.println("?: " + def.size);
                 nowFunc.allocaUsage += def.size;
-                System.err.println("3: " + nowFunc.allocaUsage);
+//                System.err.println("3: " + nowFunc.allocaUsage);
             }
-            System.err.println("getPlace: " + def + " " + place);
+//            System.err.println("getPlace: " + def + " " + place);
         } else {
             place = def.param_id * 4 + nowFunc.stackSize;
         }
@@ -78,7 +78,7 @@ public class RegAlloc implements ASMVisitor {
 
     @Override
     public void visit(ASMFunction node) {
-        System.err.println("----------------------------");
+//        System.err.println("----------------------------");
         nowFunc = node;
         for (var block : node.blocks) {
             nowBlock = block;

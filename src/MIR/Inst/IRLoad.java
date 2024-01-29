@@ -54,4 +54,9 @@ public class IRLoad extends IRBaseInst {
         }
         return new HashSet<>(new ArrayList<>(){{add(address);}});
     }
+
+    @Override
+    public void replaceUse(entity origin, entity replaced) {
+        if (address.equals(origin)) address = replaced;
+    }
 }

@@ -45,4 +45,9 @@ public class IRZext extends IRBaseInst {
     public HashSet<entity> uses() {
         return new HashSet<>(){{add(value);}};
     }
+
+    @Override
+    public void replaceUse(entity origin, entity replaced) {
+        if (value.equals(origin)) value = replaced;
+    }
 }

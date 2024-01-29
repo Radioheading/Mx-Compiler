@@ -60,6 +60,12 @@ public class IRBinOp extends IRBaseInst {
         return ret;
     }
 
+    @Override
+    public void replaceUse(entity origin, entity replaced) {
+        if (op1.equals(origin)) op1 = replaced;
+        if (op2.equals(origin)) op2 = replaced;
+    }
+
     public entity getVal() {
         if (!(op1 instanceof IRIntConst) || !(op2 instanceof IRIntConst)) {
             return null;
