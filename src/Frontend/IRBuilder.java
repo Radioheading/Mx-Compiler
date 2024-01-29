@@ -911,7 +911,7 @@ public class IRBuilder implements ASTVisitor {
         IRCall call = new IRCall(new IRRegister("", func.returnType.IRType), func.funcName, nowBlock, func.returnType.IRType);
         nowBlock.hasCall = true;
         if (!builtinFuncName.contains(func.funcName)) {
-            System.err.println("not builtin name: " + func.funcName);
+            // System.err.println("not builtin name: " + func.funcName);
             nowFunc.hasCall = true;
         }
         if (func.className != null) {

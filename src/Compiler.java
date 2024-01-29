@@ -10,10 +10,6 @@ import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import Util.globalScope;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.PrintStream;
-
 public class Compiler {
     public static void main(String[] args) throws Exception {
         CharStream input = CharStreams.fromStream(System.in);
@@ -40,13 +36,13 @@ public class Compiler {
             var Mem2Reg = new AllocElimination(irBuilder.myProgram);
             Mem2Reg.eliminateAlloc();
             new DCE(irBuilder.myProgram).ErrorElimination();
-            new CSE(irBuilder.myProgram).work();
             new CDGConstruct(irBuilder.myProgram).work();
             new ADCE(irBuilder.myProgram).work();
-            new ConstPropagation(irBuilder.myProgram).propagateConst();
             new CSE(irBuilder.myProgram).work();
+            new ConstPropagation(irBuilder.myProgram).propagateConst();
             new LoopInvariant(irBuilder.myProgram).simplifyLoopInvariant();
             new ADCE(irBuilder.myProgram).work();
+            new CSE(irBuilder.myProgram).work();
             new ConstPropagation(irBuilder.myProgram).propagateConst();
             Mem2Reg.eliminatePhi();
             ASMProgram asmProgram = new ASMProgram();

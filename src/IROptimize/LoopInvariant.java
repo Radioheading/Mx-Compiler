@@ -44,7 +44,7 @@ public class LoopInvariant {
             workLoop(succ);
         }
         BasicBlock start = null;
-        System.err.println("loopHeader = " + now.loopHeader.label + "_" + now.loopHeader.id);
+//        System.err.println("loopHeader = " + now.loopHeader.label + "_" + now.loopHeader.id);
         for (var block : now.loopHeader.pred) {
             if (!now.loopBlocks.contains(block)) {
                 start = block;
@@ -54,7 +54,7 @@ public class LoopInvariant {
         if (start == null) {
             return;
         } else {
-            System.err.println("start = " + start.label + "_" + start.id);
+//            System.err.println("start = " + start.label + "_" + start.id);
         }
         for (var block : now.loopBlocks) {
             LinkedList<IRBaseInst> newStmts = new LinkedList<>();
@@ -67,10 +67,10 @@ public class LoopInvariant {
                     }
                 }
                 if (isInvariant) {
-                    System.err.println("invariant: " + inst);
+//                    System.err.println("invariant: " + inst);
                 }
                 if (isInvariant && canBeMoved(inst)) {
-                    System.err.println("invariant: " + inst);
+//                    System.err.println("invariant: " + inst);
                     Invariant.addAll(inst.defs());
                     start.stmts.add(inst);
                 } else {
