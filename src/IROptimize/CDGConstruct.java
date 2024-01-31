@@ -24,6 +24,12 @@ public class CDGConstruct {
         int i = 0;
         for (var block : func.blockList) {
             indexMap.put(block, i++);
+            // clear
+            block.anti_idom = null;
+            block.anti_dom_succ.clear();
+            block.anti_dominanceFrontier.clear();
+            block.cdg_pred.clear();
+            block.cdg_succ.clear();
         }
         for (i = 0; i < func.blockList.size(); ++i) {
             dom.add(new BitSet(n));

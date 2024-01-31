@@ -13,6 +13,8 @@ public class ADCE {
 
     public ADCE(Program myProgram) {
         this.myProgram = myProgram;
+        new CFG(myProgram).buildCFG();
+        new CDGConstruct(myProgram).work();
     }
 
     public void work() {

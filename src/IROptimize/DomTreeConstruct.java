@@ -30,6 +30,11 @@ public class DomTreeConstruct {
         int i = 0;
         for (var block : func.blockList) {
             indexMap.put(block, i++);
+            // clear
+            block.idom = null;
+            block.dom_sub.clear();
+            block.dom_father.clear();
+            block.dominanceFrontier.clear();
         }
         for (i = 0; i < func.blockList.size(); ++i) {
             dom.add(new BitSet(n));

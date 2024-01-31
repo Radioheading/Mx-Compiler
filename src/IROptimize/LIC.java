@@ -1,28 +1,28 @@
 package IROptimize;
 
-import ASM.Instruction.BaseInst;
 import MIR.*;
+import MIR.Entity.IRConst;
+import MIR.Entity.IRRegister;
+import MIR.Entity.entity;
 import MIR.Inst.*;
-import MIR.Entity.*;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 
-public class LoopInvariant {
+public class LIC {
+    Program myProgram;
     static HashMap<IRRegister, IRBaseInst> defMap = new HashMap<>();
-    private Program myProgram;
 
-    public LoopInvariant(Program _myProgram) {
-        new CFG(_myProgram).buildCFG();
+    public LIC(Program _myProgram) {
         myProgram = _myProgram;
     }
 
-    public void simplifyLoopInvariant() {
-        myProgram.functions.forEach(this::simplifyFunc);
+    public void work() {
+        myProgram.functions.forEach(this::workFunc);
     }
 
-    private void simplifyFunc(Function func) {
+    private void workFunc(Function func) {
         defMap.clear();
 
         for (var block : func.blockList) {
@@ -41,39 +41,30 @@ public class LoopInvariant {
     }
 
     private void workLoop(Loop now) {
-        HashSet<entity> Invariant = new HashSet<>();
+        now.invariants.clear();
         for (var succ : now.succLoops) {
             workLoop(succ);
         }
-        BasicBlock start = null;
         for (var block : now.loopHeader.pred) {
             if (!now.loopBlocks.contains(block)) {
-                start = block;
+                now.preHeader = block;
                 break;
             }
         }
-        if (start == null) {
-            return;
-        }
+
         for (var block : now.loopBlocks) {
-            LinkedList<IRBaseInst> newStmts = new LinkedList<>();
             for (var inst : block.stmts) {
                 boolean isInvariant = true;
                 for (var use : inst.uses()) {
-                    if (!(use instanceof IRConst) && !(Invariant.contains(use)) && (!defMap.containsKey(use) || now.loopBlocks.contains(defMap.get(use).parentBlock))) {
+                    if (!(use instanceof IRConst) && !(now.invariants.contains(use)) && (!defMap.containsKey(use) || now.loopBlocks.contains(defMap.get(use).parentBlock))) {
                         isInvariant = false;
                         break;
                     }
                 }
                 if (isInvariant && canBeMoved(inst)) {
-                    System.err.println("invariant: " + inst);
-                    Invariant.addAll(inst.defs());
-                    start.stmts.add(inst);
-                } else {
-                    newStmts.add(inst);
+                    now.invariants.addAll(inst.defs());
                 }
             }
-            block.stmts = newStmts;
         }
     }
 

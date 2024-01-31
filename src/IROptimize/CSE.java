@@ -64,7 +64,7 @@ class RHS {
     // note: we need to rewrite the hashCode method in order to compare with values
     @Override
     public int hashCode() {
-        int result = 97;
+        int result = 131;
         result = result * 31 + (isBinary ? 1 : 0);
         for (var operand : operands) {
             result = result * 31 + operand.hashCode();
@@ -82,12 +82,13 @@ public class CSE {
     int cnt = 0;
 
     public CSE(Program _myProgram) {
+        new DomTreeConstruct(_myProgram).work();
         myProgram = _myProgram;
     }
 
     public void work() {
         myProgram.functions.forEach(this::workFunc);
-        System.err.println("CSE eliminates:\t" + cnt + "\tinstructions");
+//        System.err.println("CSE eliminates:\t" + cnt + "\tinstructions");
     }
 
     private void workFunc(Function func) {
@@ -125,7 +126,7 @@ public class CSE {
                         var destList = rhs_map.get(rhs);
                         var blockList = block_map.get(rhs);
                         for (int i = 0; i < destList.size(); ++i) {
-                            if (blockList.get(i).dom_sub.contains(nowBlock)) {
+                            if (blockList.get(i).dom_sub.contains(nowBlock) && blockList.get(i) != nowBlock) {
                                 flag = true;
                                 cnt++;
                                 replace_map.put(inst.defs().iterator().next(), destList.get(i));

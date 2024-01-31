@@ -21,9 +21,17 @@ public class CFG {
     }
 
     private void analyze_function(Function func) {
-        func.blockList.add(func.exitBlock);
+        if (func.exitBlock != null) {
+            func.blockList.add(func.exitBlock);
+        }
         func.exitBlock = null;
         // essential
+        for (var block : func.blockList) {
+            block.succ.clear();
+            block.pred.clear();
+            block.anti_succ.clear();
+            block.anti_pred.clear();
+        }
         for (var block : func.blockList) {
             if (block.terminal instanceof IRBranch branch) {
                 block.succ.add(branch.elseBranch);

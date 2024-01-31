@@ -18,6 +18,8 @@ public class AllocElimination {
     private HashMap<IRRegister, entity> last_def = new HashMap<>();
 
     public AllocElimination(Program _myProgram) {
+        new CFG(_myProgram).buildCFG();
+        new DomTreeConstruct(_myProgram).work();
         myProgram = _myProgram;
     }
 
