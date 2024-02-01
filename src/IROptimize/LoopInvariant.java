@@ -41,19 +41,11 @@ public class LoopInvariant {
     }
 
     private void workLoop(Loop now) {
+        now.getPreHeader();
+        if (now.preHeader == null) return;
         HashSet<entity> Invariant = new HashSet<>();
         for (var succ : now.succLoops) {
             workLoop(succ);
-        }
-        BasicBlock start = null;
-        for (var block : now.loopHeader.pred) {
-            if (!now.loopBlocks.contains(block)) {
-                start = block;
-                break;
-            }
-        }
-        if (start == null) {
-            return;
         }
         for (var block : now.loopBlocks) {
             LinkedList<IRBaseInst> newStmts = new LinkedList<>();
@@ -66,9 +58,15 @@ public class LoopInvariant {
                     }
                 }
                 if (isInvariant && canBeMoved(inst)) {
-                    System.err.println("invariant: " + inst);
+//                    System.err.println("invariant: " + inst);
                     Invariant.addAll(inst.defs());
-                    start.stmts.add(inst);
+                    now.preHeader.stmts.add(inst);
+                    inst.parentBlock = now.preHeader;
+                    for (var user : inst.defs().iterator().next().uses) {
+                        if (user instanceof IRPhi phi) {
+                            phi.replaceSourceBlock(block, now.preHeader);
+                        }
+                    }
                 } else {
                     newStmts.add(inst);
                 }

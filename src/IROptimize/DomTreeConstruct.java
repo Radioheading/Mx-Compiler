@@ -33,6 +33,7 @@ public class DomTreeConstruct {
             // clear
             block.idom = null;
             block.dom_sub.clear();
+            block.dom_succ.clear();
             block.dom_father.clear();
             block.dominanceFrontier.clear();
         }
@@ -115,8 +116,8 @@ public class DomTreeConstruct {
         for (int i = 0; i < func.blockList.size(); ++i) {
             for (int j = 0; j < func.blockList.size(); ++j) {
                 if (dom.get(i).get(j)) {
-                     func.blockList.get(i).dom_sub.add(func.blockList.get(j));
-                     func.blockList.get(j).dom_father.add(func.blockList.get(i));
+                     func.blockList.get(j).dom_sub.add(func.blockList.get(i));
+                     func.blockList.get(i).dom_father.add(func.blockList.get(j));
                 }
             }
         }

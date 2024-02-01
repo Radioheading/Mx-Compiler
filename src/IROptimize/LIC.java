@@ -45,12 +45,6 @@ public class LIC {
         for (var succ : now.succLoops) {
             workLoop(succ);
         }
-        for (var block : now.loopHeader.pred) {
-            if (!now.loopBlocks.contains(block)) {
-                now.preHeader = block;
-                break;
-            }
-        }
 
         for (var block : now.loopBlocks) {
             for (var inst : block.stmts) {

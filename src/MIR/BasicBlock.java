@@ -1,12 +1,13 @@
 package MIR;
 
-import MIR.Entity.entity;
+import MIR.Entity.*;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 
 import MIR.Inst.*;
+import MIR.type.*;
 
 public class BasicBlock {
     public String label;
@@ -30,6 +31,25 @@ public class BasicBlock {
     public HashSet<BasicBlock> dom_sub = new HashSet<>();
     public HashSet<BasicBlock> dom_father = new HashSet<>();
 
+    private static final IRBaseType
+            intType = new IRIntType(32), boolType = new IRIntType(8), condType = new IRIntType(1),
+            ptrType = new IRPtrType(intType, 0, false), charStar = new IRPtrType(boolType, 0, false),
+            voidType = new IRVoidType(), nullType = new IRNullType(), stringType = new IRPtrType(boolType, 0, false);
+    private static final IRConst
+            intOne = new IRIntConst(1), intZero = new IRIntConst(0), minusOne = new IRIntConst(-1), nullValue = new IRNullConst();
+
+    private entity defaultValue(IRBaseType type) {
+        if (type.isEqual(intType)) {
+            return intZero;
+        } else if (type.isEqual(boolType)) {
+            return new IRBoolConst(false);
+        } else if (type.isEqual(condType)) {
+            return new IRCondConst(false);
+        } else {
+            return nullValue;
+        }
+    }
+
     public BasicBlock(String _label, int _loopDepth) {
         label = _label;
         if (appearance.containsKey(_label)) {
@@ -48,7 +68,18 @@ public class BasicBlock {
         }
     }
 
+    public void append(IRBaseInst stmt) {
+        stmts.addLast(stmt);
+    }
+
     public String toString() {
+        for (var phi : phiMap.values()) {
+            for (var pred : pred) {
+                if (!phi.blockMap.contains(pred)) {
+                    phi.addEntry(pred, defaultValue(phi.dest.type));
+                }
+            }
+        }
         String ret = "\n" + label + "_" + id + ":\n";
         for (var phi : phiMap.values()) {
             ret = ret + phi + "\n";

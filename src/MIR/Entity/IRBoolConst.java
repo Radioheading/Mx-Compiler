@@ -19,4 +19,9 @@ public class IRBoolConst extends IRConst {
     public boolean equals(Object obj) {
         return obj instanceof IRBoolConst && ((IRBoolConst) obj).value == value;
     }
+
+    @Override
+    public int hashCode() {
+        return Boolean.hashCode(value);
+    }
 }

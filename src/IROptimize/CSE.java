@@ -9,7 +9,7 @@ import MIR.Function;
 import java.util.*;
 
 /* Basic Idea: traverse the dominator tree, maintaining a map from the
- * right-hand side of each assignment to the register that holds its value.
+ * right-hand side of each assignment to the register that horigins its value.
  * When we see an assignment, we look up its right-hand side in the map.
  * If we find it, we replace the assignment's left-hand side with the
  * register we found. If we don't find it, we add the assignment to the map.
@@ -74,6 +74,14 @@ class RHS {
         }
         return result;
     }
+
+    @Override
+    public String toString() {
+        if (isBinary) {
+            return op + " " + operands.get(0) + " " + operands.get(1);
+        }
+        return null;
+    }
 }
 
 public class CSE {
@@ -82,7 +90,9 @@ public class CSE {
     int cnt = 0;
 
     public CSE(Program _myProgram) {
+        new CFG(_myProgram).buildCFG();
         new DomTreeConstruct(_myProgram).work();
+        new DefUseCollector(_myProgram).work();
         myProgram = _myProgram;
     }
 
@@ -92,7 +102,6 @@ public class CSE {
     }
 
     private void workFunc(Function func) {
-        HashMap<IRRegister, IRRegister> replace_map = new HashMap<>();
         HashMap<RHS, ArrayList<IRRegister>> rhs_map = new HashMap<>();
         HashMap<RHS, ArrayList<BasicBlock>> block_map = new HashMap<>();
         Queue<BasicBlock> q = new LinkedList<>();
@@ -102,34 +111,19 @@ public class CSE {
         while (!q.isEmpty()) {
             var nowBlock = q.poll();
 
-            LinkedList<IRBaseInst> newStmts = new LinkedList<>();
-
-            for (var key : nowBlock.phiMap.keySet()) {
-                var inst = nowBlock.phiMap.get(key);
-                for (var use : inst.uses()) {
-                    if (use instanceof IRRegister && replace_map.containsKey(use)) {
-                        inst.replaceUse(use, replace_map.get(use));
-                    }
-                }
-            }
-
             for (var inst : nowBlock.stmts) {
-                for (var use : inst.uses()) {
-                    if (use instanceof IRRegister && replace_map.containsKey(use)) {
-                        inst.replaceUse(use, replace_map.get(use));
-                    }
-                }
-                if (inst instanceof IRBinOp || inst instanceof IRIcmp || inst instanceof IRGetElementPtr || inst instanceof IRZext || inst instanceof IRTrunc) {
+                if (inst instanceof IRBinOp || inst instanceof IRIcmp || inst instanceof IRZext || inst instanceof IRTrunc) {
                     var rhs = new RHS(inst);
                     boolean flag = false;
                     if (rhs_map.get(rhs) != null) {
                         var destList = rhs_map.get(rhs);
                         var blockList = block_map.get(rhs);
                         for (int i = 0; i < destList.size(); ++i) {
-                            if (blockList.get(i).dom_sub.contains(nowBlock) && blockList.get(i) != nowBlock) {
+                            if (blockList.get(i).dom_sub.contains(nowBlock)) {
                                 flag = true;
                                 cnt++;
-                                replace_map.put(inst.defs().iterator().next(), destList.get(i));
+//                              replaceLocalUseWith(inst.defs().iterator().next(), destList.get(i));
+                                replaceGlobalUseWith(inst.defs().iterator().next(), destList.get(i));
                                 break;
                             }
                         }
@@ -147,26 +141,33 @@ public class CSE {
                             rhs_map.get(rhs).add(inst.defs().iterator().next());
                             block_map.get(rhs).add(nowBlock);
                         }
-                        newStmts.add(inst);
-                    }
-
-                } else {
-                    newStmts.add(inst);
-                }
-            }
-
-            if (nowBlock.terminal != null) {
-                for (var use : nowBlock.terminal.uses()) {
-                    if (use instanceof IRRegister && replace_map.containsKey(use)) {
-                        nowBlock.terminal.replaceUse(use, replace_map.get(use));
                     }
                 }
             }
-
-            nowBlock.stmts = newStmts;
             for (var block : nowBlock.dom_succ) {
                 q.add(block);
             }
+        }
+    }
+
+    private void replaceLocalUseWith(entity origin, entity obj) {
+        for (var use : origin.uses) {
+            if (use.parentBlock == myProgram.defMap.get(obj).parentBlock) {
+                use.replaceUse(origin, obj);
+                obj.addUse(use);
+            }
+        }
+    }
+
+    private void replaceGlobalUseWith(entity origin, entity obj) {
+        for (IRBaseInst inst : origin.uses) {
+            inst.replaceUse(origin, obj);
+            obj.addUse(inst);
+        }
+        origin.uses.clear();
+        var defInst = myProgram.defMap.get(origin);
+        for (var use : defInst.uses()) {
+            use.removeUse(defInst);
         }
     }
 }

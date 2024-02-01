@@ -9,6 +9,7 @@ import Util.error.error;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import Util.globalScope;
+import java.io.PrintStream;
 
 public class Compiler {
     public static void main(String[] args) throws Exception {
@@ -30,20 +31,22 @@ public class Compiler {
             new SemanticChecker(gScope).visit(ASTRoot);
             IRBuilder irBuilder = new IRBuilder(gScope);
             irBuilder.visit(ASTRoot);
-            new CFG(irBuilder.myProgram).buildCFG();
+            // begin optimize
             new GlobalToLocal(irBuilder.myProgram).globalTransition();
-            new DomTreeConstruct(irBuilder.myProgram).work();
             var Mem2Reg = new AllocElimination(irBuilder.myProgram);
             Mem2Reg.eliminateAlloc();
-            new DCE(irBuilder.myProgram).ErrorElimination();
-            new CDGConstruct(irBuilder.myProgram).work();
-            new ADCE(irBuilder.myProgram).work();
-            new CSE(irBuilder.myProgram).work();
-            new ConstPropagation(irBuilder.myProgram).propagateConst();
-            new LoopInvariant(irBuilder.myProgram).simplifyLoopInvariant();
-            new ADCE(irBuilder.myProgram).work();
-            new CSE(irBuilder.myProgram).work();
-            new ConstPropagation(irBuilder.myProgram).propagateConst();
+
+            for (int i = 0; i < 5; ++i) {
+                new ADCE(irBuilder.myProgram).work();
+                new ConstPropagation(irBuilder.myProgram).propagateConst();
+                new ADCE(irBuilder.myProgram).work();
+                new CSE(irBuilder.myProgram).work();
+                new ADCE(irBuilder.myProgram).work();
+                new LoopInvariant(irBuilder.myProgram).simplifyLoopInvariant();
+                new ADCE(irBuilder.myProgram).work();
+                new IVT(irBuilder.myProgram).work();
+            }
+            // end SSA optimize
             Mem2Reg.eliminatePhi();
             ASMProgram asmProgram = new ASMProgram();
             new InstSelector(asmProgram).visit(irBuilder.myProgram);

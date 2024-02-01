@@ -1,6 +1,5 @@
 package MIR.Inst;
 
-import Backend.InstSelector;
 import MIR.*;
 import MIR.Entity.IRRegister;
 import MIR.Entity.entity;
@@ -26,4 +25,8 @@ public abstract class IRBaseInst {
     public abstract HashSet<entity> uses();
 
     public abstract void replaceUse(entity origin, entity replaced);
+
+    public void collectUsers() {
+        uses().forEach(entity -> entity.addUse(this));
+    }
 }

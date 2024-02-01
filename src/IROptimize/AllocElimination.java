@@ -23,25 +23,6 @@ public class AllocElimination {
         myProgram = _myProgram;
     }
 
-    private static final IRBaseType
-            intType = new IRIntType(32), boolType = new IRIntType(8), condType = new IRIntType(1),
-            ptrType = new IRPtrType(intType, 0, false), charStar = new IRPtrType(boolType, 0, false),
-            voidType = new IRVoidType(), nullType = new IRNullType(), stringType = new IRPtrType(boolType, 0, false);
-    private static final IRConst
-            intOne = new IRIntConst(1), intZero = new IRIntConst(0), minusOne = new IRIntConst(-1), nullValue = new IRNullConst();
-
-    private entity defaultValue(IRBaseType type) {
-        if (type.isEqual(intType)) {
-            return intZero;
-        } else if (type.isEqual(boolType)) {
-            return new IRBoolConst(false);
-        } else if (type.isEqual(condType)) {
-            return new IRCondConst(false);
-        } else {
-            return nullValue;
-        }
-    }
-
     public void eliminateAlloc() {
         for (var func : myProgram.functions) {
             addPhi(func);
@@ -150,14 +131,6 @@ public class AllocElimination {
             }
         }
 
-
-        for (var phi : block.phiMap.values()) {
-            for (var pred : block.pred) {
-                if (!phi.blockMap.contains(pred)) {
-                    phi.addEntry(pred, defaultValue(phi.dest.type));
-                }
-            }
-        }
         block.dom_succ.forEach(sd -> visitBlock(sd, func));
         cur_name = cur;
         last_def = cur_last_def;

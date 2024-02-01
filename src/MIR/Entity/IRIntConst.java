@@ -19,4 +19,9 @@ public class IRIntConst extends IRConst {
     public boolean equals(Object obj) {
         return obj instanceof IRIntConst && ((IRIntConst) obj).value == value;
     }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(value);
+    }
 }

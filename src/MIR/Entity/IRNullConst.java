@@ -16,4 +16,9 @@ public class IRNullConst extends IRConst {
     public boolean equals(Object obj) {
         return obj instanceof IRNullConst;
     }
+
+    @Override
+    public int hashCode() {
+        return 0;
+    }
 }

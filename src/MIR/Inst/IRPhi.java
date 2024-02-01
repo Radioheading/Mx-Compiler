@@ -3,10 +3,9 @@ package MIR.Inst;
 // reference: 《编译器指导手册》by @peterzheng98, @LauYeeYu, @YijingGuo, @Undecimber_7th
 
 import MIR.BasicBlock;
-import MIR.Entity.IRRegister;
-import MIR.Entity.entity;
+import MIR.Entity.*;
 import MIR.IRVisitor;
-import MIR.type.IRBaseType;
+import MIR.type.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,16 +16,24 @@ public class IRPhi extends IRBaseInst {
     public HashSet<BasicBlock> blockMap = new HashSet<>();
     public IRRegister dest;
     public IRRegister origin;
+    public IRBaseType type;
 
     public IRPhi(BasicBlock _parent, IRRegister _dest, IRRegister _origin) {
         super(_parent);
         this.dest = _dest;
         this.origin = _origin;
+        this.type = _origin.type.Type();
+    }
+
+    public IRPhi(BasicBlock _parent, IRRegister _dest, IRBaseType _type) {
+        super(_parent);
+        this.dest = _dest;
+        this.type = _type;
     }
 
     @Override
     public String toString() {
-        String ret = dest + " = phi " + origin.type.Type() + " ";
+        String ret = dest + " = phi " + type + " ";
         ArrayList<String> tmp = new ArrayList<>();
         for (var block : blockMap) {
             tmp.add("[ " + block_value.get(block) + ", %" + block.label + "_" + block.id + " ]");
@@ -79,5 +86,14 @@ public class IRPhi extends IRBaseInst {
     public void addEntry (BasicBlock from, entity value){
         blockMap.add(from);
         block_value.put(from, value);
+    }
+
+    public void replaceSourceBlock(BasicBlock origin, BasicBlock replaced) {
+        if (blockMap.contains(origin)) {
+            blockMap.remove(origin);
+            blockMap.add(replaced);
+            block_value.put(replaced, block_value.get(origin));
+            block_value.remove(origin);
+        }
     }
 }

@@ -2,7 +2,9 @@ package MIR;
 
 import AST.ASTVisitor;
 import MIR.Entity.IRGlobalVar;
+import MIR.Entity.IRRegister;
 import MIR.Entity.IRStringConst;
+import MIR.Inst.IRBaseInst;
 import MIR.Inst.IRFuncDeclare;
 import MIR.type.IRStructType;
 import java.util.ArrayList;
@@ -15,6 +17,8 @@ public class Program {
 
     public HashMap<String, IRStringConst> gStrings = new HashMap<>();
     public ArrayList<IRFuncDeclare> builtinFunc = new ArrayList<>();
+
+    public HashMap<IRRegister, IRBaseInst> defMap = new HashMap<>();
 
     public Program() {
 

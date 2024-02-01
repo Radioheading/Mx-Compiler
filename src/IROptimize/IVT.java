@@ -8,6 +8,7 @@ import MIR.Entity.*;
 import MIR.Inst.*;
 import MIR.*;
 import MIR.type.IRIntType;
+import MIR.type.IRPtrType;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -52,6 +53,7 @@ class InductVar {
 }
 
 public class IVT {
+    int strengthReductionCount = 0;
     private static final IRIntType intType = new IRIntType(32);
 
     private Program myProgram;
@@ -64,10 +66,9 @@ public class IVT {
 
     public void work() {
         new CFG(myProgram).buildCFG();
-        new LIC(myProgram).work();
         new DefUseCollector(myProgram).work();
-
         myProgram.functions.forEach(this::transformFunc);
+        System.err.println("strength reduction: " + strengthReductionCount);
     }
 
     private void transformFunc(Function func) {
@@ -77,6 +78,7 @@ public class IVT {
     }
 
     private void transformLoop(Loop loop) {
+        loop.getPreHeader();
         loop.succLoops.forEach(this::transformLoop);
         BasicIVInit(loop);
         FindDerivedIV(loop);
@@ -106,11 +108,13 @@ public class IVT {
 
             if (beginValue != null && iterValue != null && iterDef instanceof IRBinOp binOp) {
                 if (binOp.op != "add" && binOp.op != "sub") continue;
-                if (binOp.op1 == phi.dest && (loop.invariants.contains(binOp.op2) || binOp.op2 instanceof IRConst)) {
-                    var toAdd = new InductVar(beginValue, iterValue, iterDef, binOp.op == "add", true, iterDef.parentBlock);
+                if (binOp.op1 == phi.dest && LIorConst(loop, binOp.op2)) {
+                    // System.err.println("find basic IV: " + phi.dest.name + "_" + phi.dest.id);
+                    var toAdd = new InductVar(beginValue, binOp.op2, iterDef, binOp.op == "add", true, iterDef.parentBlock);
                     IVMap.put(phi.dest, toAdd);
-                } else if (binOp.op2 == phi.dest && (loop.invariants.contains(binOp.op1) || binOp.op1 instanceof IRConst) && binOp.op == "add") {
-                    var toAdd = new InductVar(beginValue, iterValue, iterDef, true, true, iterDef.parentBlock);
+                } else if (binOp.op2 == phi.dest && LIorConst(loop, binOp.op1) && binOp.op == "add") {
+                    // System.err.println("find basic IV: " + phi.dest.name + "_" + phi.dest.id);
+                    var toAdd = new InductVar(beginValue, binOp.op1, iterDef, true, true, iterDef.parentBlock);
                     IVMap.put(phi.dest, toAdd);
                 }
             }
@@ -126,24 +130,24 @@ public class IVT {
     }
 
     private boolean LIorConst(Loop loop, entity rhs) {
-        return rhs instanceof IRConst || loop.invariants.contains(rhs);
+        return rhs instanceof IRConst || myProgram.defMap.get(rhs) != null && !loop.loopBlocks.contains(myProgram.defMap.get(rhs).parentBlock);
     }
 
     private void FindDerivedIV(Loop loop) {
         LinkedList<IRBaseInst> workList = new LinkedList<>();
         HashSet<IRBaseInst> workSet = new HashSet<>();
         for (var dest : IVMap.keySet()) {
-            var inst = myProgram.defMap.get(dest);
-            for (var use : inst.uses()) {
-                if (canBeDerived(loop, myProgram.defMap.get(use)) && !workSet.contains(myProgram.defMap.get(use))) {
-                    workList.add(myProgram.defMap.get(use));
-                    workSet.add(myProgram.defMap.get(use));
+            for (var use : dest.uses) {
+                if (canBeDerived(loop, use) && !workSet.contains(use)) {
+                    workList.add(use);
+                    workSet.add(use);
                 }
             }
         }
 
         while (!workList.isEmpty()) {
             IRBinOp iter = (IRBinOp) workList.poll();
+            // System.err.println("iter: " + iter);
             boolean isDerived = false;
             InductVar IV = null;
 
@@ -154,14 +158,18 @@ public class IVT {
                 if (IVSide.isBasic && IVSide.iterDef == iter) { // this is the iteration instruction of a basic IV
                     continue;
                 }
+                // System.err.println("find add derived IV: " + iter.dest);
                 IV = new InductVar(IVop, null, rhs, "add");
+                isDerived = true;
             } else if (iter.op == "sub") { // can only be v - c
                 var IVop = iter.op1;
                 var IVSide = IVMap.get(IVop);
                 if (IVSide == null || IVSide.isBasic && IVSide.iterDef == iter) {
                     continue;
                 }
+                // System.err.println("find sub derived IV: " + iter.dest);
                 IV = new InductVar(IVop, null, iter.op2, "sub");
+                isDerived = true;
             } else { // can be v * c or c * v
                 var IVop = IVMap.containsKey(iter.op1) ? iter.op1 : iter.op2;
                 var IVSide = IVMap.get(IVop);
@@ -169,16 +177,18 @@ public class IVT {
                 if (IVSide.isBasic && IVSide.iterDef == iter) {
                     continue;
                 }
+                // System.err.println("find mul derived IV: " + iter.dest);
                 IV = new InductVar(IVop, rhs, null, "mul");
+                isDerived = true;
             }
 
             if (isDerived) {
                 IVMap.put(iter.dest, IV);
                 DerivedIVInit(loop, iter);
-                for (var use : iter.uses()) {
-                    if (canBeDerived(loop, myProgram.defMap.get(use)) && !workSet.contains(myProgram.defMap.get(use))) {
-                        workList.add(myProgram.defMap.get(use));
-                        workSet.add(myProgram.defMap.get(use));
+                for (var use : iter.dest.uses) {
+                    if (canBeDerived(loop, use) && !workSet.contains(use)) {
+                        workList.add(use);
+                        workSet.add(use);
                     }
                 }
             }
@@ -187,24 +197,22 @@ public class IVT {
 
     private void DerivedIVInit(Loop loop, IRBaseInst iter) {
         var dest = iter.defs().iterator().next();
-        IRRegister beginValue = new IRRegister(dest.name + "_iv_init", intType);
-        IRRegister iterValue = new IRRegister(dest.name + "_iv_iter", intType);
+        IRRegister beginValue = new IRRegister(dest.name + "_" + dest.id + "_iv_init", intType);
+        IRRegister iterValue = new IRRegister(dest.name + "_" + dest.id + "_iv_iter", intType);
         var IV = IVMap.get(dest);
         var priorIV = IVMap.get(IV.fatherIV);
         if (IV.deriveOp == "mul") {
             var initInst = new IRBinOp(loop.preHeader, intType, "mul", IV.mulConst, priorIV.beginValue, beginValue);
-            loop.preHeader.push_back(initInst);
+            loop.preHeader.append(initInst);
             var iterInst = new IRBinOp(loop.preHeader, intType, "mul", IV.mulConst, priorIV.iterValue, iterValue);
-            loop.preHeader.push_back(iterInst);
-            loop.preHeader.push_back(iterInst);
+            loop.preHeader.append(iterInst);
             IV.beginValue = beginValue;
             IV.iterValue = iterValue;
             IV.iterType = priorIV.iterType;
             IV.iterBlock = priorIV.iterBlock;
-            IV.iterDef = iterInst;
         } else {
-            var initInst = new IRBinOp(loop.preHeader, intType, priorIV.deriveOp, IV.addConst, priorIV.beginValue, beginValue);
-            loop.preHeader.push_back(initInst);
+            var initInst = new IRBinOp(loop.preHeader, intType, IV.deriveOp, IV.addConst, priorIV.beginValue, beginValue);
+            loop.preHeader.append(initInst);
             IV.beginValue = beginValue;
             IV.iterValue = priorIV.iterValue;
             IV.iterType = priorIV.iterType;
@@ -214,15 +222,38 @@ public class IVT {
 
     private void StrengthReduction(Loop loop, IRRegister key) {
         var IV = IVMap.get(key);
-        var newDest = new IRRegister(key.name + "_iv", intType);
-        var iterDest = new IRRegister(key.name + "_iter", intType);
         if (IV.isBasic || IV.deriveOp != "mul") return;
-        var phi = new IRPhi(loop.loopHeader, newDest, null);
-        loop.loopHeader.push_back(phi);
+        strengthReductionCount++;
+        var newDest = new IRRegister(key.name + "_" + key.id + "_iv", intType);
+        var iterDest = new IRRegister(key.name + "_" + key.id + "_iter", intType);
+        var phi = new IRPhi(loop.loopHeader, newDest, new IRIntType(32));
+        loop.loopHeader.phiMap.put(newDest, phi);
         var iterInst = new IRBinOp(IV.iterBlock, intType, IV.iterType ? "add" : "sub", newDest, IV.iterValue, iterDest);
-        phi.addEntry(IV.iterBlock, iterDest);
-        IV.iterBlock.push_back(iterInst);
+        BasicBlock iterDom = null;
+        for (var pred : loop.loopHeader.pred) {
+            if (pred.dom_father.contains(IV.iterBlock)) {
+                iterDom = pred;
+                break;
+            }
+        }
+        phi.addEntry(iterDom, iterDest);
+        // System.err.println("iter block" + IV.iterBlock.label + "_" + IV.iterBlock.id);
+        phi.addEntry(loop.preHeader, IV.beginValue);
+        IV.iterBlock.append(iterInst);
+        IV.iterDef = iterInst;
         myProgram.defMap.put(newDest, phi);
-        key.replaceUseWith(newDest);
+        replaceUseWith(key, newDest);
+    }
+
+    private void replaceUseWith(entity old, entity newUse) {
+        for (IRBaseInst inst : old.uses) {
+            inst.replaceUse(old, newUse);
+            newUse.addUse(inst);
+        }
+        old.uses.clear();
+        var defInst = myProgram.defMap.get(old);
+        for (var use : defInst.uses()) {
+            use.removeUse(defInst);
+        }
     }
 }

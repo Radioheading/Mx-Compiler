@@ -16,7 +16,7 @@
 //
 //public class Compiler {
 //    public static void main(String[] args) throws Exception {
-//        String name = "testcases/codegen/t71.mx";
+//        String name = "testcases/codegen/e1.mx";
 //        InputStream input = new FileInputStream(name);
 //        try {
 //            RootNode ASTRoot;
@@ -35,29 +35,31 @@
 //            new SemanticChecker(gScope).visit(ASTRoot);
 //            IRBuilder irBuilder = new IRBuilder(gScope);
 //            irBuilder.visit(ASTRoot);
-//            new CFG(irBuilder.myProgram).buildCFG();
+//            // begin optimize
 //            new GlobalToLocal(irBuilder.myProgram).globalTransition();
-//            new DomTreeConstruct(irBuilder.myProgram).work();
 //            var Mem2Reg = new AllocElimination(irBuilder.myProgram);
 //            Mem2Reg.eliminateAlloc();
-//            new DCE(irBuilder.myProgram).ErrorElimination();
-//            new CSE(irBuilder.myProgram).work();
-//            new CDGConstruct(irBuilder.myProgram).work();
-//            new ADCE(irBuilder.myProgram).work();
-//            new ConstPropagation(irBuilder.myProgram).propagateConst();
-//            new CSE(irBuilder.myProgram).work();
-//            new LoopInvariant(irBuilder.myProgram).simplifyLoopInvariant();
-//            new ADCE(irBuilder.myProgram).work();
-//            new ConstPropagation(irBuilder.myProgram).propagateConst();
-//            PrintStream output_1 = new PrintStream("CSE.ll");
+//
+//            for (int i = 0; i < 5; ++i) {
+//                new ADCE(irBuilder.myProgram).work();
+//                new ConstPropagation(irBuilder.myProgram).propagateConst();
+//                new ADCE(irBuilder.myProgram).work();
+//                new CSE(irBuilder.myProgram).work();
+//                new ADCE(irBuilder.myProgram).work();
+//                new LoopInvariant(irBuilder.myProgram).simplifyLoopInvariant();
+//            }
+//
+//            PrintStream output_1 = new PrintStream("test.ll");
 //            System.setOut(output_1);
 //            System.out.println(irBuilder.myProgram);
+//
+//            // end SSA optimize
 //            Mem2Reg.eliminatePhi();
 //            ASMProgram asmProgram = new ASMProgram();
 //            new InstSelector(asmProgram).visit(irBuilder.myProgram);
 //            new GraphColoring(asmProgram).allocateReg();
 //            new BlockMerger(asmProgram).MergeBlock();
-//            PrintStream output_2 = new PrintStream("CSE.s");
+//            PrintStream output_2 = new PrintStream("test.s");
 //            System.setOut(output_2);
 //            System.out.println(asmProgram);
 //        } catch (error er) {

@@ -19,17 +19,17 @@ public class DefUseCollector {
 
     private void collectBlock(BasicBlock block) {
         for (var inst : block.phiMap.values()) {
-            inst.collectUse();
+            inst.collectUsers();
             collectDef(inst);
         }
 
         for (var inst : block.stmts) {
-            inst.collectUse();
+            inst.collectUsers();
             collectDef(inst);
         }
 
         if (block.terminal != null) {
-            block.terminal.collectUse();
+            block.terminal.collectUsers();
         }
     }
 
