@@ -47,6 +47,8 @@
 //                new CSE(irBuilder.myProgram).work();
 //                new ADCE(irBuilder.myProgram).work();
 //                new LoopInvariant(irBuilder.myProgram).simplifyLoopInvariant();
+//                new ADCE(irBuilder.myProgram).work();
+//                new IVT(irBuilder.myProgram).work();
 //            }
 //
 //            PrintStream output_1 = new PrintStream("test.ll");

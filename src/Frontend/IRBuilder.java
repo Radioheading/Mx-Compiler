@@ -7,7 +7,6 @@ import MIR.BasicBlock;
 import MIR.Entity.*;
 import MIR.Function;
 import MIR.Inst.*;
-import MIR.Loop;
 import MIR.Program;
 import MIR.type.*;
 import Util.BuiltinElements;
@@ -21,7 +20,6 @@ import java.util.HashSet;
 import java.util.Objects;
 
 public class IRBuilder implements ASTVisitor {
-    private Loop curLoop;
     private boolean hasInit = false;
     private final BuiltinElements myBuiltin = new BuiltinElements();
     private Scope nowScope;
@@ -30,7 +28,6 @@ public class IRBuilder implements ASTVisitor {
     private BasicBlock nowBlock;
     private IRStructType nowClass;
     public Program myProgram = new Program();
-    private int curLoopDepth = 0;
     private final HashMap<String, IRStructType> StructInfoMap = new HashMap<>();
     private static final IRBaseType
             intType = new IRIntType(32), boolType = new IRIntType(8), condType = new IRIntType(1),
@@ -269,12 +266,10 @@ public class IRBuilder implements ASTVisitor {
             return array_head;
         }
         nowScope = new Scope(nowScope);
-        var cond = new BasicBlock("for.cond", curLoopDepth + 1);
-        var body = new BasicBlock("for.body", curLoopDepth + 1);
-        var inc = new BasicBlock("for.inc", curLoopDepth + 1);
-        var end = new BasicBlock("for.end", curLoopDepth);
-        curLoop.addLoopBlock(end);
-        curLoop = new Loop(cond, curLoop);
+        var cond = new BasicBlock("for.cond");
+        var body = new BasicBlock("for.body");
+        var inc = new BasicBlock("for.inc");
+        var end = new BasicBlock("for.end");
         end.terminal = nowBlock.terminal;
         // int i = 0;
         IRRegister iter = new IRRegister("iter", new IRPtrType(intType, 0, false));
@@ -284,9 +279,7 @@ public class IRBuilder implements ASTVisitor {
         nowBlock.push_back(new IRStore(nowBlock, new IRIntConst(0), iter));
         nowBlock.terminal = new IRJump(nowBlock, cond);
         nowBlock.hasReturned = true;
-        curLoopDepth = curLoopDepth + 1;
         nowBlock = cond;
-        curLoop.addLoopBlock(cond);
         // i < a
         IRRegister cmp_1 = new IRRegister("", intType), cmp_res = new IRRegister("slt", condType);
         nowBlock.push_back(new IRLoad(nowBlock, intType, cmp_1, iter));
@@ -297,7 +290,6 @@ public class IRBuilder implements ASTVisitor {
         // call dfs
         // specifically, load the malloc return value to some register, GEP on ptr, and store
         nowBlock = body;
-        curLoop.addLoopBlock(body);
         var mallocRet = NewDFS(layer + 1, type.Type(), initSize);
         IRRegister array_i = new IRRegister("", type), i2 = new IRRegister("", intType);
         nowBlock.push_back(new IRLoad(nowBlock, intType, i2, iter));
@@ -321,7 +313,6 @@ public class IRBuilder implements ASTVisitor {
         nowFunc.blockList.add(nowBlock);
         // i = i + 1;
         nowBlock = inc;
-        curLoop.addLoopBlock(inc);
         IRRegister add_one = new IRRegister("", intType), i3 = new IRRegister("", intType);
         nowBlock.push_back(new IRLoad(nowBlock, intType, i3, iter));
         nowBlock.push_back(new IRBinOp(nowBlock, intType, "add", i3, new IRIntConst(1), add_one));
@@ -331,8 +322,6 @@ public class IRBuilder implements ASTVisitor {
         nowFunc.blockList.add(nowBlock);
         // out of loop
         nowBlock = end;
-        curLoop = curLoop.fatherLoop;
-        curLoopDepth = curLoopDepth - 1;
         nowFunc.blockList.add(nowBlock);
         nowScope = nowScope.parentScope;
         return array_head;
@@ -366,8 +355,6 @@ public class IRBuilder implements ASTVisitor {
         nowFunc = constructor;
         nowScope = new Scope(nowScope);
         nowBlock = nowFunc.enterBlock;
-        curLoop = new Loop(nowBlock, null);
-        nowFunc.LoopRoot = curLoop;
 
         IRPtrType classType = new IRPtrType(nowClass, 0, false);
         IRRegister thisAddr = new IRRegister("this.addr", new IRPtrType(classType, 0, true));
@@ -385,18 +372,14 @@ public class IRBuilder implements ASTVisitor {
             nowBlock.terminal = new IRJump(nowBlock, nowFunc.exitBlock);
         }
         nowFunc.addAllocate();
-        curLoop = null;
     }
 
     @Override
     public void visit(FuncDefNode it) {
-        curLoopDepth = 0;
         it.IRFunc = gScope.IRFunctions.get(it.funcName);
         nowScope = new Scope(nowScope);
         nowFunc = it.IRFunc;
         nowBlock = it.IRFunc.enterBlock;
-        curLoop = new Loop(it.IRFunc.enterBlock, null);
-        nowFunc.LoopRoot = curLoop;
         boolean isMember = nowClass != null;
         int offset = isMember ? 1 : 0;
         for (int i = 0; i < it.parameterList.parameters.size(); ++i) {
@@ -435,7 +418,6 @@ public class IRBuilder implements ASTVisitor {
             it.IRFunc.enterBlock.stmts.addFirst(new IRStore(nowBlock, intZero, it.IRFunc.retReg));
         }
         it.IRFunc.addAllocate();
-        curLoop = null;
         nowScope = nowScope.parentScope;
     }
 
@@ -477,8 +459,6 @@ public class IRBuilder implements ASTVisitor {
         }
         nowFunc = new Function("__mx_global_var_init", new IRVoidType());
         nowBlock = nowFunc.enterBlock;
-        curLoop = new Loop(nowBlock, null);
-        nowFunc.LoopRoot = curLoop;
         nowBlock.terminal = new IRJump(nowBlock, nowFunc.exitBlock);
         for (var def : it.Defs) {
             if (def instanceof VarDefNode) {
@@ -487,7 +467,6 @@ public class IRBuilder implements ASTVisitor {
         }
         nowBlock.hasReturned = true;
         nowBlock = nowFunc.exitBlock;
-        curLoop.addLoopBlock(nowBlock);
         nowBlock.push_back(new IRRet(nowBlock, null));
         nowFunc.addAllocate();
         if (hasInit) {
@@ -495,7 +474,6 @@ public class IRBuilder implements ASTVisitor {
         }
         nowBlock = null;
         nowFunc = null;
-        curLoop = null;
         for (var def : it.Defs) {
             if (!(def instanceof VarDefNode)) {
                 def.accept(this);
@@ -558,10 +536,10 @@ public class IRBuilder implements ASTVisitor {
         nowScope = new Scope(nowScope);
         nowScope.fatherLoop = 1;
         nowScope.fatherFor = it;
-        it.cond = new BasicBlock("for.cond", curLoopDepth + 1);
-        it.body = new BasicBlock("for.body", curLoopDepth + 1);
-        it.inc = new BasicBlock("for.inc", curLoopDepth + 1);
-        it.end = new BasicBlock("for.end", curLoopDepth + 1);
+        it.cond = new BasicBlock("for.cond");
+        it.body = new BasicBlock("for.body");
+        it.inc = new BasicBlock("for.inc");
+        it.end = new BasicBlock("for.end");
         it.end.terminal = nowBlock.terminal;
         if (it.varInit != null) {
             it.varInit.accept(this);
@@ -570,10 +548,7 @@ public class IRBuilder implements ASTVisitor {
         }
         nowBlock.terminal = new IRJump(nowBlock, it.cond);
         nowBlock.hasReturned = true;
-        curLoopDepth = curLoopDepth + 1;
-        curLoop = new Loop(it.cond, curLoop);
         nowBlock = it.cond;
-        curLoop.addLoopBlock(it.cond);
         nowFunc.blockList.add(nowBlock);
         if (it.condition != null) {
             it.condition.accept(this);
@@ -583,7 +558,6 @@ public class IRBuilder implements ASTVisitor {
         }
         nowBlock.hasReturned = true;
         nowBlock = it.inc;
-        curLoop.addLoopBlock(it.inc);
         if (it.iteration != null) {
             it.iteration.accept(this);
         }
@@ -591,15 +565,11 @@ public class IRBuilder implements ASTVisitor {
         nowBlock.hasReturned = true;
         nowFunc.blockList.add(nowBlock);
         nowBlock = it.body;
-        curLoop.addLoopBlock(it.body);
         nowFunc.blockList.add(nowBlock);
         it.loop.forEach(sd -> sd.accept(this));
         nowBlock.terminal = new IRJump(nowBlock, it.inc);
         nowBlock.hasReturned = true;
-        curLoopDepth = curLoopDepth - 1;
         nowBlock = it.end;
-        curLoop = curLoop.fatherLoop;
-        curLoop.addLoopBlock(it.end);
         nowFunc.blockList.add(nowBlock);
         nowScope = nowScope.parentScope;
     }
@@ -607,14 +577,13 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(IfStmtNode it) {
         it.condition.accept(this);
-        BasicBlock thenBranch = new BasicBlock("if.then", curLoopDepth);
-        BasicBlock elseBranch = new BasicBlock("if.else", curLoopDepth);
-        BasicBlock endStmt = new BasicBlock("if.end", curLoopDepth);
+        BasicBlock thenBranch = new BasicBlock("if.then");
+        BasicBlock elseBranch = new BasicBlock("if.else");
+        BasicBlock endStmt = new BasicBlock("if.end");
         endStmt.terminal = nowBlock.terminal;
         BasicBlock prev = nowBlock;
         nowFunc.blockList.add(thenBranch);
         nowBlock = thenBranch;
-        curLoop.addLoopBlock(thenBranch);
         nowBlock.terminal = new IRJump(nowBlock, endStmt);
         nowScope = new Scope(nowScope);
         it.thenStmt.forEach(sd -> sd.accept(this));
@@ -623,7 +592,6 @@ public class IRBuilder implements ASTVisitor {
         if (it.elseStmt != null && it.elseStmt.size() > 0) {
             nowFunc.blockList.add(elseBranch);
             nowBlock = elseBranch;
-            curLoop.addLoopBlock(elseBranch);
             nowBlock.terminal = new IRJump(nowBlock, endStmt);
             nowScope = new Scope(nowScope);
             it.elseStmt.forEach(sd -> sd.accept(this));
@@ -635,7 +603,6 @@ public class IRBuilder implements ASTVisitor {
         prev.hasReturned = true;
         nowFunc.blockList.add(endStmt);
         nowBlock = endStmt;
-        curLoop.addLoopBlock(endStmt);
     }
 
     @Override
@@ -662,31 +629,24 @@ public class IRBuilder implements ASTVisitor {
         nowScope = new Scope(nowScope);
         nowScope.fatherLoop = 2;
         nowScope.fatherWhile = it;
-        curLoop = new Loop(nowBlock, curLoop);
-        it.cond = new BasicBlock("while.cond", curLoopDepth + 1);
-        it.body = new BasicBlock("while.body", curLoopDepth + 1);
-        it.end = new BasicBlock("while.end", curLoopDepth);
+        it.cond = new BasicBlock("while.cond");
+        it.body = new BasicBlock("while.body");
+        it.end = new BasicBlock("while.end");
         it.end.terminal = nowBlock.terminal;
         nowBlock.terminal = new IRJump(nowBlock, it.cond);
         nowBlock.hasReturned = true;
         nowFunc.blockList.add(it.cond);
-        curLoopDepth = curLoopDepth + 1;
         nowBlock = it.cond;
-        curLoop.addLoopBlock(it.cond);
         it.condition.accept(this);
         nowBlock.terminal = new IRBranch(nowBlock, getValue(it.condition, true, nowBlock), it.body, it.end);
         nowBlock.hasReturned = true;
         nowFunc.blockList.add(it.body);
         nowBlock = it.body;
-        curLoop.addLoopBlock(it.body);
         nowBlock.terminal = new IRJump(nowBlock, it.cond);
         it.doStmt.forEach(sd -> sd.accept(this));
         nowBlock.hasReturned = true;
         nowFunc.blockList.add(it.end);
-        curLoopDepth = curLoopDepth - 1;
         nowBlock = it.end;
-        curLoop = curLoop.fatherLoop;
-        curLoop.addLoopBlock(it.end);
         nowScope = nowScope.parentScope;
     }
 
@@ -851,7 +811,7 @@ public class IRBuilder implements ASTVisitor {
             }
         } else { // deal with short-circuit eval
 
-            BasicBlock rhsBlock = new BasicBlock("short.rhs", curLoopDepth), endBlock = new BasicBlock("short.end", curLoopDepth), quickBlock = new BasicBlock("short.quick", curLoopDepth);
+            BasicBlock rhsBlock = new BasicBlock("short.rhs"), endBlock = new BasicBlock("short.end"), quickBlock = new BasicBlock("short.quick");
             endBlock.terminal = nowBlock.terminal;
             IRRegister cond = new IRRegister("short_cond", boolType);
             nowFunc.init.add(new IRAlloca(nowBlock, boolType, cond));
@@ -859,14 +819,12 @@ public class IRBuilder implements ASTVisitor {
                 nowBlock.terminal = new IRBranch(nowBlock, getValue(it.lhs, true, nowBlock), rhsBlock, quickBlock);
                 nowBlock.hasReturned = true;
                 nowBlock = rhsBlock;
-                curLoop.addLoopBlock(rhsBlock);
                 nowFunc.blockList.add(nowBlock);
                 nowBlock.terminal = new IRJump(nowBlock, endBlock);
                 it.rhs.accept(this);
                 pushStore(cond, it.rhs);
                 nowBlock.hasReturned = true;
                 nowBlock = quickBlock;
-                curLoop.addLoopBlock(quickBlock);
                 nowFunc.blockList.add(nowBlock);
                 nowBlock.terminal = new IRJump(nowBlock, endBlock);
                 ExpressionNode falseExpr = new BaseExprNode(null);
@@ -874,13 +832,11 @@ public class IRBuilder implements ASTVisitor {
                 pushStore(cond, falseExpr);
                 nowBlock.hasReturned = true;
                 nowBlock = endBlock;
-                curLoop.addLoopBlock(endBlock);
                 nowFunc.blockList.add(nowBlock);
             } else {
                 nowBlock.terminal = new IRBranch(nowBlock, getValue(it.lhs, true, nowBlock), quickBlock, rhsBlock);
                 nowBlock.hasReturned = true;
                 nowBlock = quickBlock;
-                curLoop.addLoopBlock(quickBlock);
                 nowFunc.blockList.add(nowBlock);
                 ExpressionNode trueExpr = new BaseExprNode(null);
                 trueExpr.entity = new IRBoolConst(true);
@@ -888,14 +844,12 @@ public class IRBuilder implements ASTVisitor {
                 nowBlock.terminal = new IRJump(nowBlock, endBlock);
                 nowBlock.hasReturned = true;
                 nowBlock = rhsBlock;
-                curLoop.addLoopBlock(rhsBlock);
                 nowFunc.blockList.add(nowBlock);
                 nowBlock.terminal = new IRJump(nowBlock, endBlock);
                 it.rhs.accept(this);
                 pushStore(cond, it.rhs);
                 nowBlock.hasReturned = true;
                 nowBlock = endBlock;
-                curLoop.addLoopBlock(endBlock);
                 nowFunc.blockList.add(nowBlock);
             }
             it.entity = new IRRegister("", boolType);
@@ -1023,15 +977,14 @@ public class IRBuilder implements ASTVisitor {
             IRAlloca order = new IRAlloca(nowBlock, res.baseType, alloc);
             nowFunc.init.add(order);
         }
-        BasicBlock thenBranch = new BasicBlock("if.then", curLoopDepth);
-        BasicBlock elseBranch = new BasicBlock("if.else", curLoopDepth);
-        BasicBlock endStmt = new BasicBlock("if.end", curLoopDepth);
+        BasicBlock thenBranch = new BasicBlock("if.then");
+        BasicBlock elseBranch = new BasicBlock("if.else");
+        BasicBlock endStmt = new BasicBlock("if.end");
         BasicBlock prev = nowBlock;
         nowFunc.blockList.add(thenBranch);
         nowBlock.terminal = new IRBranch(nowBlock, getValue(it.condition, true, nowBlock), thenBranch, elseBranch);
         nowBlock.hasReturned = true;
         nowBlock = thenBranch;
-        curLoop.addLoopBlock(thenBranch);
         nowScope = new Scope(nowScope);
         it.jump_1.accept(this);
         if (!res.baseType.isEqual(voidType)) {
@@ -1042,7 +995,6 @@ public class IRBuilder implements ASTVisitor {
         nowBlock.hasReturned = true;
         nowFunc.blockList.add(elseBranch);
         nowBlock = elseBranch;
-        curLoop.addLoopBlock(elseBranch);
         nowScope = new Scope(nowScope);
 
         it.jump_2.accept(this);
@@ -1056,7 +1008,6 @@ public class IRBuilder implements ASTVisitor {
         prev.hasReturned = true;
         nowFunc.blockList.add(endStmt);
         nowBlock = endStmt;
-        curLoop.addLoopBlock(endStmt);
 
         if (!res.baseType.isEqual(voidType)) {
             it.entity = new IRRegister("", res.Type());

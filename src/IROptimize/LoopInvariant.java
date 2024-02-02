@@ -1,6 +1,6 @@
 package IROptimize;
 
-import ASM.Instruction.BaseInst;
+import IROptimize.Utils.*;
 import MIR.*;
 import MIR.Inst.*;
 import MIR.Entity.*;
@@ -14,7 +14,7 @@ public class LoopInvariant {
     private Program myProgram;
 
     public LoopInvariant(Program _myProgram) {
-        new CFG(_myProgram).buildCFG();
+        new LoopConstruct(_myProgram).work();
         myProgram = _myProgram;
     }
 
@@ -41,7 +41,6 @@ public class LoopInvariant {
     }
 
     private void workLoop(Loop now) {
-        now.getPreHeader();
         if (now.preHeader == null) return;
         HashSet<entity> Invariant = new HashSet<>();
         for (var succ : now.succLoops) {

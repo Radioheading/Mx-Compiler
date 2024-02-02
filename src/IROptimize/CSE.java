@@ -5,6 +5,7 @@ import MIR.Entity.*;
 import MIR.Inst.*;
 import MIR.Program;
 import MIR.Function;
+import IROptimize.Utils.*;
 
 import java.util.*;
 

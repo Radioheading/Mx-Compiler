@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 
 public class Loop {
+    public int loopDepth = 0;
     public Loop fatherLoop;
     public BasicBlock loopHeader, preHeader;
     public HashSet<BasicBlock> loopBlocks = new HashSet<>();
@@ -37,14 +38,5 @@ public class Loop {
 
     public void addSuccLoop(Loop loop) {
         succLoops.add(loop);
-    }
-
-    public void getPreHeader() {
-        for (var block : loopHeader.pred) {
-            if (!loopBlocks.contains(block)) {
-                preHeader = block;
-                break;
-            }
-        }
     }
 }

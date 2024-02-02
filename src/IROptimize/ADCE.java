@@ -1,5 +1,6 @@
 package IROptimize;
 
+import IROptimize.Utils.*;
 import MIR.*;
 import MIR.Inst.*;
 import MIR.Entity.*;

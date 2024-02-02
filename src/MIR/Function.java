@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 
 public class Function {
+    public int size;
     public String name;
     public IRBaseType retType;
     public LinkedList<BasicBlock> blockList = new LinkedList<>();
@@ -27,14 +28,15 @@ public class Function {
     public IRRegister retReg;
     public Loop LoopRoot;
     public boolean hasCall = false;
+    public HashSet<Function> callees = new HashSet<>(), callers = new HashSet<>();
 
     public IRRegister thisPtr;
 
     public Function(String _name, IRBaseType _retType) {
         this.name = _name;
         this.retType = _retType;
-        enterBlock = new BasicBlock("enter_" + name, 0);
-        exitBlock = new BasicBlock("exit_" + name, 0);
+        enterBlock = new BasicBlock("enter_" + name);
+        exitBlock = new BasicBlock("exit_" + name);
         enterBlock.terminal = new IRJump(enterBlock, exitBlock);
         blockList.add(enterBlock);
         retReg = new IRRegister("ret_" + name, _retType);

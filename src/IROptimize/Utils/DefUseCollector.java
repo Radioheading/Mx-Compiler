@@ -1,10 +1,11 @@
-package IROptimize;
+package IROptimize.Utils;
 
 import MIR.*;
 import MIR.Inst.*;
 
 public class DefUseCollector {
     private Program myProgram;
+
     public DefUseCollector(Program _myProgram) {
         myProgram = _myProgram;
     }
@@ -14,6 +15,7 @@ public class DefUseCollector {
     }
 
     private void collectFunc(Function func) {
+        Init(func);
         func.blockList.forEach(this::collectBlock);
     }
 
@@ -36,6 +38,28 @@ public class DefUseCollector {
     private void collectDef(IRBaseInst inst) {
         for (var def : inst.defs()) {
             myProgram.defMap.put(def, inst);
+        }
+    }
+
+    private void Init(Function func) {
+        myProgram.defMap.clear();
+        for (var block : func.blockList) {
+            for (var phi : block.phiMap.values()) {
+                for (var use : phi.uses()) {
+                    use.uses.clear();
+                }
+            }
+            for (var inst : block.stmts) {
+                for (var use : inst.uses()) {
+                    use.uses.clear();
+                }
+            }
+
+            if (block.terminal != null) {
+                for (var use : block.terminal.uses()) {
+                    use.uses.clear();
+                }
+            }
         }
     }
 }

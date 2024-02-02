@@ -1,9 +1,15 @@
-package IROptimize;
+package IROptimize.Utils;
+
+/*
+    * @program: Mx_star_Compiler
+    * reference: YiChaoZhong, 《编译器指导手册》
+ */
+
 import MIR.*;
 
 import java.util.*;
 
-public class CDGConstruct {
+public class DomTreeConstruct {
     private Program myProgram;
     private HashMap<BasicBlock, Integer> indexMap = new HashMap<>();
     private HashSet<BasicBlock> vis = new HashSet<>();
@@ -11,7 +17,7 @@ public class CDGConstruct {
     private Stack<BasicBlock> stack = new Stack<>();
     private ArrayList<BitSet> dom = new ArrayList<>();
     private int n = 0;
-    public CDGConstruct(Program _myProgram) {
+    public DomTreeConstruct(Program _myProgram) {
         myProgram = _myProgram;
     }
 
@@ -25,11 +31,11 @@ public class CDGConstruct {
         for (var block : func.blockList) {
             indexMap.put(block, i++);
             // clear
-            block.anti_idom = null;
-            block.anti_dom_succ.clear();
-            block.anti_dominanceFrontier.clear();
-            block.cdg_pred.clear();
-            block.cdg_succ.clear();
+            block.idom = null;
+            block.dom_sub.clear();
+            block.dom_succ.clear();
+            block.dom_father.clear();
+            block.dominanceFrontier.clear();
         }
         for (i = 0; i < func.blockList.size(); ++i) {
             dom.add(new BitSet(n));
@@ -37,12 +43,12 @@ public class CDGConstruct {
     }
 
     private void DFS(BasicBlock now) {
-//        System.err.println("visiting: " + indexMap.get(now));
+        // System.err.println("visiting: " + indexMap.get(now));
         // System.err.println("vis: " + now.label + "_" + now.id);
         vis.add(now);
-        for (var succ : now.anti_succ) {
-//            System.err.println("checking: " + indexMap.get(succ) + " " + indexMap.get(now));
-            // System.err.println("succ: " + succ.label + "_" + succ.id);
+        for (var succ : now.succ) {
+            // System.err.println("checking: " + indexMap.get(succ));
+            // System.err.println("check: " + succ.label + "_" + succ.id);
             if (!vis.contains(succ) && !Objects.equals(succ, now)) {
                 DFS(succ);
             }
@@ -51,11 +57,10 @@ public class CDGConstruct {
     }
 
     private void ReversePostorder(Function func) {
-        DFS(func.blockList.get(func.blockList.size() - 1));
+        DFS(func.enterBlock);
 
         while (stack.size() > 0) {
             ROP.add(stack.peek());
-            // System.err.println("stack: " + stack.peek().label + "_" + stack.peek().id);
             stack.pop();
         }
     }
@@ -67,13 +72,12 @@ public class CDGConstruct {
                 dom.get(i).set(j, true);
             }
         }
-        func.blockList.get(func.blockList.size() - 1).anti_idom = func.blockList.get(func.blockList.size() - 1);
+        func.blockList.get(0).idom = func.blockList.get(0);
         boolean flag = true;
         while (flag) {
             flag = false;
-            for (int t = func.blockList.size() - 1; t >= 0; --t) {
-                var block = func.blockList.get(t);
-                if (block.anti_pred.size() == 0) {
+            for (var block : ROP) {
+                if (block.equals(func.enterBlock) || (block.pred.size() == 0)) {
                     for (int i = 0; i < func.blockList.size(); ++i) {
                         dom.get(indexMap.get(block)).set(i, false);
                     }
@@ -85,7 +89,7 @@ public class CDGConstruct {
                 for (int i = 0; i < n; ++i) {
                     tmp.set(i, true);
                 }
-                for (var pred : block.anti_pred) {
+                for (var pred : block.pred) {
                     int predIndex = indexMap.get(pred);
                     for (int i = 0; i < n; ++i) {
                         tmp.set(i, tmp.get(i) && dom.get(predIndex).get(i));
@@ -109,22 +113,27 @@ public class CDGConstruct {
                 }
             }
         }
+        for (int i = 0; i < func.blockList.size(); ++i) {
+            for (int j = 0; j < func.blockList.size(); ++j) {
+                if (dom.get(i).get(j)) {
+                     func.blockList.get(j).dom_sub.add(func.blockList.get(i));
+                     func.blockList.get(i).dom_father.add(func.blockList.get(j));
+                }
+            }
+        }
     }
 
     private void BuildDom(Function func) {
-        for (int u = n - 2; u >= 0; --u) {
-//            System.err.println("son: " + u);
-            for (int i = n - 1; i >= 0; --i) {
+        for (int u = 1; u < n; ++u) {
+            for (int i = 0; i < n; ++i) {
                 if (!dom.get(u).get(i)) continue;
                 BitSet tmp = new BitSet(n);
-                for (int j = n - 1; j >= 0; --j) {
+                for (int j = 0; j < n; ++j) {
                     tmp.set(j, (dom.get(i).get(j) & dom.get(u).get(j)) ^ dom.get(u).get(j));
                 }
                 if (tmp.cardinality() == 1 && tmp.get(u)) {
-                    func.blockList.get(u).anti_idom = func.blockList.get(i);
-//                    System.err.println("father: " + i);
-//                    System.err.println();
-                    func.blockList.get(i).anti_dom_succ.add(func.blockList.get(u));
+                    func.blockList.get(u).idom = func.blockList.get(i);
+                    func.blockList.get(i).dom_succ.add(func.blockList.get(u));
                     break;
                 }
             }
@@ -133,20 +142,14 @@ public class CDGConstruct {
 
     private void GetDominanceFrontier(Function func) {
         for (var block : func.blockList) {
-            if (block.anti_pred.size() >= 2) {
-                for (var pred : block.anti_pred) {
+            if (block.pred.size() >= 2) {
+                for (var pred : block.pred) {
                     var runner = pred;
-                    while (runner != null && !Objects.equals(indexMap.get(runner), indexMap.get(block.anti_idom))) {
-                        runner.anti_dominanceFrontier.add(block);
-                        runner = runner.anti_idom;
+                    while (runner != null && !Objects.equals(indexMap.get(runner), indexMap.get(block.idom))) {
+                        runner.dominanceFrontier.add(block);
+                        runner = runner.idom;
                     }
                 }
-            }
-        }
-        for (var block : func.blockList) {
-            for (var frontier : block.anti_dominanceFrontier) {
-                frontier.cdg_succ.add(block);
-                block.cdg_pred.add(frontier);
             }
         }
     }

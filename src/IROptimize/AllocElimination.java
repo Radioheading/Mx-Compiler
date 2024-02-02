@@ -3,14 +3,11 @@ package IROptimize;
 import MIR.*;
 import MIR.Entity.*;
 import MIR.Inst.*;
-import MIR.type.*;
-import Util.error.internalError;
+import IROptimize.Utils.*;
 
 import java.util.HashMap;
-
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Stack;
 
 public class AllocElimination {
     private Program myProgram;
@@ -156,7 +153,7 @@ public class AllocElimination {
                 if (succ.pred.size() > 1 && original.size() > 1 && succ.phiMap.size() > 0) {
                     // System.err.println("adding edge: " + block.label + "_" + block.id + " -> " + succ.label + "_" + succ.id);
                     // add a new block
-                    BasicBlock newBlock = new BasicBlock("phi_" + block.label + "_" + block.id, block.loopDepth);
+                    BasicBlock newBlock = new BasicBlock("phi_" + block.label + "_" + block.id);
                     toAdd.add(newBlock);
                     newBlock.terminal = new IRJump(newBlock, succ);
                     newBlock.pred.add(block);

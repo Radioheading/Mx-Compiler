@@ -50,7 +50,7 @@ public class BasicBlock {
         }
     }
 
-    public BasicBlock(String _label, int _loopDepth) {
+    public BasicBlock(String _label) {
         label = _label;
         if (appearance.containsKey(_label)) {
             id = appearance.get(_label);
@@ -59,7 +59,6 @@ public class BasicBlock {
             id = 0;
             appearance.put(_label, 1);
         }
-        loopDepth = _loopDepth;
     }
 
     public void push_back(IRBaseInst stmt) {

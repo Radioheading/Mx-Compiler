@@ -20,6 +20,8 @@ public class Program {
 
     public HashMap<IRRegister, IRBaseInst> defMap = new HashMap<>();
 
+    public HashMap<String, Function> funcMap = new HashMap<>();
+
     public Program() {
 
     }

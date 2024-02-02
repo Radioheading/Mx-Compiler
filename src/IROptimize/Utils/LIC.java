@@ -1,4 +1,4 @@
-package IROptimize;
+package IROptimize.Utils;
 
 import MIR.*;
 import MIR.Entity.IRConst;

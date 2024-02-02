@@ -8,7 +8,7 @@ import MIR.Entity.*;
 import MIR.Inst.*;
 import MIR.*;
 import MIR.type.IRIntType;
-import MIR.type.IRPtrType;
+import IROptimize.Utils.*;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -67,8 +67,9 @@ public class IVT {
     public void work() {
         new CFG(myProgram).buildCFG();
         new DefUseCollector(myProgram).work();
+        new LoopConstruct(myProgram).work();
         myProgram.functions.forEach(this::transformFunc);
-        System.err.println("strength reduction: " + strengthReductionCount);
+//        System.err.println("strength reduction: " + strengthReductionCount);
     }
 
     private void transformFunc(Function func) {
@@ -78,7 +79,6 @@ public class IVT {
     }
 
     private void transformLoop(Loop loop) {
-        loop.getPreHeader();
         loop.succLoops.forEach(this::transformLoop);
         BasicIVInit(loop);
         FindDerivedIV(loop);
