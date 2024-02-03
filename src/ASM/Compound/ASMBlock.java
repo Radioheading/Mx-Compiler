@@ -3,13 +3,9 @@ package ASM.Compound;
 import ASM.ASMVisitor;
 import ASM.Instruction.BaseInst;
 import ASM.Operand.Reg;
-import Backend.InstSelector;
-import Backend.RegAlloc;
-import MIR.IRVisitor;
 
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.TreeSet;
 
 public class ASMBlock {
     public boolean visited = false;

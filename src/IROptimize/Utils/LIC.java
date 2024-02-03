@@ -1,14 +1,11 @@
 package IROptimize.Utils;
 
-import MIR.*;
-import MIR.Entity.IRConst;
-import MIR.Entity.IRRegister;
-import MIR.Entity.entity;
-import MIR.Inst.*;
+import llvmIR.*;
+import llvmIR.Entity.IRConst;
+import llvmIR.Entity.IRRegister;
+import llvmIR.Inst.*;
 
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
 
 public class LIC {
     Program myProgram;

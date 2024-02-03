@@ -1,8 +1,8 @@
 package IROptimize;
 
-import MIR.*;
-import MIR.Entity.*;
-import MIR.Inst.*;
+import llvmIR.*;
+import llvmIR.Entity.*;
+import llvmIR.Inst.*;
 import IROptimize.Utils.*;
 
 import java.util.HashMap;

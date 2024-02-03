@@ -1,7 +1,7 @@
 package AST;
 
 import AST.Statements.SuiteNode;
-import MIR.Function;
+import llvmIR.Function;
 import Util.position;
 
 public class FuncDefNode extends ASTNode {

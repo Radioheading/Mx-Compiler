@@ -4,11 +4,9 @@ package Util;
 import AST.*;
 import AST.Statements.ForStmtNode;
 import AST.Statements.WhileStmtNode;
-import MIR.Entity.IRRegister;
-import MIR.Function;
-import MIR.type.IRBaseType;
-import MIR.type.IRStructType;
-import Util.error.semanticError;
+import llvmIR.Entity.IRRegister;
+import llvmIR.Function;
+import llvmIR.type.IRStructType;
 
 import java.util.HashMap;
 

@@ -15,3 +15,5 @@ out/
 *.txt
 *.s
 out/
+bin/*
+!bin/builtin.s

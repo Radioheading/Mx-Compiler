@@ -1,6 +1,6 @@
 package AST;
 
-import MIR.type.IRBaseType;
+import llvmIR.type.IRBaseType;
 import Util.position;
 import Util.Type;
 

@@ -4,10 +4,10 @@
 
 package IROptimize;
 
-import MIR.Entity.*;
-import MIR.Inst.*;
-import MIR.*;
-import MIR.type.IRIntType;
+import llvmIR.Entity.*;
+import llvmIR.Inst.*;
+import llvmIR.*;
+import llvmIR.type.IRIntType;
 import IROptimize.Utils.*;
 
 import java.util.HashMap;

@@ -1,10 +1,10 @@
 package Util;
 
-import MIR.Entity.IRGlobalVar;
+import llvmIR.Entity.IRGlobalVar;
 import Util.error.semanticError;
-import Util.BuiltinElements;
+
 import java.util.HashMap;
-import MIR.type.*;
+import llvmIR.type.*;
 
 import AST.*;
 

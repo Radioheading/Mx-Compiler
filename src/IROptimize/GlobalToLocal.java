@@ -1,9 +1,9 @@
 package IROptimize;
 
-import MIR.*;
-import MIR.Entity.*;
-import MIR.Inst.*;
-import MIR.type.*;
+import llvmIR.*;
+import llvmIR.Entity.*;
+import llvmIR.Inst.*;
+import llvmIR.type.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;

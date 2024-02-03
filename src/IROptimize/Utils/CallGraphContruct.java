@@ -1,9 +1,7 @@
 package IROptimize.Utils;
 
-import MIR.*;
-import MIR.Inst.*;
-
-import java.util.HashMap;
+import llvmIR.*;
+import llvmIR.Inst.*;
 
 public class CallGraphContruct {
     Program myProgram;
@@ -19,7 +17,9 @@ public class CallGraphContruct {
             myProgram.funcMap.put(func.name, func);
         }
 
-
+        for (var func : myProgram.functions) {
+            workFunc(func);
+        }
     }
 
     private void workFunc(Function func) {

@@ -1,13 +1,14 @@
 package IROptimize.Utils;
 
-import MIR.*;
-import MIR.Inst.*;
+import llvmIR.*;
+import llvmIR.Inst.*;
 
 public class DefUseCollector {
     private Program myProgram;
 
     public DefUseCollector(Program _myProgram) {
         myProgram = _myProgram;
+        myProgram.defMap.clear();
     }
 
     public void work() {
@@ -42,7 +43,6 @@ public class DefUseCollector {
     }
 
     private void Init(Function func) {
-        myProgram.defMap.clear();
         for (var block : func.blockList) {
             for (var phi : block.phiMap.values()) {
                 for (var use : phi.uses()) {

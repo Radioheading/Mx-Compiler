@@ -5,7 +5,7 @@ package IROptimize.Utils;
     * reference: YiChaoZhong, 《编译器指导手册》
  */
 
-import MIR.*;
+import llvmIR.*;
 
 import java.util.*;
 

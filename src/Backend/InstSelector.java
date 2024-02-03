@@ -8,15 +8,13 @@ import ASM.*;
 import ASM.Compound.*;
 import ASM.Instruction.*;
 import ASM.Operand.*;
-import MIR.*;
-import MIR.Entity.*;
-import MIR.Inst.*;
-import MIR.type.IRIntType;
-import MIR.type.IRVoidType;
-import Util.error.internalError;
+import llvmIR.*;
+import llvmIR.Entity.*;
+import llvmIR.Inst.*;
+import llvmIR.type.IRIntType;
+import llvmIR.type.IRVoidType;
 
 import java.util.HashMap;
-import java.util.Objects;
 
 public class InstSelector implements IRVisitor {
     private int globalLoad = 0;

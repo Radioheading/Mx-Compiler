@@ -2,13 +2,12 @@
 
 package IROptimize;
 
-import MIR.*;
-import MIR.Entity.*;
-import MIR.Inst.*;
+import llvmIR.*;
+import llvmIR.Entity.*;
+import llvmIR.Inst.*;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 
 public class ConstPropagation {
     Program myProgram;

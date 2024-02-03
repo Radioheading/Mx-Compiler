@@ -3,7 +3,7 @@ package AST.Statements;
 import AST.ASTVisitor;
 import AST.Expressions.ExpressionNode;
 import AST.VarDefNode;
-import MIR.BasicBlock;
+import llvmIR.BasicBlock;
 import Util.position;
 
 import java.util.ArrayList;

@@ -3,6 +3,7 @@
 //import Backend.*;
 //import Frontend.*;
 //import IROptimize.*;
+//import IROptimize.Utils.CFG;
 //import Parser.*;
 //import Util.MxErrorListener;
 //import Util.error.error;
@@ -16,7 +17,7 @@
 //
 //public class Compiler {
 //    public static void main(String[] args) throws Exception {
-//        String name = "testcases/codegen/e1.mx";
+//        String name = "testcases/optim-new/inline.mx";
 //        InputStream input = new FileInputStream(name);
 //        try {
 //            RootNode ASTRoot;
@@ -40,7 +41,7 @@
 //            var Mem2Reg = new AllocElimination(irBuilder.myProgram);
 //            Mem2Reg.eliminateAlloc();
 //
-//            for (int i = 0; i < 5; ++i) {
+//            for (int i = 0; i < 1; ++i) {
 //                new ADCE(irBuilder.myProgram).work();
 //                new ConstPropagation(irBuilder.myProgram).propagateConst();
 //                new ADCE(irBuilder.myProgram).work();
@@ -49,9 +50,12 @@
 //                new LoopInvariant(irBuilder.myProgram).simplifyLoopInvariant();
 //                new ADCE(irBuilder.myProgram).work();
 //                new IVT(irBuilder.myProgram).work();
+//                new ADCE(irBuilder.myProgram).work();
+//                new PrintStream("IVT.ll").println(irBuilder.myProgram);
+//                new FuncInliner(irBuilder.myProgram).work();
 //            }
 //
-//            PrintStream output_1 = new PrintStream("test.ll");
+//            PrintStream output_1 = new PrintStream("Inline.ll");
 //            System.setOut(output_1);
 //            System.out.println(irBuilder.myProgram);
 //
@@ -61,7 +65,7 @@
 //            new InstSelector(asmProgram).visit(irBuilder.myProgram);
 //            new GraphColoring(asmProgram).allocateReg();
 //            new BlockMerger(asmProgram).MergeBlock();
-//            PrintStream output_2 = new PrintStream("test.s");
+//            PrintStream output_2 = new PrintStream("Inline.s");
 //            System.setOut(output_2);
 //            System.out.println(asmProgram);
 //        } catch (error er) {

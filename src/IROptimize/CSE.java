@@ -1,10 +1,10 @@
 package IROptimize;
 
-import MIR.BasicBlock;
-import MIR.Entity.*;
-import MIR.Inst.*;
-import MIR.Program;
-import MIR.Function;
+import llvmIR.BasicBlock;
+import llvmIR.Entity.*;
+import llvmIR.Inst.*;
+import llvmIR.Program;
+import llvmIR.Function;
 import IROptimize.Utils.*;
 
 import java.util.*;

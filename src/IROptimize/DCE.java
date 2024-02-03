@@ -1,16 +1,14 @@
 package IROptimize;
 
-import MIR.*;
-import MIR.Entity.*;
-import MIR.Inst.IRBaseInst;
-import MIR.Inst.IRCall;
-import MIR.Inst.IRPhi;
-import MIR.type.IRIntType;
+import llvmIR.*;
+import llvmIR.Entity.*;
+import llvmIR.Inst.IRBaseInst;
+import llvmIR.Inst.IRCall;
+import llvmIR.Inst.IRPhi;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Queue;
 
 public class DCE {
     Program myProgram;

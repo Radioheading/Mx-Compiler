@@ -1,5 +1,5 @@
 package IROptimize.Utils;
-import MIR.*;
+import llvmIR.*;
 
 import java.util.*;
 

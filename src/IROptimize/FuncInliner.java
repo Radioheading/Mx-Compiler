@@ -1,9 +1,11 @@
 package IROptimize;
 
-import MIR.*;
+import llvmIR.*;
 import IROptimize.Utils.*;
-import MIR.Inst.IRCall;
+import llvmIR.Inst.*;
+import llvmIR.Entity.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -43,32 +45,193 @@ public class FuncInliner {
 
     LinkedList<CallInfo> workList = new LinkedList<>();
     private HashSet<String> builtinFuncs = new HashSet<>();
+    private HashMap<BasicBlock, BasicBlock> renameBlockMap = new HashMap<>();
+    private HashMap<entity, entity> renameEntityMap = new HashMap<>();
 
     public void work() {
         // add all the builtin functions to the hashset
         PreloadBuiltinFuncs();
         FuncSizeCalc();
 
-        while (!workList.isEmpty()) {
+        boolean init = true;
+        while (init || !workList.isEmpty()) {
+            init = false;
             workList.clear();
+            new CallGraphContruct(myProgram).work();
             LoadWorkList();
 
             for (var callInfo : workList) {
+                new CallGraphContruct(myProgram).work();
                 if (canInline(callInfo)) { // the function may have changed
                     new CFG(myProgram).buildCFG();
                     new DefUseCollector(myProgram).work();
-                    InlineFunc(callInfo.callee);
+                    InlineFunc(callInfo);
                 }
             }
         }
+
+        new CFG(myProgram).buildCFG();
+        new CallGraphContruct(myProgram).work();
+
+        ArrayList<Function> newFunctions = new ArrayList<>();
+
+        for (var func : myProgram.functions) {
+//            System.err.println("function " + func.name + " has " + func.callers.size() + " callers");
+            if (func.callers.size() == 0 && !func.name.equals("main")) {
+                myProgram.funcMap.remove(func.name);
+            } else {
+//                System.err.println("accepted!");
+                newFunctions.add(func);
+            }
+        }
+
+        myProgram.functions = newFunctions;
     }
 
-    private void InlineFunc(Function func) {
+    private void InlineFunc(CallInfo callInfo) {
+        System.err.println("inlining " + callInfo.callee.name + " into " + callInfo.caller.name);
+        renameBlockMap.clear();
+        renameEntityMap.clear();
         /* todo:
          *  1. replace params with call arguments
-         *  2. make brand new Blocks of the callee
+         *  2. make brand new blocks and new instructions of the callee
          *  3. link the jump relations to the new block
+         *  4. replace all the defs and uses
+         *  5. replace the uses of the LHS of callInst
          */
+        var call = callInfo.call;
+        Function caller = callInfo.caller, callee = callInfo.callee;
+        BasicBlock callerBlock = call.parentBlock, newCalleeEnter = null, newCalleeExit = null;
+        BasicBlock afterBlock = new BasicBlock(caller.name + "_after");
+        caller.blockList.add(afterBlock);
+        renameBlockMap.put(afterBlock, afterBlock);
+        afterBlock.loopDepth = callerBlock.loopDepth;
+        IRRet newRetInst = null;
+        entity callRes = null;
+
+        caller.size += callee.size + 1;
+
+        for (int i = 0; i < callee.parameterIn.size(); ++i) {
+            renameEntityMap.put(callee.parameterIn.get(i), call.arguments.get(i));
+        }
+
+        for (var block : callee.blockList) {
+            var newBlock = new BasicBlock(block.label + "_inlined");
+            newBlock.loopDepth = call.parentBlock.loopDepth + block.loopDepth;
+            renameBlockMap.put(block, newBlock);
+            caller.blockList.add(newBlock);
+            if (block.succ.size() == 0) {
+                newCalleeExit = newBlock;
+            } else if (block.pred.size() == 0) {
+                newCalleeEnter = newBlock;
+            }
+        }
+
+        for (var block : callee.blockList) {
+            for (var phi : block.phiMap.values()) {
+                IRPhi newPhi = (IRPhi) phi.copyAndRename(block);
+                HashMap<BasicBlock, entity> newBlockValue = new HashMap<>();
+                HashSet<BasicBlock> newBlockMap = new HashSet<>();
+                for (var from : newPhi.block_value.keySet()) {
+                    newBlockMap.add(renameBlockMap.get(from));
+                    newBlockValue.put(renameBlockMap.get(from), newPhi.block_value.get(from));
+                }
+                newPhi.block_value = newBlockValue;
+                newPhi.blockMap = newBlockMap;
+                renameBlockMap.get(block).phiMap.put(newPhi.dest, newPhi);
+            }
+            for (int i = 0; i < block.stmts.size(); ++i) {
+                var stmt = block.stmts.get(i);
+                if (stmt instanceof IRRet ret) {
+                    newRetInst = (IRRet) ret.copyAndRename(block);
+                    renameBlockMap.get(block).stmts.add(newRetInst);
+                } else {
+                    renameBlockMap.get(block).stmts.add(stmt.copyAndRename(block));
+                }
+            }
+            if (block.terminal != null) {
+                renameBlockMap.get(block).terminal = block.terminal.copyAndRename(block);
+            }
+        }
+
+        LinkedList<IRBaseInst> newStmts = new LinkedList<>();
+        boolean flag = false;
+
+        for (int i = 0; i < callerBlock.stmts.size(); ++i) {
+            var stmt = callerBlock.stmts.get(i);
+            if (flag) {
+                afterBlock.append(stmt);
+            } else if (stmt == call) {
+                flag = true;
+            } else {
+                newStmts.add(stmt);
+            }
+        }
+        afterBlock.terminal = callerBlock.terminal;
+        callerBlock.stmts = newStmts;
+        callerBlock.terminal = new IRJump(callerBlock, newCalleeEnter);
+        newCalleeExit.terminal = new IRJump(newCalleeExit, afterBlock);
+
+        for (var newBlock : renameBlockMap.values()) {
+            if (newBlock == afterBlock) {
+                continue;
+            }
+            // rewrite defs
+            for (var phi : newBlock.phiMap.values()) {
+                rewriteDefs(phi);
+            }
+            for (var stmt : newBlock.stmts) {
+                rewriteDefs(stmt);
+            }
+            if (newBlock.terminal != null) {
+                if (newBlock.terminal instanceof IRJump jump) {
+                    jump.destination = renameBlockMap.get(jump.destination);
+                } else if (newBlock.terminal instanceof IRBranch branch) {
+                    branch.thenBranch = renameBlockMap.get(branch.thenBranch);
+                    branch.elseBranch = renameBlockMap.get(branch.elseBranch);
+                }
+            }
+        }
+
+        for (var newBlock : renameBlockMap.values()) {
+            if (newBlock == afterBlock) {
+                continue;
+            }
+            // rewrite uses
+            for (var phi : newBlock.phiMap.values()) {
+                for (var use : phi.uses()) {
+                    if (renameEntityMap.containsKey(use)) {
+                        phi.replaceUse(use, renameEntityMap.get(use));
+                    }
+                }
+            }
+
+            for (var stmt : newBlock.stmts) {
+                for (var use : stmt.uses()) {
+                    if (renameEntityMap.containsKey(use)) {
+                        stmt.replaceUse(use, renameEntityMap.get(use));
+                    }
+                }
+            }
+
+            if (newBlock.terminal != null) {
+                for (var use : newBlock.terminal.uses()) {
+                    if (renameEntityMap.containsKey(use)) {
+                        newBlock.terminal.replaceUse(use, renameEntityMap.get(use));
+                    }
+                }
+            }
+        }
+
+        callRes = newRetInst.returnValue;
+        newCalleeExit.stmts.clear();
+
+        // rewrite rest of the caller by the new call ret
+        for (var block : caller.blockList) {
+            for (var stmt : block.stmts) {
+                stmt.replaceUse(call.dest, callRes);
+            }
+        }
     }
 
     private void FuncSizeCalc() {
@@ -128,7 +291,15 @@ public class FuncInliner {
         return !callee.callees.contains(caller) && (caller.size < instNum && callee.size < instNum
                 && callee.blockList.size() < blockNum && caller.blockList.size() < blockNum
                 || caller.size < maxInstNum && callee.size < maxInstNum
-                && callee.blockList.size() < blockNum && caller.blockList.size() < blockNum
+                && callee.blockList.size() < maxBlockNum && caller.blockList.size() < maxBlockNum
                 && (block.loopDepth >= 2 || callee.callers.size() == 1 || callee.callees.size() == 0));
+    }
+
+    private void rewriteDefs(IRBaseInst inst) {
+        for (var def : inst.defs()) {
+            IRRegister newReg = def.copy();
+            inst.replaceDef(def, newReg);
+            renameEntityMap.put(def, newReg);
+        }
     }
 }

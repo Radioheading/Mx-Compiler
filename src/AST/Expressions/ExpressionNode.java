@@ -1,9 +1,8 @@
 package AST.Expressions;
 
 import AST.*;
-import MIR.Entity.IRRegister;
-import MIR.Entity.entity;
-import MIR.type.IRIntType;
+import llvmIR.Entity.IRRegister;
+import llvmIR.Entity.entity;
 import Util.position;
 
 abstract public class ExpressionNode extends ASTNode {

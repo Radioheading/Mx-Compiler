@@ -1,10 +1,8 @@
 package IROptimize.Utils;
 
-import MIR.*;
-import MIR.Inst.*;
+import llvmIR.*;
+import llvmIR.Inst.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedList;
 
 public class CFG {

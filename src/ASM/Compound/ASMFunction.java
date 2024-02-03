@@ -3,8 +3,7 @@ package ASM.Compound;
 import ASM.ASMVisitor;
 import ASM.Instruction.BaseInst;
 import ASM.Operand.*;
-import Backend.RegAlloc;
-import MIR.Function;
+import llvmIR.Function;
 
 import java.util.ArrayList;
 import java.util.HashMap;

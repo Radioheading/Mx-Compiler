@@ -45,6 +45,8 @@ public class Compiler {
                 new LoopInvariant(irBuilder.myProgram).simplifyLoopInvariant();
                 new ADCE(irBuilder.myProgram).work();
                 new IVT(irBuilder.myProgram).work();
+                new ADCE(irBuilder.myProgram).work();
+                new FuncInliner(irBuilder.myProgram).work();
             }
             // end SSA optimize
             Mem2Reg.eliminatePhi();
