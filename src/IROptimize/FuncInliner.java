@@ -5,6 +5,8 @@ import IROptimize.Utils.*;
 import llvmIR.Inst.*;
 import llvmIR.Entity.*;
 
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,19 +50,19 @@ public class FuncInliner {
     private HashMap<BasicBlock, BasicBlock> renameBlockMap = new HashMap<>();
     private HashMap<entity, entity> renameEntityMap = new HashMap<>();
 
-    public void work() {
+    public void work() throws FileNotFoundException {
         // add all the builtin functions to the hashset
         PreloadBuiltinFuncs();
         FuncSizeCalc();
-
-        boolean init = true;
-        while (init || !workList.isEmpty()) {
-            init = false;
-            workList.clear();
+        while (true) {
             new CallGraphContruct(myProgram).work();
             LoadWorkList();
-
-            for (var callInfo : workList) {
+            System.err.println("workList size: " + workList.size());
+            if (workList.size() == 0) {
+                break;
+            }
+            while (!workList.isEmpty()) {
+                var callInfo = workList.poll();
                 new CallGraphContruct(myProgram).work();
                 if (canInline(callInfo)) { // the function may have changed
                     new CFG(myProgram).buildCFG();
@@ -76,11 +78,9 @@ public class FuncInliner {
         ArrayList<Function> newFunctions = new ArrayList<>();
 
         for (var func : myProgram.functions) {
-//            System.err.println("function " + func.name + " has " + func.callers.size() + " callers");
             if (func.callers.size() == 0 && !func.name.equals("main")) {
                 myProgram.funcMap.remove(func.name);
             } else {
-//                System.err.println("accepted!");
                 newFunctions.add(func);
             }
         }
@@ -88,7 +88,9 @@ public class FuncInliner {
         myProgram.functions = newFunctions;
     }
 
-    private void InlineFunc(CallInfo callInfo) {
+    private void InlineFunc(CallInfo callInfo) throws FileNotFoundException {
+        new PrintStream(callInfo.callee.name + "_inline_" + callInfo.caller.name + callInfo.hashCode() + ".ll").println(myProgram);
+
         System.err.println("inlining " + callInfo.callee.name + " into " + callInfo.caller.name);
         renameBlockMap.clear();
         renameEntityMap.clear();
@@ -102,24 +104,42 @@ public class FuncInliner {
         var call = callInfo.call;
         Function caller = callInfo.caller, callee = callInfo.callee;
         BasicBlock callerBlock = call.parentBlock, newCalleeEnter = null, newCalleeExit = null;
-        BasicBlock afterBlock = new BasicBlock(caller.name + "_after");
-        caller.blockList.add(afterBlock);
+        BasicBlock afterBlock = new BasicBlock(callee.name + "_after");
+        ArrayList<BasicBlock> afterBlocks = new ArrayList<>();
+        afterBlocks.add(afterBlock);
         renameBlockMap.put(afterBlock, afterBlock);
         afterBlock.loopDepth = callerBlock.loopDepth;
         IRRet newRetInst = null;
-        entity callRes = null;
+        entity callRes;
 
         caller.size += callee.size + 1;
+        System.err.println("caller name: " + caller.name);
+        System.err.println("caller size: " + caller.size);
 
         for (int i = 0; i < callee.parameterIn.size(); ++i) {
             renameEntityMap.put(callee.parameterIn.get(i), call.arguments.get(i));
+        }
+
+        LinkedList<BasicBlock> beforeBlocks = new LinkedList<>();
+
+        boolean isAfter = false;
+
+        for (int i = 0; i < caller.blockList.size(); ++i) {
+            if (caller.blockList.get(i) == callerBlock) {
+                beforeBlocks.add(caller.blockList.get(i));
+                isAfter = true;
+            } else if (isAfter) {
+                afterBlocks.add(caller.blockList.get(i));
+            } else {
+                beforeBlocks.add(caller.blockList.get(i));
+            }
         }
 
         for (var block : callee.blockList) {
             var newBlock = new BasicBlock(block.label + "_inlined");
             newBlock.loopDepth = call.parentBlock.loopDepth + block.loopDepth;
             renameBlockMap.put(block, newBlock);
-            caller.blockList.add(newBlock);
+            beforeBlocks.add(newBlock);
             if (block.succ.size() == 0) {
                 newCalleeExit = newBlock;
             } else if (block.pred.size() == 0) {
@@ -130,6 +150,7 @@ public class FuncInliner {
         for (var block : callee.blockList) {
             for (var phi : block.phiMap.values()) {
                 IRPhi newPhi = (IRPhi) phi.copyAndRename(block);
+                newPhi.parentBlock = renameBlockMap.get(block);
                 HashMap<BasicBlock, entity> newBlockValue = new HashMap<>();
                 HashSet<BasicBlock> newBlockMap = new HashSet<>();
                 for (var from : newPhi.block_value.keySet()) {
@@ -144,13 +165,13 @@ public class FuncInliner {
                 var stmt = block.stmts.get(i);
                 if (stmt instanceof IRRet ret) {
                     newRetInst = (IRRet) ret.copyAndRename(block);
-                    renameBlockMap.get(block).stmts.add(newRetInst);
+                    renameBlockMap.get(block).append(newRetInst);
                 } else {
-                    renameBlockMap.get(block).stmts.add(stmt.copyAndRename(block));
+                    renameBlockMap.get(block).append(stmt.copyAndRename(block));
                 }
             }
             if (block.terminal != null) {
-                renameBlockMap.get(block).terminal = block.terminal.copyAndRename(block);
+                renameBlockMap.get(block).appendTerminal(block.terminal.copyAndRename(block));
             }
         }
 
@@ -167,7 +188,7 @@ public class FuncInliner {
                 newStmts.add(stmt);
             }
         }
-        afterBlock.terminal = callerBlock.terminal;
+        afterBlock.appendTerminal(callerBlock.terminal);
         callerBlock.stmts = newStmts;
         callerBlock.terminal = new IRJump(callerBlock, newCalleeEnter);
         newCalleeExit.terminal = new IRJump(newCalleeExit, afterBlock);
@@ -226,10 +247,21 @@ public class FuncInliner {
         callRes = newRetInst.returnValue;
         newCalleeExit.stmts.clear();
 
+        // rewrite caller.blockList
+        caller.blockList = beforeBlocks;
+        caller.blockList.addAll(afterBlocks);
+
         // rewrite rest of the caller by the new call ret
         for (var block : caller.blockList) {
+            for (var phi : block.phiMap.values()) {
+                phi.replaceUse(call.dest, callRes, afterBlock);
+                phi.replaceOrigin(callerBlock, afterBlock);
+            }
             for (var stmt : block.stmts) {
                 stmt.replaceUse(call.dest, callRes);
+            }
+            if (block.terminal != null) {
+                block.terminal.replaceUse(call.dest, callRes);
             }
         }
     }
@@ -243,6 +275,7 @@ public class FuncInliner {
                 size += block.terminal != null ? 1 : 0;
             }
             func.size = size;
+            System.err.println("function " + func.name + " size: " + size);
         }
     }
 
@@ -252,7 +285,7 @@ public class FuncInliner {
                 for (var inst : block.stmts) {
                     if (inst instanceof IRCall call && !builtinFuncs.contains(call.name)) {
                         var toAdd = new CallInfo(call, func, myProgram.funcMap.get(call.name));
-                        if (canInline(toAdd)) {
+                        if (canInline(toAdd) && !toAdd.callee.name.equals("Array_Node.size")) {
                             workList.add(toAdd);
                         }
                     }
@@ -288,7 +321,7 @@ public class FuncInliner {
         var block = callInfo.call.parentBlock;
         var caller = callInfo.caller;
         var callee = callInfo.callee;
-        return !callee.callees.contains(caller) && (caller.size < instNum && callee.size < instNum
+        return callee.callees.size() == 0 && (caller.size < instNum && callee.size < instNum
                 && callee.blockList.size() < blockNum && caller.blockList.size() < blockNum
                 || caller.size < maxInstNum && callee.size < maxInstNum
                 && callee.blockList.size() < maxBlockNum && caller.blockList.size() < maxBlockNum

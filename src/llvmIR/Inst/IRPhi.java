@@ -36,6 +36,11 @@ public class IRPhi extends IRBaseInst {
         String ret = dest + " = phi " + type + " ";
         ArrayList<String> tmp = new ArrayList<>();
         for (var block : blockMap) {
+            if (block.label.equals("for.cond") && block.id == 2) {
+                System.err.println("fuck!");
+                System.err.println(ret);
+                System.err.println(parentBlock.label + "_" + parentBlock.id);
+            }
             tmp.add("[ " + block_value.get(block) + ", %" + block.label + "_" + block.id + " ]");
         }
         ret += String.join(", ", tmp);
@@ -83,6 +88,30 @@ public class IRPhi extends IRBaseInst {
         }
     }
 
+    public void replaceUse(entity origin, entity replaced, BasicBlock newBlock) {
+        BasicBlock oldBlock = null;
+        for (var block : blockMap) {
+            if (block_value.get(block).equals(origin)) {
+                block_value.put(newBlock, replaced);
+                block_value.remove(block);
+                oldBlock = block;
+            }
+        }
+        if (oldBlock != null) {
+            blockMap.remove(oldBlock);
+            blockMap.add(newBlock);
+        }
+    }
+
+    public void replaceOrigin(BasicBlock origin, BasicBlock replaced) {
+        if (blockMap.contains(origin)) {
+            blockMap.remove(origin);
+            blockMap.add(replaced);
+            block_value.put(replaced, block_value.get(origin));
+            block_value.remove(origin);
+        }
+    }
+
     @Override
     public void replaceDef(IRRegister origin, IRRegister replaced) {
         if (dest.equals(origin)) {
@@ -92,7 +121,7 @@ public class IRPhi extends IRBaseInst {
 
     @Override
     public IRBaseInst copyAndRename(BasicBlock _parent) {
-        IRPhi ret = new IRPhi(_parent, dest, origin);
+        IRPhi ret = new IRPhi(_parent, dest, type);
         for (var block : blockMap) {
             ret.blockMap.add(block);
             ret.block_value.put(block, block_value.get(block));

@@ -47,7 +47,6 @@ public class ADCE {
 
         while (!workList.isEmpty()) {
             IRBaseInst inst = workList.iterator().next();
-            // System.err.println("iterator = " + inst);
             workList.remove(inst);
             live.add(inst);
             liveBlock.add(inst.parentBlock);

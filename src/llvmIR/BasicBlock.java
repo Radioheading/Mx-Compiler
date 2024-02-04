@@ -72,6 +72,11 @@ public class BasicBlock {
         stmt.parentBlock = this;
     }
 
+    public void appendTerminal(IRBaseInst inst) {
+        terminal = inst;
+        inst.parentBlock = this;
+    }
+
     public String toString() {
         for (var phi : phiMap.values()) {
             for (var pred : pred) {

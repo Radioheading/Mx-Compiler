@@ -6,3 +6,4 @@ Parser/
 Util/
 Compiler.class
 ASM/
+llvmIR/

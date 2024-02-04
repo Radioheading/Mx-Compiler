@@ -2,6 +2,7 @@
 
 package IROptimize;
 
+import IROptimize.Utils.CFG;
 import llvmIR.*;
 import llvmIR.Entity.*;
 import llvmIR.Inst.*;
@@ -19,6 +20,7 @@ public class ConstPropagation {
     }
 
     public void propagateConst() {
+        new CFG(myProgram).buildCFG();
         myProgram.functions.forEach(this::propagateConst_function);
     }
 
@@ -70,6 +72,8 @@ public class ConstPropagation {
                 for (var def : inst.defs()) {
                     for (var use : variables.get(def)) {
                         if (use instanceof IRPhi phi) {
+                            System.err.println(inst);
+                            System.err.println(inst.parentBlock.label + "_" + inst.parentBlock.id);
                             phi.addEntry(inst.parentBlock, val);
                             workList.add(phi);
                         } else {

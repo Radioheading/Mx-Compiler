@@ -411,7 +411,7 @@ public class IRBuilder implements ASTVisitor {
         }
         if (Objects.equals(it.funcName, "main")) { // void init()
             if (hasInit) {
-                it.IRFunc.enterBlock.stmts.addFirst(new IRCall(null, "__mx_global_var_init", nowBlock, null));
+                it.IRFunc.enterBlock.stmts.addFirst(new IRCall(null, "__mx_global_var_init", nowFunc.enterBlock, null));
                 it.IRFunc.enterBlock.hasCall = true;
             }
             it.IRFunc.enterBlock.stmts.addFirst(new IRStore(nowBlock, intZero, it.IRFunc.retReg));

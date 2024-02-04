@@ -49,7 +49,7 @@ public class GlobalToLocal {
             }
         }
         if (!exist) return;
-        IRRegister newReg = new IRRegister(gVar.name, gVar.type.Type());
+        IRRegister newReg = new IRRegister(gVar.name.replace("@", ""), gVar.type.Type());
         if (func.name.equals("main")) {
             boolean flag = false;
             LinkedList<IRBaseInst> newStmts = new LinkedList<>();
