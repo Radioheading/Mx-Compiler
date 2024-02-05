@@ -56,6 +56,7 @@ public class IRPhi extends IRBaseInst {
     public void rename(entity origin, entity obj) {
         for (var block : blockMap) {
             if (block_value.get(block).equals(origin)) {
+                System.err.println("replacing: " + origin + " to: " + obj);
                 block_value.put(block, obj);
             }
         }

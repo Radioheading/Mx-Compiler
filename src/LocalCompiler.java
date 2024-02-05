@@ -17,7 +17,7 @@
 //
 //public class Compiler {
 //    public static void main(String[] args) throws Exception {
-//        String name = "testcases/optim-new/inline.mx";
+//        String name = "testcases/opt2/7.in";
 //        InputStream input = new FileInputStream(name);
 //        try {
 //            RootNode ASTRoot;
@@ -37,11 +37,11 @@
 //            IRBuilder irBuilder = new IRBuilder(gScope);
 //            irBuilder.visit(ASTRoot);
 //            // begin optimize
-//            new GlobalToLocal(irBuilder.myProgram).globalTransition();
 //            var Mem2Reg = new AllocElimination(irBuilder.myProgram);
-//            Mem2Reg.eliminateAlloc();
 //
-//            for (int i = 0; i < 1; ++i) {
+//            for (int i = 0; i < 2; ++i) {
+//                new GlobalToLocal(irBuilder.myProgram).globalTransition();
+//                Mem2Reg.eliminateAlloc();
 //                new ADCE(irBuilder.myProgram).work();
 //                new ConstPropagation(irBuilder.myProgram).propagateConst();
 //                new ADCE(irBuilder.myProgram).work();

@@ -146,6 +146,7 @@ public class DomTreeConstruct {
                 for (var pred : block.pred) {
                     var runner = pred;
                     while (runner != null && !Objects.equals(indexMap.get(runner), indexMap.get(block.idom))) {
+//                        System.err.println("add: " + runner.label + "_" + runner.id + " to " + block.label + "_" + block.id);
                         runner.dominanceFrontier.add(block);
                         runner = runner.idom;
                     }

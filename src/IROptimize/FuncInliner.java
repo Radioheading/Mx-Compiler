@@ -38,7 +38,7 @@ public class FuncInliner {
      *
      */
 
-    private static int blockNum = 20, maxBlockNum = 50, instNum = 150, maxInstNum = 300;
+    private static int blockNum = 100, maxBlockNum = 200, instNum = 500, maxInstNum = 1000;
     private Program myProgram;
 
     public FuncInliner(Program _myProgram) {
@@ -57,7 +57,7 @@ public class FuncInliner {
         while (true) {
             new CallGraphContruct(myProgram).work();
             LoadWorkList();
-            System.err.println("workList size: " + workList.size());
+            // System.err.println("workList size: " + workList.size());
             if (workList.size() == 0) {
                 break;
             }
@@ -89,7 +89,7 @@ public class FuncInliner {
     }
 
     private void InlineFunc(CallInfo callInfo) throws FileNotFoundException {
-        new PrintStream(callInfo.callee.name + "_inline_" + callInfo.caller.name + callInfo.hashCode() + ".ll").println(myProgram);
+//        new PrintStream(callInfo.callee.name + "_inline_" + callInfo.caller.name + callInfo.hashCode() + ".ll").println(myProgram);
 
         System.err.println("inlining " + callInfo.callee.name + " into " + callInfo.caller.name);
         renameBlockMap.clear();
@@ -113,8 +113,8 @@ public class FuncInliner {
         entity callRes;
 
         caller.size += callee.size + 1;
-        System.err.println("caller name: " + caller.name);
-        System.err.println("caller size: " + caller.size);
+        // System.err.println("caller name: " + caller.name);
+        // System.err.println("caller size: " + caller.size);
 
         for (int i = 0; i < callee.parameterIn.size(); ++i) {
             renameEntityMap.put(callee.parameterIn.get(i), call.arguments.get(i));
@@ -275,7 +275,7 @@ public class FuncInliner {
                 size += block.terminal != null ? 1 : 0;
             }
             func.size = size;
-            System.err.println("function " + func.name + " size: " + size);
+            // System.err.println("function " + func.name + " size: " + size);
         }
     }
 
@@ -321,7 +321,7 @@ public class FuncInliner {
         var block = callInfo.call.parentBlock;
         var caller = callInfo.caller;
         var callee = callInfo.callee;
-        return callee.callees.size() == 0 && (caller.size < instNum && callee.size < instNum
+        return (callee.callees.size() == 0 || callee.callers.size() == 1) && (caller.size < instNum && callee.size < instNum
                 && callee.blockList.size() < blockNum && caller.blockList.size() < blockNum
                 || caller.size < maxInstNum && callee.size < maxInstNum
                 && callee.blockList.size() < maxBlockNum && caller.blockList.size() < maxBlockNum

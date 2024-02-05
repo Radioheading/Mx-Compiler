@@ -108,48 +108,41 @@ public class GlobalToLocal {
             for (var func : myProgram.functions) {
                 ReadOnlyOptimize(func, global);
             }
-//            System.err.println("&gValue" + global.name);
-            if (global.init_use) {
-//                System.err.println("old value:" + global.initValue);
-//                System.err.println("new value" + defaultValue(global.type.Type()));
-                newGVariables.add(global);
-            } else {
-                Function onlyDest = null;
-                boolean flag = true;
-                for (var func : myProgram.functions) {
-                    for (var block : func.blockList) {
-                        for (var inst : block.stmts) {
-                            if (inst instanceof IRLoad load && load.address.equals(global) || inst instanceof IRStore store && store.dest.equals(global)) {
+            Function onlyDest = null;
+            boolean flag = true;
+            for (var func : myProgram.functions) {
+                for (var block : func.blockList) {
+                    for (var inst : block.stmts) {
+                        if (inst instanceof IRLoad load && load.address.equals(global) || inst instanceof IRStore store && store.dest.equals(global)) {
 //                                System.err.println("appear in : " + func.name);
-                                if (onlyDest != null && !onlyDest.name.equals(func.name)) {
-                                    flag = false;
-                                    break;
-                                } else {
-                                    onlyDest = func;
-                                }
+                            if (onlyDest != null && !onlyDest.name.equals(func.name)) {
+                                flag = false;
+                                break;
+                            } else {
+                                onlyDest = func;
                             }
                         }
                     }
                 }
-                if (onlyDest != null) {
+            }
+            if (onlyDest != null) {
 //                    System.err.println(onlyDest.name);
-                }
-                if (onlyDest == null) continue;
-                if (flag && (onlyDest.name.equals("main") || onlyDest.name.equals("__mx_global_var_init"))) {
-//                    System.err.println("do it");
-                    IRRegister newReg = new IRRegister("global_" , global.type);
-                    onlyDest.enterBlock.stmts.addFirst(new IRStore(onlyDest.enterBlock, global.initValue, newReg));
-                    var alloc = new IRAlloca(onlyDest.enterBlock, newReg.type, newReg);
+            }
+            if (onlyDest == null) continue;
+            if (flag && (onlyDest.name.equals("main"))) {
+                System.err.println("localizing: " + global);
+                IRRegister newReg = new IRRegister("global_" + global.name.replace("@", ""), global.type);
+                onlyDest.enterBlock.stmts.addFirst(new IRStore(onlyDest.enterBlock, global.initValue, newReg));
+                var alloc = new IRAlloca(onlyDest.enterBlock, newReg.type, newReg);
 //                    System.err.println(alloc);
-                    onlyDest.init.add(alloc);
-                    for (var block : onlyDest.blockList) {
-                        for (var inst : block.stmts) {
-                            inst.rename(global, newReg);
-                        }
+                onlyDest.init.add(alloc);
+                for (var block : onlyDest.blockList) {
+                    for (var inst : block.stmts) {
+                        inst.rename(global, newReg);
                     }
-                } else {
-                    newGVariables.add(global);
                 }
+            } else {
+                newGVariables.add(global);
             }
         }
         for (var func : myProgram.functions) {

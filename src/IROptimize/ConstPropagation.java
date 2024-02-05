@@ -72,9 +72,11 @@ public class ConstPropagation {
                 for (var def : inst.defs()) {
                     for (var use : variables.get(def)) {
                         if (use instanceof IRPhi phi) {
-                            System.err.println(inst);
-                            System.err.println(inst.parentBlock.label + "_" + inst.parentBlock.id);
-                            phi.addEntry(inst.parentBlock, val);
+                            for (var value : phi.block_value.entrySet()) {
+                                if (value.getValue().equals(def)) {
+                                    phi.block_value.put(value.getKey(), val);
+                                }
+                            }
                             workList.add(phi);
                         } else {
                             use.rename(def, val);

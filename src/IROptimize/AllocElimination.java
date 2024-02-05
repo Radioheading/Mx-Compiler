@@ -5,6 +5,8 @@ import llvmIR.Entity.*;
 import llvmIR.Inst.*;
 import IROptimize.Utils.*;
 
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -15,15 +17,16 @@ public class AllocElimination {
     private HashMap<IRRegister, entity> last_def = new HashMap<>();
 
     public AllocElimination(Program _myProgram) {
-        new CFG(_myProgram).buildCFG();
-        new DomTreeConstruct(_myProgram).work();
         myProgram = _myProgram;
     }
 
-    public void eliminateAlloc() {
+    public void eliminateAlloc() throws FileNotFoundException {
+        new CFG(myProgram).buildCFG();
+        new DomTreeConstruct(myProgram).work();
         for (var func : myProgram.functions) {
             addPhi(func);
         }
+//        new PrintStream("phi.ll").println(myProgram);
         for (var func : myProgram.functions) {
             cur_name.clear();
             last_def.clear();
@@ -50,12 +53,14 @@ public class AllocElimination {
             }
         }
         for (var alloca : func.allocas) {
+//            System.err.println("allocas: " + alloca);
             // standard algorithm for inserting phi-functions
             HashSet<BasicBlock> F = new HashSet<>();
             HashSet<BasicBlock> W = new HashSet<>();
             for (var block : func.blockList) {
                 for (var inst : block.stmts) {
                     if (inst instanceof IRStore store && store.dest.equals(alloca)) {
+//                        System.err.println("store: " + block.label + " " + store.value);
                         W.add(block);
                         all.get(alloca).put(block, store.value);
                     }
@@ -64,14 +69,16 @@ public class AllocElimination {
 
             while (!W.isEmpty()) {
                 BasicBlock X = W.iterator().next();
+//                System.err.println("W: " + X.label);
                 W.remove(X);
                 if (!all.get(alloca).containsKey(X)) {
                     all.get(alloca).put(X, X.phiMap.get(alloca).dest);
                 }
                 for (var Y : X.dominanceFrontier) {
+//                    System.err.println("dominance frontier: " + Y.label + " " + alloca + " " + X.label);
                     if (!F.contains(Y)) {
                         if (Y.phiMap.containsKey(alloca)) {
-                            // Y.phiMap.get(alloca).addEntry(X, all.get(alloca).get(X));
+//                             Y.phiMap.get(alloca).addEntry(X, all.get(alloca).get(X));
                         } else {
                             IRPhi phi = new IRPhi(Y, new IRRegister(alloca.name + "_phi", alloca.type.Type()), alloca);
                             // phi.addEntry(X, all.get(alloca).get(X));
@@ -98,6 +105,12 @@ public class AllocElimination {
         block.phiMap.forEach((key, value) ->
                 last_def.put((IRRegister) key, value.dest));
 
+        for (var phi : block.phiMap.values()) {
+            for (var element : cur_name.keySet()) {
+                phi.rename(element, cur_name.get(element));
+            }
+        }
+
         for (var inst : block.stmts) {
             for (var element : cur_name.keySet()) {
                 inst.rename(element, cur_name.get(element));
@@ -122,7 +135,9 @@ public class AllocElimination {
         // now consider every successor's phis...
         for (var edgeBlock : block.succ) {
             for (var element : edgeBlock.phiMap.keySet()) {
-                if (last_def.get((IRRegister) element) != null) {
+                var phi = edgeBlock.phiMap.get(element);
+                if (last_def.get((IRRegister) element) != null && func.allocas.contains((IRRegister) element)) {
+//                    System.err.println("add entry: " + element + " " + block.label + " " + last_def.get((IRRegister) element));
                     edgeBlock.phiMap.get(element).addEntry(block, last_def.get((IRRegister) element));
                 }
             }
@@ -142,6 +157,14 @@ public class AllocElimination {
 
     private void rename(Function func) {
         visitBlock(func.enterBlock, func);
+
+        var newAllocas = new HashSet<IRRegister>();
+        for (var alloca : func.allocas) {
+            if (func.no_alloc.contains(alloca)) {
+                newAllocas.add(alloca);
+            }
+        }
+        func.allocas = newAllocas;
     }
 
     private void addEdge(Function func) {
@@ -154,6 +177,7 @@ public class AllocElimination {
                     // System.err.println("adding edge: " + block.label + "_" + block.id + " -> " + succ.label + "_" + succ.id);
                     // add a new block
                     BasicBlock newBlock = new BasicBlock("phi_" + block.label + "_" + block.id);
+                    newBlock.loopDepth = block.loopDepth;
                     toAdd.add(newBlock);
                     newBlock.terminal = new IRJump(newBlock, succ);
                     newBlock.pred.add(block);
