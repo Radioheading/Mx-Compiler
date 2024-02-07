@@ -38,7 +38,7 @@ public class FuncInliner {
      *
      */
 
-    private static int blockNum = 100, maxBlockNum = 200, instNum = 500, maxInstNum = 1000;
+    private static int blockNum = 40, maxBlockNum = 100, instNum = 240, maxInstNum = 600;
     private Program myProgram;
 
     public FuncInliner(Program _myProgram) {
@@ -325,7 +325,7 @@ public class FuncInliner {
                 && callee.blockList.size() < blockNum && caller.blockList.size() < blockNum
                 || caller.size < maxInstNum && callee.size < maxInstNum
                 && callee.blockList.size() < maxBlockNum && caller.blockList.size() < maxBlockNum
-                && (block.loopDepth >= 2 || callee.callers.size() == 1 || callee.callees.size() == 0));
+                && (block.loopDepth >= 1 || caller.callers.size() > 0));
     }
 
     private void rewriteDefs(IRBaseInst inst) {

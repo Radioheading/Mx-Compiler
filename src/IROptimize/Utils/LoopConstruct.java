@@ -30,6 +30,8 @@ public class LoopConstruct {
         myProgram = _myProgram;
     }
 
+    Loop curLoop;
+
     public void work() {
         new CFG(myProgram).buildCFG();
         new DomTreeConstruct(myProgram).work();
@@ -44,6 +46,7 @@ public class LoopConstruct {
         for (var entry : backEdges.entrySet()) {
             BuildLoop(entry.getKey(), entry.getValue());
         }
+        curLoop = func.LoopRoot;
         ConstructLoopTree(func.enterBlock, func.LoopRoot);
     }
 
@@ -62,6 +65,7 @@ public class LoopConstruct {
         loopMap.putIfAbsent(loopHeader, new Loop(loopHeader, null));
         var curLoop = loopMap.get(loopHeader);
         curLoop.addLoopBlock(backBlock);
+        curLoop.backBlocks.add(backBlock);
 
         LinkedList<BasicBlock> workList = new LinkedList<>();
         workList.add(backBlock);
@@ -84,14 +88,15 @@ public class LoopConstruct {
 
         vis.add(cur);
 
-        if (!father.loopBlocks.contains(cur)) {
+        while (!father.loopBlocks.contains(cur)) {
             father = father.fatherLoop;
         }
 
         if (loopMap.containsKey(cur)) {
-            var curLoop = loopMap.get(cur);
+            curLoop = loopMap.get(cur);
             curLoop.loopDepth = father.loopDepth + 1;
             curLoop.fatherLoop = father;
+//            System.err.println("to: " + father.loopHeader.label + "_" + father.loopHeader.id);
             father.succLoops.add(curLoop);
             MakePreHeader(curLoop);
         }
@@ -99,7 +104,7 @@ public class LoopConstruct {
         cur.loopDepth = father.loopDepth + 1;
 
         for (var succ : cur.succ) {
-            ConstructLoopTree(succ, father);
+            ConstructLoopTree(succ, curLoop);
         }
     }
 

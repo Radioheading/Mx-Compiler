@@ -125,12 +125,9 @@ public class GlobalToLocal {
                     }
                 }
             }
-            if (onlyDest != null) {
-//                    System.err.println(onlyDest.name);
-            }
             if (onlyDest == null) continue;
             if (flag && (onlyDest.name.equals("main"))) {
-                System.err.println("localizing: " + global);
+//                System.err.println("localizing: " + global);
                 IRRegister newReg = new IRRegister("global_" + global.name.replace("@", ""), global.type);
                 onlyDest.enterBlock.stmts.addFirst(new IRStore(onlyDest.enterBlock, global.initValue, newReg));
                 var alloc = new IRAlloca(onlyDest.enterBlock, newReg.type, newReg);

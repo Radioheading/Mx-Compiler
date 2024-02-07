@@ -14,11 +14,11 @@ public class LoopInvariant {
     private Program myProgram;
 
     public LoopInvariant(Program _myProgram) {
-        new LoopConstruct(_myProgram).work();
         myProgram = _myProgram;
     }
 
     public void simplifyLoopInvariant() {
+        new LoopConstruct(myProgram).work();
         myProgram.functions.forEach(this::simplifyFunc);
     }
 
@@ -37,7 +37,7 @@ public class LoopInvariant {
                 }
             }
         }
-        workLoop(func.LoopRoot);
+        func.LoopRoot.succLoops.forEach(this::workLoop);
     }
 
     private void workLoop(Loop now) {
@@ -57,7 +57,7 @@ public class LoopInvariant {
                     }
                 }
                 if (isInvariant && canBeMoved(inst)) {
-//                    System.err.println("invariant: " + inst);
+//                    System.err.println("#invariant: " + inst);
                     Invariant.addAll(inst.defs());
                     now.preHeader.stmts.add(inst);
                     inst.parentBlock = now.preHeader;

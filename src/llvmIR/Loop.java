@@ -31,6 +31,8 @@ public class Loop {
         }
     }
 
+    public HashSet<BasicBlock> backBlocks = new HashSet<>();
+
     public void addSuccLoop(Loop loop) {
         succLoops.add(loop);
     }
