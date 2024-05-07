@@ -161,7 +161,7 @@ public class GraphColoring {
         }
     }
 
-    private void allocate_func(ASMFunction func) {
+    public void allocate_func(ASMFunction func) {
         new LivenessAnalyzer(func).LivenessAnalysis();
         init(func);
         CalculateSpillCost(func);

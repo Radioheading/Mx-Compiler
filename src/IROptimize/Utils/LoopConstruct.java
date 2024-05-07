@@ -26,19 +26,24 @@ public class LoopConstruct {
 
     HashSet<BasicBlock> vis = new HashSet<>();
 
+    CFG CFGBuilder;
+    DomTreeConstruct DomTreeBuilder;
+
     public LoopConstruct(Program _myProgram) {
         myProgram = _myProgram;
+        CFGBuilder = new CFG(myProgram);
+        DomTreeBuilder = new DomTreeConstruct(myProgram);
     }
 
     Loop curLoop;
 
     public void work() {
-        new CFG(myProgram).buildCFG();
-        new DomTreeConstruct(myProgram).work();
         myProgram.functions.forEach(this::workOnFunc);
     }
 
-    private void workOnFunc(Function func) {
+    public void workOnFunc(Function func) {
+        CFGBuilder.build_CFG_function(func);
+        DomTreeBuilder.workFunction(func);
         vis.clear();
         func.LoopRoot = new Loop(func.enterBlock, null);
         func.LoopRoot.loopBlocks.addAll(func.blockList);
@@ -119,6 +124,6 @@ public class LoopConstruct {
         if (realPreCnt < 2) {
             return;
         }
-        System.err.println("fuck");
+        System.err.println("fuck conless");
     }
 }

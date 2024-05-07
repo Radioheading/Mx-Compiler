@@ -14,11 +14,11 @@ public class CFG {
 
     public void buildCFG() {
         for (var func : myProgram.functions) {
-            analyze_function(func);
+            build_CFG_function(func);
         }
     }
 
-    private void analyze_function(Function func) {
+    public void build_CFG_function(Function func) {
         if (func.exitBlock != null) {
             func.blockList.add(func.exitBlock);
         }

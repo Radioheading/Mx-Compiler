@@ -60,6 +60,16 @@ public class ASMBlock {
         }
     }
 
+    public void insert_front(BaseInst inst) {
+        if (headInst == null) {
+            headInst = tailInst = inst;
+        } else {
+            inst.next = headInst;
+            headInst.prev = inst;
+            headInst = inst;
+        }
+    }
+
     public void remove(BaseInst inst) {
         if (inst == headInst) {
             headInst = inst.next;

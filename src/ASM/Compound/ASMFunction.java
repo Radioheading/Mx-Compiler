@@ -17,6 +17,8 @@ public class ASMFunction {
     public int allocaUsage = 4; // return address is reserved
     public int paramUsage = 0;
 
+    public boolean is_main = false;
+
     public ASMFunction(Function func) {
         name = func.name;
         stackSize = 0;
@@ -25,7 +27,13 @@ public class ASMFunction {
 
     @Override
     public String toString() {
-        String ret = "\t.text\n\t.globl\t" + name + "\n" + name + ":\n";
+        String ret = null;
+
+        if (!is_main) {
+            ret = "\t.text\n\t.globl\t" + name + "\n" + name + ":\n";
+        } else {
+            ret = "\t.text\n\t.globl\tmain\nmain:\n";
+        }
         for (var block : blocks) {
             ret += block + "\n";
         }

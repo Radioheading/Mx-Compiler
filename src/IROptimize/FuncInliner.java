@@ -41,10 +41,13 @@ public class FuncInliner {
     private static int blockNum = 40, maxBlockNum = 100, instNum = 240, maxInstNum = 600;
     private Program myProgram;
 
-    public FuncInliner(Program _myProgram) {
+    public FuncInliner(Program _myProgram, int _blockNum, int _maxBlockNum, int _instNum, int _maxInstNum) {
         myProgram = _myProgram;
+        blockNum = _blockNum;
+        maxBlockNum = _maxBlockNum;
+        instNum = _instNum;
+        maxInstNum = _maxInstNum;
     }
-
     LinkedList<CallInfo> workList = new LinkedList<>();
     private HashSet<String> builtinFuncs = new HashSet<>();
     private HashMap<BasicBlock, BasicBlock> renameBlockMap = new HashMap<>();

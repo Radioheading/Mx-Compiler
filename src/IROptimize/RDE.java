@@ -9,19 +9,23 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class RDE {
-    Program myProgram;
+    private Program myProgram;
+    private CFG CFGBuilder;
+    private DefUseCollector defUseCollector;
 
     public RDE(Program _myProgram) {
         myProgram = _myProgram;
+        CFGBuilder = new CFG(myProgram);
+        defUseCollector = new DefUseCollector(myProgram);
     }
 
     public void work() {
-        new LoopConstruct(myProgram).work();
-        new DefUseCollector(myProgram).work();
         myProgram.functions.forEach(this::workFunc);
     }
 
     private void workFunc(Function func) {
+        CFGBuilder.build_CFG_function(func);
+        defUseCollector.collectFunc(func);
         func.LoopRoot.succLoops.forEach(this::workLoop);
     }
 

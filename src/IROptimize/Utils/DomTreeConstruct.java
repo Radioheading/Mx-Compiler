@@ -156,11 +156,13 @@ public class DomTreeConstruct {
     }
 
     public void work() {
-        for (var func : myProgram.functions) {
-            init(func);
-            GetDominance(func);
-            BuildDom(func);
-            GetDominanceFrontier(func);
-        }
+        myProgram.functions.forEach(this::workFunction);
+    }
+
+    public void workFunction(Function func) {
+        init(func);
+        GetDominance(func);
+        BuildDom(func);
+        GetDominanceFrontier(func);
     }
 }

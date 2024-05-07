@@ -1,11 +1,12 @@
 package llvmIR.Entity;
 
 import llvmIR.Inst.IRBaseInst;
+import llvmIR.Value;
 import llvmIR.type.IRBaseType;
 
 import java.util.HashSet;
 
-public abstract class entity {
+public abstract class entity extends Value {
     public String name;
     public IRBaseType type;
 

@@ -9,7 +9,7 @@ import llvmIR.type.IRStructType;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Program {
+public class Program extends Value {
     public ArrayList<Function> functions = new ArrayList<>();
     public ArrayList<IRStructType> classes = new ArrayList<>();
     public ArrayList<IRGlobalVar> gVariables = new ArrayList<>();

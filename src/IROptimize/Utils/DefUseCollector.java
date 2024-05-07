@@ -15,7 +15,7 @@ public class DefUseCollector {
         myProgram.functions.forEach(this::collectFunc);
     }
 
-    private void collectFunc(Function func) {
+    public void collectFunc(Function func) {
         Init(func);
         func.blockList.forEach(this::collectBlock);
     }

@@ -14,6 +14,7 @@ import llvmIR.Inst.*;
 import llvmIR.type.IRIntType;
 import llvmIR.type.IRVoidType;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class InstSelector implements IRVisitor {
@@ -24,10 +25,19 @@ public class InstSelector implements IRVisitor {
     private int maxCallParam = 0;
     private ASMBlock nowBlock;
     private ASMFunction nowFunc;
-    private ASMProgram myProgram;
+    public ASMProgram myProgram;
+    private HashMap<String, ArrayList<IRGlobalVar>> usedGlobal = new HashMap<>();
+    public HashMap<String, ArrayList<IRGlobalVar>> dirtyGlobal = new HashMap<>();
 
     public InstSelector(ASMProgram _myProgram) {
         myProgram = _myProgram;
+    }
+
+    public ASMFunction compileFunction(Function function) {
+        nowFunc = new ASMFunction(function);
+        myProgram.functions.add(nowFunc);
+        function.accept(this);
+        return nowFunc;
     }
 
     private Reg getReg(entity obj) {
@@ -37,6 +47,7 @@ public class InstSelector implements IRVisitor {
             Reg reg = new VReg(4);
             nowBlock.push_back(new LaInst(reg, obj.name));
             globalLoad += obj.type.size;
+            usedGlobal.get(nowFunc.name).add((IRGlobalVar) obj);
             return reg;
         } else if (obj instanceof IRStringConst) {
             Reg reg = new VReg(4);
@@ -134,10 +145,13 @@ public class InstSelector implements IRVisitor {
         nowFunc.pushVeryBack(new RetInst());
     }
 
-    @Override
-    public void visit(Program node) {
+    public void init(Program node) {
         node.gVariables.forEach(this::visitGlobalVariable);
         node.gStrings.forEach(this::visitGlobalString);
+    }
+
+    @Override
+    public void visit(Program node) {
         for (var func : node.functions) {
             nowFunc = new ASMFunction(func);
             myProgram.functions.add(nowFunc);
@@ -160,6 +174,8 @@ public class InstSelector implements IRVisitor {
     @Override
     public void visit(Function node) {
         regMap.clear();
+        usedGlobal.put(node.name, new ArrayList<>());
+        dirtyGlobal.put(node.name, new ArrayList<>());
         tempUsage = 0;
         maxCallParam = 0;
         globalLoad = 0;
@@ -321,6 +337,7 @@ public class InstSelector implements IRVisitor {
     @Override
     public void visit(IRRet inst) {
         nowBlock.isLast = true;
+        nowFunc.exitBlock = nowBlock;
         if (inst.returnValue != null)
             nowBlock.push_back(new MoveInst(myProgram.a0, getReg(inst.returnValue)));
         addLoad(myProgram.ra, myProgram.sp, new Imm(maxCallParam), 4);
@@ -334,6 +351,9 @@ public class InstSelector implements IRVisitor {
 
     @Override
     public void visit(IRStore inst) {
+        if (inst.dest instanceof IRGlobalVar) {
+            dirtyGlobal.get(nowFunc.name).add((IRGlobalVar) inst.dest);
+        }
         addStore(getReg(inst.value), getReg(inst.dest), new Imm(0), inst.value.type.size);
     }
 
@@ -381,5 +401,10 @@ public class InstSelector implements IRVisitor {
             Reg ans = getReg(inst.dest), source = getReg(inst.src);
             nowBlock.push_back(new MoveInst(ans, source));
         }
+    }
+
+    @Override
+    public void visit(IRBaseInst inst) {
+
     }
 }

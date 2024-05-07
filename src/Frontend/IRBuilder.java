@@ -355,6 +355,13 @@ public class IRBuilder implements ASTVisitor {
         nowScope = new Scope(nowScope);
         nowBlock = nowFunc.enterBlock;
 
+        for (var memberName : nowClass.memberType.keySet()) {
+            System.err.println("put " + memberName + "in: " + nowClass.name);
+            var type = nowClass.memberType.get(memberName);
+            var ptr = new IRRegister("this.." + memberName, new IRPtrType(type, 0, true));
+            nowScope.entities.put(memberName, ptr);
+        }
+
         IRPtrType classType = new IRPtrType(nowClass, 0, false);
         IRRegister thisAddr = new IRRegister("this.addr", new IRPtrType(classType, 0, true));
         IRRegister thisIn = new IRRegister("this", classType);
@@ -371,6 +378,7 @@ public class IRBuilder implements ASTVisitor {
             nowBlock.terminal = new IRJump(nowBlock, nowFunc.exitBlock);
         }
         nowFunc.addAllocate();
+        nowScope = nowScope.parentScope;
     }
 
     @Override
@@ -389,6 +397,14 @@ public class IRBuilder implements ASTVisitor {
             nowScope.entities.put(reg.name, ptr);
             if (i > 7) {
                 nowFunc.no_alloc.add(target);
+            }
+        }
+        if (isMember) {
+            for (var memberName : nowClass.memberType.keySet()) {
+                System.err.println("put " + memberName + " in: " + nowClass.name);
+                var type = nowClass.memberType.get(memberName);
+                var ptr = new IRRegister("this.." + memberName, new IRPtrType(type, 0, true));
+                nowScope.entities.put(memberName, ptr);
             }
         }
         for (int i = 0; i < it.parameterList.parameters.size(); ++i) {
@@ -678,7 +694,7 @@ public class IRBuilder implements ASTVisitor {
             }
         } else {
             it.address = nowScope.getEntity(it.str, true);
-            if (it.address == null) { // possibilities: member or member function
+            if (it.address == null || it.address.name.matches("this..*")) { // possibilities: member or member function
                 // only need to deal with one case: member variable, others can be resolved in funcCallExprNode
                 if (it.funcDefGuess == null) { // is member variable
                     var thisPtr = nowFunc.thisPtr;

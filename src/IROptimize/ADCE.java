@@ -22,7 +22,7 @@ public class ADCE {
         myProgram.functions.forEach(this::work_on_func);
     }
 
-    private void work_on_func(Function func) {
+    public void work_on_func(Function func) {
         HashSet<IRBaseInst> live = new HashSet<>();
         HashSet<BasicBlock> liveBlock = new HashSet<>();
         HashSet<entity> liveUse = new HashSet<>();

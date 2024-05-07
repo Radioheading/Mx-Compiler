@@ -1,11 +1,12 @@
 package llvmIR.Inst;
 
+import llvmIR.Value;
 import llvmIR.type.IRBaseType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class IRFuncDeclare {
+public class IRFuncDeclare extends Value {
     IRBaseType retType;
     String funcName;
     ArrayList<IRBaseType> parameters = new ArrayList<>();
@@ -16,6 +17,12 @@ public class IRFuncDeclare {
         if (paramType != null) {
             parameters.addAll(Arrays.asList(paramType));
         }
+    }
+
+    public IRFuncDeclare(String _funcName, IRBaseType _type, ArrayList<IRBaseType> paramType) {
+        funcName = _funcName;
+        retType = _type;
+        parameters.addAll(paramType);
     }
 
     @Override

@@ -1,10 +1,13 @@
 package Jorginho.interpreter.Backend;
 
+import ASM.Compound.ASMFunction;
+import Jorginho.JIT.FunctionCompiler;
 import llvmIR.Entity.*;
 import llvmIR.Function;
 import llvmIR.Inst.IRBaseInst;
 import llvmIR.Inst.IRCall;
 import llvmIR.Program;
+import Jorginho.LibControl.ravelController;
 
 import java.io.InputStream;
 import java.io.ObjectInputFilter;
@@ -19,10 +22,14 @@ public class VirtualMachine {
     InputStream input;
     PrintStream output;
     Scanner scanner;
-    int DEFAULT_MEMORY_SIZE = 1 << 27;
-    int DEFAULT_STACK_SIZE = 1 << 25;
-    int stack_cur = 0;
-    int heap_cur = DEFAULT_STACK_SIZE;
+    int DEFAULT_MEMORY_SIZE = 1 << 26;
+    int RAVEL_TEXT_SPACE    = 0x1000000; // 16MB for ravel instructions
+    int STACK_SPACE         = 0x100000;  //  1MB for stack storage
+    int RAVEL_STACK_SPACE   = 0x100000;  //  1MB for ravel stack storage
+    int stack_cur = DEFAULT_MEMORY_SIZE - STACK_SPACE;
+    int heap_cur = RAVEL_TEXT_SPACE;
+    int[] registers = new int[32];
+    FunctionCompiler functionCompiler;
 
     /*
      * for sake of simplicity, we don't simulate with text segment
@@ -57,12 +64,51 @@ public class VirtualMachine {
 
     private ArrayList<StackFrame> stack = new ArrayList<>();
 
+    public int callRavelFunction(IRCall callInst, boolean hasLink) {
+        String funcName = callInst.name;
+        ASMFunction asmFunction = functionCompiler.getFunction(funcName);
+        ArrayList<IRGlobalVar> dirtyGlobal = functionCompiler.getDirtyGlobal(funcName);
 
-    VirtualMachine(Program _irProgram, InputStream input, PrintStream output) {
+        for (int i = 0; i < 32; ++i) {
+            registers[i] = 0;
+        }
+
+        // todo: linkLib and stdout config
+
+        String linkCode = null;
+        String rBufferCache = null;
+
+
+        // put all parameters into registers
+        for (int i = 0; i < Integer.min(callInst.arguments.size(), 8) ; ++i) {
+            registers[i] = getValue(callInst.arguments.get(i));
+        }
+
+        // put the rest into stack memory
+        for (int i = 8; i < callInst.arguments.size(); ++i) {
+            registers[2] -= callInst.arguments.get(i).type.size;
+        }
+
+        for (int i = 8; i < callInst.arguments.size(); ++i) {
+            storeValueReg(getValue(callInst.arguments.get(i)), registers[2] + (i - 8) * 4, callInst.arguments.get(i).type.size);
+        }
+
+        int ret = Jorginho.LibControl.ravelController.ravelSimulate(functionCompiler.getCompiledFunctionString(funcName), linkCode, registers, memory, DEFAULT_MEMORY_SIZE, rBufferCache, false);
+
+        for (int i = 0; i < dirtyGlobal.size(); i++) {
+            IRGlobalVar global = dirtyGlobal.get(i);
+            int value = registers[10 + i + 1];
+            storeValueReg(value, globalAddrMap.get(global), global.type.Type().size);
+        }
+
+        return ret;
+    }
+
+    VirtualMachine(Program _irProgram, InputStream input, PrintStream output, FunctionCompiler functionCompiler) {
         this.input = input;
         this.output = output;
         scanner = new Scanner(input);
-
+        this.functionCompiler = functionCompiler;
         irProgram = _irProgram;
         startUp();
     }
@@ -89,7 +135,7 @@ public class VirtualMachine {
     }
 
     public void finishFunc() {
-        for (int addr = getCurFrame().prev_stack; addr <= stack_cur; ++addr) {
+        for (int addr = getCurFrame().prev_stack - 1; addr >= stack_cur; --addr) {
             memory[addr] = 0;
             memoryValid[addr] = false;
         }
@@ -119,6 +165,7 @@ public class VirtualMachine {
     public void storeReg(entity src, IRRegister dest) {
         if (dest instanceof IRGlobalVar) {
             storeValueReg(getValue(src), globalAddrMap.get(dest), src.type.size);
+            functionCompiler.updateGlobalValue(dest.name, getValue(src), src.type.size);
         } else if (dest instanceof IRRegister) {
 //            System.err.println("#storeReg: " + getValue(src) + ", addr: " + getCurFrame().localVars.get(dest));
             storeValueReg(getValue(src), getCurFrame().localVars.get(dest), src.type.size);
@@ -190,13 +237,13 @@ public class VirtualMachine {
     }
 
     public void allocLocal(IRRegister reg) {
-        getCurFrame().localVars.put(reg, stack_cur);
+        getCurFrame().localVars.put(reg, stack_cur - reg.type.Type().size);
 
         for (int i = 0; i < reg.type.Type().size; ++i) {
             memoryValid[stack_cur + i] = false;
         }
 
-        stack_cur += reg.type.size;
+        stack_cur -= reg.type.Type().size;
     }
 
     void allocGlobal(IRGlobalVar gVar) {
@@ -217,8 +264,8 @@ public class VirtualMachine {
             addr = heap_cur;
             heap_cur += sConst.length() + 1;
         } else {
-            addr = stack_cur;
-            stack_cur += sConst.length() + 1;
+            addr = stack_cur - sConst.length() - 1;
+            stack_cur -= sConst.length() + 1;
         }
 
         for (int i = 0; i < sConst.length(); ++i) {

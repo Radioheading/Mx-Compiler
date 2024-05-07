@@ -25,7 +25,7 @@ public class ConstPropagation {
     }
 
 
-    private void propagateConst_function(Function func) {
+    public void propagateConst_function(Function func) {
         variables.clear();
         workList.clear();
         for (var block : func.blockList) {

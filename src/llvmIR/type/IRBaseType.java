@@ -1,6 +1,8 @@
 package llvmIR.type;
 
-public abstract class IRBaseType {
+import llvmIR.Value;
+
+public abstract class IRBaseType extends Value {
     public String name;
 
     public int size;

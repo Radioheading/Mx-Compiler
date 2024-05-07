@@ -9,7 +9,7 @@ import java.util.LinkedList;
 import llvmIR.Inst.*;
 import llvmIR.type.*;
 
-public class BasicBlock {
+public class BasicBlock extends Value {
     public String label;
     public boolean hasCall = false;
     public boolean hasReturned = false;

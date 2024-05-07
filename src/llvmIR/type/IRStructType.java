@@ -30,6 +30,8 @@ public class IRStructType extends IRBaseType {
     }
 
     public IRBaseType getType(String _key) {
+//        System.err.println("getting: " + _key);
+//        System.err.println("type: " + memberType.get(_key));
         return memberType.get(_key);
     }
 

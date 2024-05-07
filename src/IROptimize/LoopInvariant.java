@@ -12,17 +12,19 @@ import java.util.LinkedList;
 public class LoopInvariant {
     static HashMap<IRRegister, IRBaseInst> defMap = new HashMap<>();
     private Program myProgram;
+    private LoopConstruct loopConstruct;
 
     public LoopInvariant(Program _myProgram) {
         myProgram = _myProgram;
+        loopConstruct = new LoopConstruct(myProgram);
     }
 
     public void simplifyLoopInvariant() {
-        new LoopConstruct(myProgram).work();
         myProgram.functions.forEach(this::simplifyFunc);
     }
 
-    private void simplifyFunc(Function func) {
+    public void simplifyFunc(Function func) {
+        loopConstruct.workOnFunc(func);
         defMap.clear();
 
         for (var block : func.blockList) {
@@ -37,7 +39,7 @@ public class LoopInvariant {
                 }
             }
         }
-        func.LoopRoot.succLoops.forEach(this::workLoop);
+        workLoop(func.LoopRoot);
     }
 
     private void workLoop(Loop now) {
@@ -57,7 +59,7 @@ public class LoopInvariant {
                     }
                 }
                 if (isInvariant && canBeMoved(inst)) {
-//                    System.err.println("#invariant: " + inst);
+                    System.err.println("#invariant: " + inst);
                     Invariant.addAll(inst.defs());
                     now.preHeader.stmts.add(inst);
                     inst.parentBlock = now.preHeader;

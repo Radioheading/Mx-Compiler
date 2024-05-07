@@ -102,7 +102,7 @@ public class CSE {
 //        System.err.println("CSE eliminates:\t" + cnt + "\tinstructions");
     }
 
-    private void workFunc(Function func) {
+    public void workFunc(Function func) {
         HashMap<RHS, ArrayList<IRRegister>> rhs_map = new HashMap<>();
         HashMap<RHS, ArrayList<BasicBlock>> block_map = new HashMap<>();
         Queue<BasicBlock> q = new LinkedList<>();

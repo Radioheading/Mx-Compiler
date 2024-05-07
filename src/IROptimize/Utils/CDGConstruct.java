@@ -152,11 +152,13 @@ public class CDGConstruct {
     }
 
     public void work() {
-        for (var func : myProgram.functions) {
-            init(func);
-            GetDominance(func);
-            BuildDom(func);
-            GetDominanceFrontier(func);
-        }
+        myProgram.functions.forEach(this::work_on_func);
+    }
+
+    public void work_on_func(Function func) {
+        init(func);
+        GetDominance(func);
+        BuildDom(func);
+        GetDominanceFrontier(func);
     }
 }

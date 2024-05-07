@@ -17,7 +17,7 @@
 //
 //public class Compiler {
 //    public static void main(String[] args) throws Exception {
-//        String name = "testcases/opt2/7.in";
+//        String name = "testcases/opt2/4.in";
 //        InputStream input = new FileInputStream(name);
 //        try {
 //            RootNode ASTRoot;
@@ -39,7 +39,7 @@
 //            // begin optimize
 //            var Mem2Reg = new AllocElimination(irBuilder.myProgram);
 //
-//            for (int i = 0; i < 2; ++i) {
+//            for (int i = 0; i < 3; ++i) {
 //                new GlobalToLocal(irBuilder.myProgram).globalTransition();
 //                Mem2Reg.eliminateAlloc();
 //                new ADCE(irBuilder.myProgram).work();
@@ -49,10 +49,11 @@
 //                new ADCE(irBuilder.myProgram).work();
 //                new LoopInvariant(irBuilder.myProgram).simplifyLoopInvariant();
 //                new ADCE(irBuilder.myProgram).work();
+//                new RDE(irBuilder.myProgram).work();
+//                new ADCE(irBuilder.myProgram).work();
 //                new IVT(irBuilder.myProgram).work();
 //                new ADCE(irBuilder.myProgram).work();
-//                new PrintStream("IVT.ll").println(irBuilder.myProgram);
-//                new FuncInliner(irBuilder.myProgram).work();
+//                // new FuncInliner(irBuilder.myProgram).work();
 //            }
 //
 //            PrintStream output_1 = new PrintStream("Inline.ll");

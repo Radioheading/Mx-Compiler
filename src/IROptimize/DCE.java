@@ -21,7 +21,7 @@ public class DCE {
         myProgram.functions.forEach(this::DCE_function);
     }
 
-    private void DCE_function(Function func) {
+    public void DCE_function(Function func) {
         HashMap<IRRegister, HashSet<IRBaseInst>> variables = new HashMap<>();
         HashMap<IRRegister, HashSet<IRBaseInst>> back_up = new HashMap<>();
         HashMap<IRRegister, IRBaseInst> defInst = new HashMap<>();

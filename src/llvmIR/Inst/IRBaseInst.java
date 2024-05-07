@@ -6,8 +6,11 @@ import llvmIR.Entity.entity;
 
 import java.util.HashSet;
 
-public abstract class IRBaseInst {
+public abstract class IRBaseInst extends Value {
     public boolean shouldRemove = false;
+    public IRBaseInst nextInst = null;
+
+
     public BasicBlock parentBlock;
 
     public abstract String toString();

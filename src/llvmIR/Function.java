@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 
-public class Function {
+public class Function extends Value {
     public int size;
     public String name;
     public IRBaseType retType;
@@ -25,6 +25,8 @@ public class Function {
     public HashSet<Function> callees = new HashSet<>(), callers = new HashSet<>();
 
     public IRRegister thisPtr;
+
+    public Function() {}
 
     public Function(String _name, IRBaseType _retType) {
         this.name = _name;

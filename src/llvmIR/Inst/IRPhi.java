@@ -36,11 +36,6 @@ public class IRPhi extends IRBaseInst {
         String ret = dest + " = phi " + type + " ";
         ArrayList<String> tmp = new ArrayList<>();
         for (var block : blockMap) {
-            if (block.label.equals("for.cond") && block.id == 2) {
-                System.err.println("fuck!");
-                System.err.println(ret);
-                System.err.println(parentBlock.label + "_" + parentBlock.id);
-            }
             tmp.add("[ " + block_value.get(block) + ", %" + block.label + "_" + block.id + " ]");
         }
         ret += String.join(", ", tmp);

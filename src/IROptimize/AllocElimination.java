@@ -16,14 +16,19 @@ public class AllocElimination {
     private HashMap<IRRegister, entity> cur_name = new HashMap<>();
     private HashMap<IRRegister, entity> last_def = new HashMap<>();
 
+    private CFG CFGBuilder;
+    private DomTreeConstruct domTreeConstruct;
+
     public AllocElimination(Program _myProgram) {
         myProgram = _myProgram;
+        CFGBuilder = new CFG(myProgram);
+        domTreeConstruct = new DomTreeConstruct(myProgram);
     }
 
     public void eliminateAlloc() throws FileNotFoundException {
-        new CFG(myProgram).buildCFG();
-        new DomTreeConstruct(myProgram).work();
         for (var func : myProgram.functions) {
+            CFGBuilder.build_CFG_function(func);
+            domTreeConstruct.workFunction(func);
             addPhi(func);
         }
 //        new PrintStream("phi.ll").println(myProgram);
@@ -32,6 +37,21 @@ public class AllocElimination {
             last_def.clear();
             rename(func);
         }
+    }
+
+    public void optimize_func(Function function) {
+        CFGBuilder.build_CFG_function(function);
+        domTreeConstruct.workFunction(function);
+        addPhi(function);
+        cur_name.clear();
+        last_def.clear();
+        rename(function);
+    }
+
+    public void eliminate_phi_func(Function function) {
+        CFGBuilder.build_CFG_function(function);
+        domTreeConstruct.workFunction(function);
+        removePhi(function);
     }
 
     public void eliminatePhi() {

@@ -55,24 +55,29 @@ class InductVar {
 public class IVT {
     int strengthReductionCount = 0;
     private static final IRIntType intType = new IRIntType(32);
-
     private Program myProgram;
+    private CFG CFGBuilder;
+    private DefUseCollector DUCollector;
+    private LoopConstruct LoopConstructor;
+
 
     private HashMap<IRRegister, InductVar> IVMap = new HashMap<>();
 
     public IVT(Program _myProgram) {
         myProgram = _myProgram;
+        CFGBuilder = new CFG(myProgram);
+        DUCollector = new DefUseCollector(myProgram);
+        LoopConstructor = new LoopConstruct(myProgram);
     }
 
     public void work() {
-        new CFG(myProgram).buildCFG();
-        new DefUseCollector(myProgram).work();
-        new LoopConstruct(myProgram).work();
         myProgram.functions.forEach(this::transformFunc);
-//        System.err.println("strength reduction: " + strengthReductionCount);
     }
 
-    private void transformFunc(Function func) {
+    public void transformFunc(Function func) {
+        CFGBuilder.build_CFG_function(func);
+        DUCollector.collectFunc(func);
+        LoopConstructor.workOnFunc(func);
         for (var loop : func.LoopRoot.succLoops) {
             transformLoop(loop);
         }

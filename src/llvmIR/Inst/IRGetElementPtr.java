@@ -78,6 +78,7 @@ public class IRGetElementPtr extends IRBaseInst {
     @Override
     public IRBaseInst copyAndRename(BasicBlock _parent) {
         IRGetElementPtr getelementptr = new IRGetElementPtr(dest, _parent, type, (IRRegister) ptr, indexes.get(0));
+        getelementptr.type = type;
         for (int i = 1; i < indexes.size(); ++i) {
             getelementptr.indexes.add(indexes.get(i));
         }
